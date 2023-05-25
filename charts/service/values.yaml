@@ -1,4 +1,4 @@
-# Default values for centralized-helm-chart.
+# Default values for Breadfast Helm Chart.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -7,24 +7,27 @@ replicaCount: 1
 image:
   repository: us-central1-docker.pkg.dev/prj-n-floating-623c/apps
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
   tag: ""
+  # -- Overrides the image tag whose default is the chart appVersion.
 
 imagePullSecrets: []
-nameOverride: "centralized-helm"
-fullnameOverride: "centralized-helm"
+nameOverride: "{{ .Release.Name }}"
+fullnameOverride: ""
+# -- Provide node groups selector
 nodeSelectorLabels: {}
 deploymentLabels: {}
 
 serviceAccount:
-  # Specifies whether a service account should be created
+  # -- (bool) If true, creates service account
   create: false
-  # Annotations to add to the service account
-  annotations: {}
   # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
+  # -- If not set and create is true, a name is generated using the fullname template
+  annotations: {}
   name: ""
+  # -- Provide IAM Role ARN, if create is true.
 
+## Pod annotations
+##
 podAnnotations: {}
 
 podLabels: {}
@@ -35,37 +38,56 @@ podSecurityContext: {}
 securityContext: {}
 
 service:
+  # -- Service type, can be either `ClusterIP`, `NodePort`, `LoadBalancer` or `ExternalName`
   type: ClusterIP
+  # -- Kubernetes service port when single port service
   port: 80
   targetPort: 80
 
+# -- (bool) If true, Creats Ingress DNS name to expose the service publicly
 ingress:
   enabled: false
 
+# We should always specify how much of each resource a container needs.
+# https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 resources: {}
 
+# The kubelet uses liveness probes to know when to restart a container.
+# https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 livenessProbe: {}
 
+# The kubelet uses startup probe to indicates whether the application within the container is started
+# https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#when-should-you-use-a-startup-probe
 startupProbe: {}
 
+# The kubelet uses readiness probes to know when a container is ready to start accepting traffic.
+# https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 readinessProbe: {}
 
+# -- (map) Environment variable map
 containerEnv: []
 
+# -- (list) List of volumes to create
 volumes: []
+
+# -- (list) List of volumes to attach
 volumeMounts: []
 
 autoscaling:
   enabled: false
 
+# -- (bool) If true, It will inject Vault Agent to get secrets from Vault
 vaultAgent:
   enabled: false
 
+# -- (bool) If true, Override to the Entrypoint
 entrypointOverride:
   enabled: false
 
+# -- Pod affinity rule. Default affinity rule is set to make sure pods are not deployed on the same node
 podAffinity: {}
 podAntiAffinity: {}
 
+# -- (bool) If true, Creates CronJob resource
 cronJob:
   create: false
