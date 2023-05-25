@@ -2,9 +2,8 @@ name: Chart Release
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
-    - 'charts/cron-jobs/**'
     - 'charts/service/**'
     - 'scripts/helm-release-chart.sh'
     - '.github/workflows/chart-release.yml'
