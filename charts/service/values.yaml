@@ -1,0 +1,71 @@
+# Default values for centralized-helm-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: us-central1-docker.pkg.dev/prj-n-floating-623c/apps
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: "centralized-helm"
+fullnameOverride: "centralized-helm"
+nodeSelectorLabels: {}
+deploymentLabels: {}
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+
+ingress:
+  enabled: false
+
+resources: {}
+
+livenessProbe: {}
+
+startupProbe: {}
+
+readinessProbe: {}
+
+containerEnv: []
+
+volumes: []
+volumeMounts: []
+
+autoscaling:
+  enabled: false
+
+vaultAgent:
+  enabled: false
+
+entrypointOverride:
+  enabled: false
+
+podAffinity: {}
+podAntiAffinity: {}
+
+cronJob:
+  create: false
