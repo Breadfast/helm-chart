@@ -1,0 +1,6 @@
+image:
+  tag: stable
+  repository: nginx
+
+verticalPodAutoscaler:
+  enabled: false
