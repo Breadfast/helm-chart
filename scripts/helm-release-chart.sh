@@ -23,5 +23,5 @@ function release-helm-chart {
     && git push origin gh-pages) || echo -e "\nSilently failed to update the chart"
 }
 
-# Execute script.
+# Execute Helm Release script.
 release-helm-chart
