@@ -3,8 +3,8 @@ on:
   push:
     branches:
       - main
-    paths:
-    - 'service/**'
+    # paths:
+    # - 'service/**'
 jobs:
   update_release_draft:
     runs-on: ubuntu-latest
