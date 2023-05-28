@@ -1,17 +1,16 @@
 name: 'release'
-
 on:
   push:
-    tags:
-      - "v*" # Run on every commit tag which begins with "v" like (v0.1.3)
+    branches:
+      - main
     paths:
     - 'service/**'
-
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
     steps:
-      - uses: marvinpinto/action-automatic-releases@latest
-        env:
-          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+      - uses: release-drafter/release-drafter@latest
+
