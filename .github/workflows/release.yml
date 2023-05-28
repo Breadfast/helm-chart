@@ -1,4 +1,4 @@
-name: 'release'
+name: 'Release Drafter'
 on:
   push:
     branches:
@@ -6,11 +6,11 @@ on:
     paths:
     - 'service/**'
 jobs:
-  release:
+  update_release_draft:
     name: Release
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
     steps:
-      - uses: release-drafter/release-drafter@latest
+      - uses: release-drafter/release-drafter@v5
 
