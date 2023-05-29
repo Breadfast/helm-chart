@@ -13,14 +13,14 @@ function release-helm-chart {
   rm -rf $changedDir/charts/*.tgz
   helm package -u $changedDir
 
-  echo -e "\nSwitching git branch to main so that we can commit package along the previous versions."
-  (git checkout main \
+  echo -e "\nSwitching git branch to gh-pages so that we can commit package along the previous versions."
+  (git checkout gh-pages \
     && helm repo index . \
     && echo -e "\nCommit new package and index." \
     && git add -A "./*.tgz" ./index.yaml \
     && git commit -m "Update Helm repository from CI." \
-    && echo -e "\nGenerating new Helm index, containing all existing versions in main (previous ones + new one)." \
-    && git push origin main) || echo -e "\nSilently failed to update the chart"
+    && echo -e "\nGenerating new Helm index, containing all existing versions in gh-pages (previous ones + new one)." \
+    && git push origin gh-pages) || echo -e "\nSilently failed to update the chart"
 }
 
 # Execute Helm Release script.

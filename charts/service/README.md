@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.2.1](https://img.shields.io/badge/Version-0.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.2.2](https://img.shields.io/badge/Version-0.2.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -27,7 +27,7 @@ A Helm chart for Kubernetes
 | entrypointOverride | bool | `{"enabled":false}` | If true, Override to the Entrypoint |
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
-| image.repository | string | `"us-central1-docker.pkg.dev/prj-n-floating-623c/apps"` |  |
+| image.repository | string | `"repo/image"` |  |
 | image.tag | string | `""` |  |
 | imagePullSecrets | list | `[]` |  |
 | ingress | bool | `{"enabled":false}` | If true, Creats Ingress DNS name to expose the service publicly |

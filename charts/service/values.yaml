@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: us-central1-docker.pkg.dev/prj-n-floating-623c/apps
+  repository: repo/image
   pullPolicy: IfNotPresent
   tag: ""
   # -- Overrides the image tag whose default is the chart appVersion.
