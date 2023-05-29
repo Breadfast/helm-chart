@@ -1,7 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "centralized-helm-chart.fullname" . }}-service
+  name: {{ include "service.fullname" . }}-service
+  labels:
+  {{- include "service.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -10,4 +12,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-    {{- include "centralized-helm-chart.selectorLabels" . | nindent 4 }}
+    {{- include "service.selectorLabels" . | nindent 4 }}

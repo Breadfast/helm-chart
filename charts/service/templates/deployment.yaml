@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "centralized-helm-chart.fullname" . }}
+  name: {{ include "service.fullname" . }}
   labels:
-  {{- include "centralized-helm-chart.labels" . | nindent 4 }}
+  {{- include "service.labels" . | nindent 4 }}
   {{- with .Values.deploymentLabels }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -13,7 +13,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "centralized-helm-chart.selectorLabels" . | nindent 6 }}
+      {{- include "service.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       annotations:
@@ -24,7 +24,7 @@ spec:
         {{- toYaml .Values.vaultAgent.annotations | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "centralized-helm-chart.selectorLabels" . | nindent 8 }}
+        {{- include "service.selectorLabels" . | nindent 8 }}
         {{- with .Values.podLabels }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -53,7 +53,7 @@ spec:
       {{- if .Values.vaultAgent.enabled }}
       serviceAccountName: {{ .Values.vaultAgent.serviceAccount }}
       {{- else }}
-      serviceAccountName: {{ include "centralized-helm-chart.serviceAccountName" . }}
+      serviceAccountName: {{ include "service.serviceAccountName" . }}
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -62,7 +62,7 @@ spec:
         {{- toYaml .Values.volumes | nindent 8}}
       {{- end }}
       containers:
-      - name: {{ include "centralized-helm-chart.name" . }}
+      - name: {{ include "service.name" . }}
         securityContext:
           {{- toYaml .Values.securityContext | nindent 12 }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
