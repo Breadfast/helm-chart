@@ -34,14 +34,18 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "service.labels" -}}
-app: {{ include "service.name" . }}
+app.kubernetes.io/name: {{ include "service.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+meta.helm.sh/release-name: {{ .Release.Name }}
+meta.helm.sh/release-namespace: {{ .Release.Namespace }}
 {{- end }}
 
 {{/*
 Selector labels
 */}}
 {{- define "service.selectorLabels" -}}
-app: {{ include "service.name" . }}
+app.kubernetes.io/name: {{ include "service.name" . }}
 {{- end }}
 
 {{/*
