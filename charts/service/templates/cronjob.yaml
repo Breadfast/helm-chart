@@ -5,7 +5,7 @@ kind: CronJob
 metadata:
   name: {{ .name }}
   labels:
-  {{- include "service.labels" . | nindent 4 }}
+  {{- include "service.labels" $ | nindent 4 }}
 spec:
   schedule: {{ .schedule | quote }}
   {{- with .concurrencyPolicy }}
