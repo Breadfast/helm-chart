@@ -4,6 +4,9 @@ metadata:
   name: {{ include "service.fullname" . }}
   labels:
   {{- include "service.labels" . | nindent 4 }}
+  {{- if .Values.datadog.enabled }}
+    {{- include "datadog.labels" . | nindent 4 }}
+  {{- end }}
   {{- with .Values.deploymentLabels }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
@@ -25,6 +28,9 @@ spec:
       {{- end }}
       labels:
         {{- include "service.selectorLabels" . | nindent 8 }}
+        {{- if .Values.datadog.enabled }}
+          {{- include "datadog.labels" . | nindent 8 }}
+        {{- end }}
         {{- with .Values.podLabels }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
