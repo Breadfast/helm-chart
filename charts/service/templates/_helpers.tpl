@@ -48,7 +48,7 @@ datadog labels
 {{- if .Values.datadog.enabled -}}
 tags.datadoghq.com/env: {{ .Release.Namespace }}
 tags.datadoghq.com/service: {{ include "service.name" . }}
-tags.datadoghq.com/version: {{ .Values.image.tag }}
+tags.datadoghq.com/version: {{ (split "_" .Values.image.tag)._2 }}
 {{- end -}}
 {{- end -}}
 
