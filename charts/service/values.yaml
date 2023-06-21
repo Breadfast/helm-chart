@@ -91,3 +91,7 @@ podAntiAffinity: {}
 # -- (bool) If true, Creates CronJob resource
 cronJob:
   create: false
+
+# -- (bool) If true, Add datadog labels to pods and deployments
+datadog:
+  enabled: false
