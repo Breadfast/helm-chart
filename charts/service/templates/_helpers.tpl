@@ -42,6 +42,17 @@ meta.helm.sh/release-namespace: {{ .Release.Namespace }}
 {{- end }}
 
 {{/*
+datadog labels
+*/}}
+{{- define "datadog.labels" -}}
+{{- if .Values.datadog.enabled -}}
+tags.datadoghq.com/env: {{ .Release.Namespace }}
+tags.datadoghq.com/service: {{ include "service.name" . }}
+tags.datadoghq.com/version: {{ .Values.image.tag }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Selector labels
 */}}
 {{- define "service.selectorLabels" -}}
