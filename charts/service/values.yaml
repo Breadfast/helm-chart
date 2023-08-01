@@ -95,3 +95,6 @@ cronJob:
 # -- (bool) If true, Add datadog labels to pods and deployments
 datadog:
   enabled: false
+
+# -- Node Tolerations. Tolerations allow the scheduler to schedule pods with matching taints
+nodeTolerations: []
