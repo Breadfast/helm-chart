@@ -30,6 +30,10 @@ spec:
           nodeSelector:
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- with $.Values.nodeTolerations }}
+          tolerations:
+            {{- toYaml . | nindent 10}}
+          {{- end }}
 ---          
 {{ end }}
 {{ end }}
