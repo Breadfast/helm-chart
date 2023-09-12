@@ -20,7 +20,7 @@ A Helm chart for Kubernetes
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| argorollouts.enabled | bool | `false` | |
+| argorollouts.enabled | bool | `false` |  |
 | argorollouts.steps[0].setWeight | int | `20` |  |
 | argorollouts.steps[1].pause.duration | string | `"1m"` |  |
 | argorollouts.steps[2].setWeight | int | `60` |  |
