@@ -98,3 +98,12 @@ datadog:
 
 # -- Node Tolerations. Tolerations allow the scheduler to schedule pods with matching taints
 nodeTolerations: []
+
+argorollouts:
+  enabled: false
+  steps:
+  - setWeight: 20
+  - pause:  
+      duration: "1m"
+  - setWeight: 60
+  - pause: {}

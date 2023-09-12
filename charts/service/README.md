@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.2.9](https://img.shields.io/badge/Version-0.2.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.2.10](https://img.shields.io/badge/Version-0.2.10-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -20,6 +20,11 @@ A Helm chart for Kubernetes
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| argorollouts.enabled | bool | `false` |  |
+| argorollouts.steps[0].setWeight | int | `20` |  |
+| argorollouts.steps[1].pause.duration | string | `"1m"` |  |
+| argorollouts.steps[2].setWeight | int | `60` |  |
+| argorollouts.steps[3].pause | object | `{}` |  |
 | autoscaling.enabled | bool | `false` |  |
 | containerEnv | map | `[]` | Environment variable map |
 | cronJob | bool | `{"create":false}` | If true, Creates CronJob resource |
