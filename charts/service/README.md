@@ -20,11 +20,15 @@ A Helm chart for Kubernetes
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| argorollouts.enabled | bool | `false` | it will create argo-rollouts instead of deployment if its enabled  |
+| argorollouts.steps[0].setWeight | int | `20` |  |
+| argorollouts.steps[1].pause.duration | string | `"1m"` |  |
+| argorollouts.steps[2].setWeight | int | `60` |  |
+| argorollouts.steps[3].pause | object | `{}` |  |
 | autoscaling.enabled | bool | `false` |  |
 | containerEnv | map | `[]` | Environment variable map |
 | cronJob | bool | `{"create":false}` | If true, Creates CronJob resource |
 | datadog | bool | `{"enabled":false}` | If true, Add datadog labels to pods and deployments |
-| argorollouts.enabled | bool | `false` | It will create an argo rllouts instead of deployment if it's enabled |
 | deploymentLabels | object | `{}` |  |
 | entrypointOverride | bool | `{"enabled":false}` | If true, Override to the Entrypoint |
 | fullnameOverride | string | `""` |  |
