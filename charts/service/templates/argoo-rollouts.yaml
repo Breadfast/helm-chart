@@ -22,8 +22,9 @@ spec:
         nginx:
           stableIngress: {{ include "service.fullname" . }}-ingress
       steps:
-      - setWeight: 5
-      - pause: {}
+      {{- with .Values.argorollouts.steps }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
   selector:
     matchLabels:
       {{- include "service.selectorLabels" . | nindent 6 }}
