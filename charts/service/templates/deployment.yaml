@@ -102,7 +102,7 @@ spec:
         {{- end }}
 
       {{- if .Values.sidecars }}
-        {{- toYaml .Values.sidecars | nindent 8}}
+        {{- toYaml .Values.sidecars | nindent 6}}
       {{- end }}
 ---
 {{ end }}
