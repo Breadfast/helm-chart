@@ -81,7 +81,7 @@ spec:
         resources:
           {{- toYaml .Values.resources | nindent 12 }}
         {{- if .Values.containerLifecycle }}
-          {{- toYaml .Values.containerLifecycle | nindent 6}}
+          {{- toYaml .Values.containerLifecycle | nindent 8}}
         {{- end }}
         livenessProbe:
         {{- with .Values.livenessProbe }}
