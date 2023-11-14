@@ -80,6 +80,9 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
           {{- toYaml .Values.resources | nindent 12 }}
+        {{- if .Values.containerLifecycle }}
+          {{- toYaml .Values.containerLifecycle | nindent 6}}
+        {{- end }}
         livenessProbe:
         {{- with .Values.livenessProbe }}
           {{- toYaml . | nindent 12 }}
