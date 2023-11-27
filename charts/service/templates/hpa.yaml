@@ -34,4 +34,18 @@ spec:
           type: Utilization
           averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
     {{- end }}
+  behavior:
+    {{- if .Values.autoscaling.scaledownStabilization}}
+    scaleDown:
+      stabilizationWindowSeconds: {{ .Values.autoscaling.scaledownStabilization }}
+    {{- end }}
+    scaleUp:
+      stabilizationWindowSeconds: 0
+    {{- if .Values.autoscaling.podsIncrease }}
+      policies:
+      - type: Pods
+        value: {{ .Values.autoscaling.podsIncrease }}
+        periodSeconds: 15
+    {{- end }}
+
 {{- end }}
