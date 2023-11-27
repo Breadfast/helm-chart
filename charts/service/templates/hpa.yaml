@@ -38,6 +38,10 @@ spec:
     {{- if .Values.autoscaling.scaledownStabilization}}
     scaleDown:
       stabilizationWindowSeconds: {{ .Values.autoscaling.scaledownStabilization }}
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 120
     {{- end }}
     scaleUp:
       stabilizationWindowSeconds: 0
