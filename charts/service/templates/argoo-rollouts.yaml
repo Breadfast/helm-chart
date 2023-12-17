@@ -16,6 +16,9 @@ spec:
   revisionHistoryLimit: 2
   strategy:
     canary:
+      {{- if .Values.argorollouts.analysis }}
+        {{- toYaml .Values.argorollouts.analysis | nindent 6}}
+      {{- end }}
       canaryService: {{ include "service.fullname" . }}-service-canary
       stableService: {{ include "service.fullname" . }}-service
       trafficRouting:
