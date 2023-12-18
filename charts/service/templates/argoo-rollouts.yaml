@@ -81,6 +81,10 @@ spec:
       {{- if .Values.volumes }}
         {{- toYaml .Values.volumes | nindent 8}}
       {{- end }}
+      {{- if .Values.initContainers }}
+      initContainers:
+        {{- toYaml .Values.initContainers | nindent 6}}
+      {{- end }}
       tolerations:
       {{- if .Values.nodeTolerations }}
         {{- toYaml .Values.nodeTolerations | nindent 8}}
@@ -89,6 +93,9 @@ spec:
       - name: {{ include "service.name" . }}
         securityContext:
           {{- toYaml .Values.securityContext | nindent 12 }}
+      {{- if .Values.gracePeriod }}
+        terminationGracePeriodSeconds: {{ .Values.gracePeriod }}
+      {{- end }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
@@ -113,6 +120,9 @@ spec:
         {{- if .Values.volumeMounts }}
           {{- toYaml .Values.volumeMounts | nindent 12}}
         {{- end }}
+      {{- if .Values.sidecars }}
+        {{- toYaml .Values.sidecars | nindent 6}}
+      {{- end }}
 ---
 {{ end }}
 
