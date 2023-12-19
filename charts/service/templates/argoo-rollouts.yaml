@@ -17,7 +17,8 @@ spec:
   strategy:
     canary:
       {{- if .Values.argorollouts.analysis }}
-        {{- toYaml .Values.argorollouts.analysis | nindent 6}}
+      analysis:
+        {{- toYaml .Values.argorollouts.analysis | nindent 8}}
       {{- end }}
       canaryService: {{ include "service.fullname" . }}-service-canary
       stableService: {{ include "service.fullname" . }}-service
