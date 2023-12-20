@@ -22,6 +22,12 @@ spec:
       {{- end }}
       canaryService: {{ include "service.fullname" . }}-service-canary
       stableService: {{ include "service.fullname" . }}-service
+      stableMetadata:
+        labels:
+          app.kubernetes.io/part-of: stable
+      canaryMetadata:
+        labels:
+          app.kubernetes.io/part-of: canary
       trafficRouting:
         nginx:
           stableIngress: {{ include "service.fullname" . }}-ingress
