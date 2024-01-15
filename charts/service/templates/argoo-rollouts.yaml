@@ -11,6 +11,7 @@ metadata:
   {{- with .Values.deploymentLabels }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  annotations:
   {{- with .Values.deploymentAnnotations }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
