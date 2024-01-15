@@ -11,6 +11,9 @@ metadata:
   {{- with .Values.deploymentLabels }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  {{- with .Values.deploymentAnnotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   revisionHistoryLimit: 2
@@ -25,9 +28,11 @@ spec:
       stableMetadata:
         labels:
           app.kubernetes.io/part-of: stable
+          role: stable
       canaryMetadata:
         labels:
           app.kubernetes.io/part-of: canary
+          role: canary
       trafficRouting:
         nginx:
           stableIngress: {{ include "service.fullname" . }}-ingress
