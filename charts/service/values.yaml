@@ -107,3 +107,6 @@ argorollouts:
       duration: "1m"
   - setWeight: 60
   - pause: {}
+
+# -- Specify deployment rolling strategy: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+rollingStrategy: RollingUpdate
