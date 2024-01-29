@@ -15,6 +15,12 @@ spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
+  strategy:
+  {{- if .Values.rollingStrategy}}
+    type: {{ .Values.rollingStrategy}}
+  {{- else }}
+    type: RollingUpdate
+  {{- end }}
   selector:
     matchLabels:
       {{- include "service.selectorLabels" . | nindent 6 }}
