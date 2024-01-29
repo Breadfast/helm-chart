@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.2.30](https://img.shields.io/badge/Version-0.2.30-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.2.31](https://img.shields.io/badge/Version-0.2.31-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -49,6 +49,7 @@ A Helm chart for Kubernetes
 | readinessProbe | object | `{}` |  |
 | replicaCount | int | `1` |  |
 | resources | object | `{}` |  |
+| rollingStrategy | string | `"RollingUpdate"` | Specify deployment rolling strategy: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | securityContext | object | `{}` |  |
 | service.port | int | `80` | Kubernetes service port when single port service |
 | service.targetPort | int | `80` |  |
