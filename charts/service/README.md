@@ -54,6 +54,9 @@ A Helm chart for Kubernetes
 | service.port | int | `80` | Kubernetes service port when single port service |
 | service.targetPort | int | `80` |  |
 | service.type | string | `"ClusterIP"` | Service type, can be either `ClusterIP`, `NodePort`, `LoadBalancer` or `ExternalName` |
+| monitorService.port | int | `9113` | Kubernetes service port when single port service |
+| monitorService.targetPort | int | `9113` |  |
+| monitorService.type | string | `"ClusterIP"` | Service type, can be either `ClusterIP`, `NodePort`, `LoadBalancer` or `ExternalName` |
 | serviceAccount.annotations | object | `{}` | If not set and create is true, a name is generated using the fullname template |
 | serviceAccount.create | bool | `false` | If true, creates service account |
 | serviceAccount.name | string | `""` |  |
