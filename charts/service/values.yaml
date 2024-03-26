@@ -44,6 +44,12 @@ service:
   port: 80
   targetPort: 80
 
+serviceMonitor:
+  enabled: true
+  port: 9113
+  targetPort: 9113
+  type: ClusterIP
+
 # -- (bool) If true, Creats Ingress DNS name to expose the service publicly
 ingress:
   enabled: false

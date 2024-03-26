@@ -57,6 +57,10 @@ A Helm chart for Kubernetes
 | serviceAccount.annotations | object | `{}` | If not set and create is true, a name is generated using the fullname template |
 | serviceAccount.create | bool | `false` | If true, creates service account |
 | serviceAccount.name | string | `""` |  |
+| serviceMonitor.enabled | bool | `true` |  |
+| serviceMonitor.port | int | `9113` |  |
+| serviceMonitor.targetPort | int | `9113` |  |
+| serviceMonitor.type | string | `"ClusterIP"` |  |
 | startupProbe | object | `{}` |  |
 | vaultAgent | bool | `{"enabled":false}` | If true, It will inject Vault Agent to get secrets from Vault |
 | volumeMounts | list | `[]` | List of volumes to attach |
