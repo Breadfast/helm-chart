@@ -1,0 +1,17 @@
+{{- if .Values.serviceMonitor.enabled | default false}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "service.fullname" . }}-nginx-exporte-service
+  labels:
+  {{- include "service.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.serviceMonitor.type }}
+  ports:
+    - port: {{ .Values.serviceMonitor.port }}
+      targetPort: {{ .Values.serviceMonitor.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "service.selectorLabels" . | nindent 4 }}
+{{- end }}
