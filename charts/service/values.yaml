@@ -45,7 +45,7 @@ service:
   targetPort: 80
 
 serviceMonitor:
-  enabled: true
+  enabled: false
   port: 9113
   targetPort: 9113
   type: ClusterIP

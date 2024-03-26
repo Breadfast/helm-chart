@@ -1,4 +1,4 @@
-{{- if .Values.monitorService.enabled | default false}}
+{{- if .Values.serviceMonitor.enabled | default false}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -6,10 +6,10 @@ metadata:
   labels:
   {{- include "service.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.monitorService.type }}
+  type: {{ .Values.serviceMonitor.type }}
   ports:
-    - port: {{ .Values.monitorService.port }}
-      targetPort: {{ .Values.monitorService.targetPort }}
+    - port: {{ .Values.serviceMonitor.port }}
+      targetPort: {{ .Values.serviceMonitor.targetPort }}
       protocol: TCP
       name: http
   selector:
