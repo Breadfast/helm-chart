@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.2.34](https://img.shields.io/badge/Version-0.2.34-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.2.35](https://img.shields.io/badge/Version-0.2.35-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -32,6 +32,7 @@ A Helm chart for Kubernetes
 | deploymentLabels | object | `{}` |  |
 | entrypointOverride | bool | `{"enabled":false}` | If true, Override to the Entrypoint |
 | extraService.enabled | bool | `false` |  |
+| extraService.name | string | `"extraport"` |  |
 | extraService.port | int | `9113` |  |
 | extraService.targetPort | int | `9113` |  |
 | extraService.type | string | `"ClusterIP"` |  |

@@ -12,10 +12,10 @@ spec:
       protocol: TCP
       name: http
     {{- if .Values.extraService.enabled | default false }}
-    - port: {{ .Values.extraService.Port }}
+    - port: {{ .Values.extraService.port }}
       targetPort: {{ .Values.extraService.targetPort }}
-      protocol: {{ .Values.extraService.portName }}
-      name: {{ .Values.extraService.protocol }}
+      protocol: TCP
+      name: {{ .Values.extraService.portName }}
     {{- end }}
   selector:
     {{- include "service.selectorLabels" . | nindent 4 }}
