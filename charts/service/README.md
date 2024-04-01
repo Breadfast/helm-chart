@@ -31,6 +31,9 @@ A Helm chart for Kubernetes
 | datadog | bool | `{"enabled":false}` | If true, Add datadog labels to pods and deployments |
 | deploymentLabels | object | `{}` |  |
 | entrypointOverride | bool | `{"enabled":false}` | If true, Override to the Entrypoint |
+| extraService.port | int | `9113` |  |
+| extraService.targetPort | int | `9113` |  |
+| extraService.type | string | `"ClusterIP"` |  |
 | fullnameOverride | string | `""` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"repo/image"` |  |
