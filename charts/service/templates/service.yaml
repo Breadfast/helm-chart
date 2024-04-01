@@ -14,8 +14,8 @@ spec:
     {{- if .Values.extraService }}
     - port: {{ .Values.extraService.Port }}
       targetPort: {{ .Values.extraService.targetPort }}
-      protocol: TCP
-      name: metrics
+      protocol: {{ .Values.extraService.portName }}
+      name: {{ .Values.extraService.protocol }}
     {{- end }}
   selector:
     {{- include "service.selectorLabels" . | nindent 4 }}
