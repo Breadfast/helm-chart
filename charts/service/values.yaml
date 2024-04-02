@@ -49,7 +49,7 @@ extraService:
   port: 9113
   targetPort: 9113
   type: ClusterIP 
-  name: extraport
+  portName: extraport
 
 
 # -- (bool) If true, Creats Ingress DNS name to expose the service publicly

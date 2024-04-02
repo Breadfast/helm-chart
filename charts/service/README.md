@@ -32,8 +32,8 @@ A Helm chart for Kubernetes
 | deploymentLabels | object | `{}` |  |
 | entrypointOverride | bool | `{"enabled":false}` | If true, Override to the Entrypoint |
 | extraService.enabled | bool | `false` |  |
-| extraService.name | string | `"extraport"` |  |
 | extraService.port | int | `9113` |  |
+| extraService.portName | string | `"extraport"` |  |
 | extraService.targetPort | int | `9113` |  |
 | extraService.type | string | `"ClusterIP"` |  |
 | fullnameOverride | string | `""` |  |
