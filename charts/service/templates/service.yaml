@@ -11,7 +11,7 @@ spec:
       targetPort: {{ .Values.service.targetPort }}
       protocol: TCP
       name: http
-    {{- if .Values.extraService.enabled | default false }}
+    {{- if .Values.extraService.enabled }}
     - port: {{ .Values.extraService.port }}
       targetPort: {{ .Values.extraService.targetPort }}
       protocol: TCP
