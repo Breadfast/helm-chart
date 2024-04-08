@@ -56,6 +56,10 @@ extraService:
 ingress:
   enabled: false
 
+# -- (bool) If true, Creats Multible Ingresses DNS name to expose the service publicly
+multiIngress:
+  enabled: false
+
 # We should always specify how much of each resource a container needs.
 # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 resources: {}

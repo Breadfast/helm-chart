@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.2.38](https://img.shields.io/badge/Version-0.2.38-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.2.39](https://img.shields.io/badge/Version-0.2.39-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -43,7 +43,8 @@ A Helm chart for Kubernetes
 | imagePullSecrets | list | `[]` |  |
 | ingress | bool | `{"enabled":false}` | If true, Creats Ingress DNS name to expose the service publicly |
 | livenessProbe | object | `{}` |  |
-| nameOverride | string | `"{{ .Release.Name }}"` |  |
+| multiIngress | bool | `{"enabled":false}` | If true, Creats Multible Ingresses DNS name to expose the service publicly |
+| nameOverride | string | `"test"` |  |
 | nodeSelectorLabels | object | `{}` | Provide node groups selector |
 | nodeTolerations | list | `[]` | Node Tolerations. Tolerations allow the scheduler to schedule pods with matching taints |
 | podAffinity | object | `{}` | Pod affinity rule. Default affinity rule is set to make sure pods are not deployed on the same node |
