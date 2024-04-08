@@ -43,8 +43,8 @@ A Helm chart for Kubernetes
 | imagePullSecrets | list | `[]` |  |
 | ingress | bool | `{"enabled":false}` | If true, Creats Ingress DNS name to expose the service publicly |
 | livenessProbe | object | `{}` |  |
-| nameOverride | string | `"{{ .Release.Name }}"` | |
 | multiIngress | bool | `{"enabled":false}` | If true, Creats Multible Ingresses DNS name to expose the service publicly |
+| nameOverride | string | `"{{ .Release.Name }}"` |  |
 | nodeSelectorLabels | object | `{}` | Provide node groups selector |
 | nodeTolerations | list | `[]` | Node Tolerations. Tolerations allow the scheduler to schedule pods with matching taints |
 | podAffinity | object | `{}` | Pod affinity rule. Default affinity rule is set to make sure pods are not deployed on the same node |
