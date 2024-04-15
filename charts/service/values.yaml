@@ -11,7 +11,7 @@ image:
   # -- Overrides the image tag whose default is the chart appVersion.
 
 imagePullSecrets: []
-nameOverride: "{{ .Release.Name }}"
+nameOverride: ""
 fullnameOverride: ""
 # -- Provide node groups selector
 nodeSelectorLabels: {}
@@ -48,12 +48,16 @@ extraService:
   enabled: false
   port: 9113
   targetPort: 9113
-  type: ClusterIP 
+  type: ClusterIP
   portName: extraport
 
 
 # -- (bool) If true, Creats Ingress DNS name to expose the service publicly
 ingress:
+  enabled: false
+
+# -- (bool) If true, Creats Multible Ingresses DNS name to expose the service publicly
+multiIngress:
   enabled: false
 
 # We should always specify how much of each resource a container needs.
@@ -111,7 +115,7 @@ argorollouts:
   enabled: false
   steps:
   - setWeight: 20
-  - pause:  
+  - pause:
       duration: "1m"
   - setWeight: 60
   - pause: {}
