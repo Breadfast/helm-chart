@@ -47,11 +47,11 @@ A Helm chart for Kubernetes
 | nameOverride | string | `""` |  |
 | nodeSelectorLabels | object | `{}` | Provide node groups selector |
 | nodeTolerations | list | `[]` | Node Tolerations. Tolerations allow the scheduler to schedule pods with matching taints |
+| pdb.enabled | bool | `false` | If true, Creates a PodDistrubtionBudget for the pods of the replicaset |
+| pdb.minAvailable | string or int | `60%` | the number of pods that need to stay available after distruption event, either total number of pods or percentage of total pods
 | podAffinity | object | `{}` | Pod affinity rule. Default affinity rule is set to make sure pods are not deployed on the same node |
 | podAnnotations | object | `{}` |  |
 | podAntiAffinity | object | `{}` |  |
-| pdb.enabled | bool | `false` | If true, Creates a PodDistrubtionBudget for the pods of the replicaset |
-| pdb.minAvailable | string or int | `60%` | the number of pods that need to stay available after distruption event, either total number of pods or percentage of total pods
 | podLabels | object | `{}` |  |
 | podSecurityContext | object | `{}` |  |
 | readinessProbe | object | `{}` |  |
