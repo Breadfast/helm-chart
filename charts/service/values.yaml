@@ -122,3 +122,7 @@ argorollouts:
 
 # -- Specify deployment rolling strategy: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
 rollingStrategy: RollingUpdate
+
+pdb:
+  enabled: false
+  minAvailable: 60%
