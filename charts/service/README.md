@@ -30,8 +30,8 @@ A Helm chart for Kubernetes
 | cronJob | bool | `{"create":false}` | If true, Creates CronJob resource |
 | datadog | bool | `{"enabled":false}` | If true, Add datadog labels to pods and deployments |
 | deploymentLabels | object | `{}` |  |
-| destinationRule.enabled   | bool  | `false`   |   |
-| destinationRule.trafficPolicy |   object  |   `{}` |  |
+| destinationRule.enabled | bool | `false` |  |
+| destinationRule.trafficPolicy | object | `{}` |  |
 | entrypointOverride | bool | `{"enabled":false}` | If true, Override to the Entrypoint |
 | extraService.enabled | bool | `false` |  |
 | extraService.port | int | `9113` |  |

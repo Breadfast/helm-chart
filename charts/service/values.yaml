@@ -17,6 +17,10 @@ fullnameOverride: ""
 nodeSelectorLabels: {}
 deploymentLabels: {}
 
+destinationRule:
+  enabled: false
+  trafficPolicy: {}
+
 serviceAccount:
   # -- (bool) If true, creates service account
   create: false
