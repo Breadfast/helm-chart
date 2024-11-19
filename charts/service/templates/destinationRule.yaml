@@ -1,0 +1,13 @@
+{{ if .Values.destinationRule.enabled }}
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: {{ include "service.fullname" . }}
+spec:
+  host: {{ include "service.fullname" . }}-service
+  {{- with .Values.destinationRule.trafficPolicy }}
+  trafficPolicy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+---
+{{ end }}
