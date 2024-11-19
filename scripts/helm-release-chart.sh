@@ -8,7 +8,7 @@ function release-helm-chart {
     exit 1
   fi
   echo -e "\nGenerating Helm Chart package for new version."
-  changedDir=`git diff --name-only HEAD~1 | awk -F "/*[^/]*/*$" '{ print ($1 == " " ? "." : $1); }' | sort | uniq | head -n1`
+  changedDir=`git diff --name-only HEAD~1 | awk -F "/*[^/]*/*$" '{ if ($1 != "") print $1; else print "." }' | sort | uniq | head -n1`
   echo "Packaging $changedDir..."
   rm -rf $changedDir/charts/*.tgz
   helm package -u $changedDir
