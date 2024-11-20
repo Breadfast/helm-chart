@@ -130,3 +130,8 @@ rollingStrategy: RollingUpdate
 pdb:
   enabled: false
   minAvailable: 60%
+
+virtualService:
+  enabled: false
+  hosts: []
+  http: {}

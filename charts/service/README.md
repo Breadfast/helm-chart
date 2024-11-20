@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.2.41](https://img.shields.io/badge/Version-0.2.41-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.2.42](https://img.shields.io/badge/Version-0.2.42-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -69,6 +69,9 @@ A Helm chart for Kubernetes
 | serviceAccount.name | string | `""` |  |
 | startupProbe | object | `{}` |  |
 | vaultAgent | bool | `{"enabled":false}` | If true, It will inject Vault Agent to get secrets from Vault |
+| virtualService.enabled | bool | `false` |  |
+| virtualService.hosts | list | `[]` |  |
+| virtualService.http | object | `{}` |  |
 | volumeMounts | list | `[]` | List of volumes to attach |
 | volumes | list | `[]` | List of volumes to create |
 

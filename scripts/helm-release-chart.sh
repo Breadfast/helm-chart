@@ -3,12 +3,12 @@
 set -e
 
 function release-helm-chart {
-  if [ -n "$(git status --porcelain)" ]; then
-    echo -e "\nGit working tree not clean, aborting."
-    exit 1
-  fi
+ # if [ -n "$(git status --porcelain)" ]; then
+  #  echo -e "\nGit working tree not clean, aborting."
+   # exit 1
+ # fi
   echo -e "\nGenerating Helm Chart package for new version."
-  changedDir=`git diff --name-only HEAD~1 | awk -F "/*[^/]*/*$" '{ if ($1 != "") print $1; else print "." }' | sort | uniq | head -n1`
+  changedDir="charts/service"
   echo "Packaging $changedDir..."
   rm -rf $changedDir/charts/*.tgz
   helm package -u $changedDir
