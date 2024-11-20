@@ -70,6 +70,7 @@ A Helm chart for Kubernetes
 | startupProbe | object | `{}` |  |
 | vaultAgent | bool | `{"enabled":false}` | If true, It will inject Vault Agent to get secrets from Vault |
 | virtualService.enabled | bool | `false` |  |
+| virtualService.hosts | list | `[]` |  |
 | virtualService.http | object | `{}` |  |
 | volumeMounts | list | `[]` | List of volumes to attach |
 | volumes | list | `[]` | List of volumes to create |
