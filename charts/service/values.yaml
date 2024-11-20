@@ -134,4 +134,4 @@ pdb:
 virtualService:
   enabled: false
   hosts: []
-  http: {} 
+  http: {}
