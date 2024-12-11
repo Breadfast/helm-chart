@@ -141,3 +141,4 @@ goreplay:
   args: ["-input-raw", "any:80", "--output-file", "/traffic/requests-%Y-%m-%d-%H.log", "-verbose", "2", "--output-file-append"]
   gcpbucketName: "goreplay-non-prod"
   image: "us-central1-docker.pkg.dev/prj-n-floating-623c/apps/goreplay:latest"
+  
