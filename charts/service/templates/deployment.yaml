@@ -33,6 +33,9 @@ spec:
       {{- if .Values.vaultAgent.enabled }}
         {{- toYaml .Values.vaultAgent.annotations | nindent 8 }}
       {{- end }}
+      {{- if .Values.goreplay.enabled }}
+        gke-gcsfuse/volumes: "true"
+      {{- end }}
       labels:
         {{- include "service.selectorLabels" . | nindent 8 }}
         {{- if .Values.datadog.enabled }}
@@ -77,6 +80,15 @@ spec:
       {{- if .Values.volumes }}
         {{- toYaml .Values.volumes | nindent 8}}
       {{- end }}
+      {{- if .Values.goreplay.enabled }}
+      - name: goreplay-traffic
+        csi:
+          driver: gcsfuse.csi.storage.gke.io
+          volumeAttributes:
+            bucketName: {{ .Values.goreplay.gcpbucketName }}
+            mountOptions: "implicit-dirs"
+            gcsfuseLoggingSeverity: warning
+      {{- end }}
       tolerations:
       {{- if .Values.nodeTolerations }}
         {{- toYaml .Values.nodeTolerations | nindent 8}}
@@ -116,6 +128,16 @@ spec:
         {{- if .Values.volumeMounts }}
           {{- toYaml .Values.volumeMounts | nindent 12}}
         {{- end }}
+
+      {{- if .Values.goreplay.enabled }}
+      - name: goreplay
+        image: {{ .Values.goreplay.image }}
+        command: ["./gor"]
+        args: {{ toYaml .Values.goreplay.args | nindent 12 }}
+        volumeMounts:
+        - name: goreplay-traffic
+          mountPath: /traffic
+      {{- end }}
 
       {{- if .Values.sidecars }}
         {{- toYaml .Values.sidecars | nindent 6}}

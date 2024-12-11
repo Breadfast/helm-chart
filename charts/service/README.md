@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.2.43](https://img.shields.io/badge/Version-0.2.43-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.2.44](https://img.shields.io/badge/Version-0.2.44-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -39,6 +39,16 @@ A Helm chart for Kubernetes
 | extraService.targetPort | int | `9113` |  |
 | extraService.type | string | `"ClusterIP"` |  |
 | fullnameOverride | string | `""` |  |
+| goreplay.args[0] | string | `"-input-raw"` |  |
+| goreplay.args[1] | string | `"any:80"` |  |
+| goreplay.args[2] | string | `"--output-file"` |  |
+| goreplay.args[3] | string | `"/traffic/requests-%Y-%m-%d-%H.log"` |  |
+| goreplay.args[4] | string | `"-verbose"` |  |
+| goreplay.args[5] | string | `"2"` |  |
+| goreplay.args[6] | string | `"--output-file-append"` |  |
+| goreplay.enabled | bool | `false` |  |
+| goreplay.gcpbucketName | string | `"goreplay-non-prod"` |  |
+| goreplay.image | string | `"us-central1-docker.pkg.dev/prj-n-floating-623c/apps/goreplay:latest"` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"repo/image"` |  |
 | image.tag | string | `""` |  |
