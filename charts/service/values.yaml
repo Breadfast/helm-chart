@@ -84,10 +84,22 @@ readinessProbe: {}
 containerEnv: []
 
 # -- (list) List of volumes to create
+# -- To add GCP Bucket as volume, use the following format
+# - name: volume-name
+#   csi:
+#     driver: gcsfuse.csi.storage.gke.io
+#     volumeAttributes:
+#       bucketName: gcp-bucket-name
+#       mountOptions: "implicit-dirs"
+#       gcsfuseLoggingSeverity: warning
 volumes: []
 
 # -- (list) List of volumes to attach
 volumeMounts: []
+
+# -- (bool) If true, add annotation o enable GCP Volume Mounts (GCSFuse)
+gcpVolumeMounts:
+  enabled: false
 
 autoscaling:
   enabled: false

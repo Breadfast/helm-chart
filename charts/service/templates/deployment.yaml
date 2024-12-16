@@ -33,6 +33,9 @@ spec:
       {{- if .Values.vaultAgent.enabled }}
         {{- toYaml .Values.vaultAgent.annotations | nindent 8 }}
       {{- end }}
+      {{- if .Values.gcpVolumeMounts.enabled }}
+        gke-gcsfuse/volumes: "true"
+      {{- end }}
       labels:
         {{- include "service.selectorLabels" . | nindent 8 }}
         {{- if .Values.datadog.enabled }}
