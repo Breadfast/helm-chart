@@ -33,7 +33,8 @@ spec:
       {{- if .Values.vaultAgent.enabled }}
         {{- toYaml .Values.vaultAgent.annotations | nindent 8 }}
       {{- end }}
-      {{- if .Values.goreplay.enabled }}
+      # Enable GCS Fuse volumes if either goreplay or GCP volume mounts are enabled
+      {{- if or .Values.goreplay.enabled .Values.gcpVolumeMounts.enabled }}
         gke-gcsfuse/volumes: "true"
       {{- end }}
       labels:
