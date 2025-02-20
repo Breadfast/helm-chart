@@ -128,7 +128,7 @@ datadog:
 nodeTolerations: []
 
 argorollouts:
-  dynamicStableScale: false
+  dynamicStableScale: true
   enabled: false
   steps:
   - setWeight: 20
