@@ -22,7 +22,7 @@ spec:
   revisionHistoryLimit: 2
   strategy:
     canary:
-      {{- if .Values.canary.dynamicStableScale.enabled }}
+      {{- if .Values.argorollouts.dynamicStableScale }}
       dynamicStableScale: true
       {{- end }}
       {{- if .Values.argorollouts.analysis }}

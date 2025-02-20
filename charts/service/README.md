@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.2.49](https://img.shields.io/badge/Version-0.2.49-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.2.50](https://img.shields.io/badge/Version-0.2.50-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -20,6 +20,7 @@ A Helm chart for Kubernetes
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| argorollouts.dynamicStableScale | bool | `false` |  |
 | argorollouts.enabled | bool | `false` |  |
 | argorollouts.steps[0].setWeight | int | `20` |  |
 | argorollouts.steps[1].pause.duration | string | `"1m"` |  |
