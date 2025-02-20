@@ -22,6 +22,9 @@ spec:
   revisionHistoryLimit: 2
   strategy:
     canary:
+      {{- if .Values.canary.dynamicStableScale.enabled }}
+      dynamicStableScale: true
+      {{- end }}
       {{- if .Values.argorollouts.analysis }}
       analysis:
         {{- toYaml .Values.argorollouts.analysis | nindent 8}}
