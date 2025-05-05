@@ -1,4 +1,5 @@
 {{- if .Values.ingress.enabled -}}
+{{- $defaultSvcName := printf "%s-service" (include "service.fullname" .) -}}
 {{- $fullName := include "service.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
 {{- if and .Values.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
@@ -48,9 +49,9 @@ spec:
             {{- end }}
             backend:
               service:
-                name: {{ .serviceName }}
+                name: {{ .serviceName | default $defaultSvcName }}
                 port:
-                  number: {{ $svcPort }}
+                  number: {{ .servicePort | default $svcPort }}
           {{- end }}
     {{- end }}
 {{- end }}

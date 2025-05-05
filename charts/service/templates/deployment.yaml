@@ -118,6 +118,16 @@ spec:
         {{- if .Values.containerLifecycle }}
           {{- toYaml .Values.containerLifecycle | nindent 8}}
         {{- end }}
+        ports:
+          {{- if .Values.service.ports }}
+          {{- range .Values.service.ports }}
+          - containerPort: {{ .port }}
+            protocol: TCP
+          {{- end }}
+          {{- else }}
+          - containerPort: {{ .Values.service.port }}
+            protocol: TCP
+          {{- end }}
         livenessProbe:
         {{- with .Values.livenessProbe }}
           {{- toYaml . | nindent 12 }}
