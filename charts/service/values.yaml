@@ -47,6 +47,15 @@ service:
   # -- Kubernetes service port when single port service
   port: 80
   targetPort: 80
+  # -- Used when the service container requires multiple ports. The port parameter will be ignored if this is set.
+  #    Example:
+  #       - port: 8069
+  #         targetPort: 8069
+  #       - port: 8072
+  #         targetPort: 8072
+  #       - port: 8071
+  #         targetPort: 8071
+  ports: []
 
 extraService:
   enabled: false

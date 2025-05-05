@@ -48,9 +48,9 @@ spec:
             {{- end }}
             backend:
               service:
-                name: {{ .serviceName }}
+                name: {{ .serviceName | default $fullName }}
                 port:
-                  number: {{ $svcPort }}
+                  number: {{ .servicePort | default $svcPort }}
           {{- end }}
     {{- end }}
 {{- end }}

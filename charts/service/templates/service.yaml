@@ -7,10 +7,17 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
+    {{- if .Values.service.ports }}
+    {{- range .Values.service.ports }}
+    - port: {{ .port }}
+      targetPort: {{ .targetPort }}
+      protocol: TCP
+    {{- end }}
+    {{- else }}
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort }}
       protocol: TCP
-      name: http
+    {{- end }}
     {{- if .Values.extraService.enabled }}
     - port: {{ .Values.extraService.port }}
       targetPort: {{ .Values.extraService.targetPort }}
