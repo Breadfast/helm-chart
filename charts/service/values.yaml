@@ -49,11 +49,14 @@ service:
   targetPort: 80
   # -- Used when the service container requires multiple ports. The port parameter will be ignored if this is set.
   #    Example:
-  #       - port: 8069
+  #       - name: http
+  #         port: 8069
   #         targetPort: 8069
-  #       - port: 8072
+  #       - name: websocket
+  #         port: 8072
   #         targetPort: 8072
-  #       - port: 8071
+  #       - name: xmlrpc
+  #         port: 8071
   #         targetPort: 8071
   ports: []
 
