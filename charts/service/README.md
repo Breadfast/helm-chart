@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.2.52](https://img.shields.io/badge/Version-0.2.52-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.2.53](https://img.shields.io/badge/Version-0.2.53-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -74,7 +74,7 @@ A Helm chart for Kubernetes
 | rollingStrategy | string | `"RollingUpdate"` | Specify deployment rolling strategy: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | securityContext | object | `{}` |  |
 | service.port | int | `80` | Kubernetes service port when single port service |
-| service.ports | list | `[]` | Used when the service container requires multiple ports. The port parameter will be ignored if this is set.    Example:       - port: 8069         targetPort: 8069       - port: 8072         targetPort: 8072       - port: 8071         targetPort: 8071 |
+| service.ports | list | `[]` | Used when the service container requires multiple ports. The port parameter will be ignored if this is set.    Example:       - name: http         port: 8069         targetPort: 8069       - name: websocket         port: 8072         targetPort: 8072       - name: xmlrpc         port: 8071         targetPort: 8071 |
 | service.targetPort | int | `80` |  |
 | service.type | string | `"ClusterIP"` | Service type, can be either `ClusterIP`, `NodePort`, `LoadBalancer` or `ExternalName` |
 | serviceAccount.annotations | object | `{}` | If not set and create is true, a name is generated using the fullname template |

@@ -9,7 +9,8 @@ spec:
   ports:
     {{- if .Values.service.ports }}
     {{- range .Values.service.ports }}
-    - port: {{ .port }}
+    - name: {{ .name }}
+      port: {{ .port }}
       targetPort: {{ .targetPort }}
       protocol: TCP
     {{- end }}
