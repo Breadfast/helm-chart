@@ -15,7 +15,8 @@ spec:
       protocol: TCP
     {{- end }}
     {{- else }}
-    - port: {{ .Values.service.port }}
+    - name: {{ .Values.service.name }}
+      port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort }}
       protocol: TCP
     {{- end }}

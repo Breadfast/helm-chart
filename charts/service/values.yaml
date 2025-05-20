@@ -44,6 +44,8 @@ securityContext: {}
 service:
   # -- Service type, can be either `ClusterIP`, `NodePort`, `LoadBalancer` or `ExternalName`
   type: ClusterIP
+  # -- Service port name when single port service
+  name: http
   # -- Kubernetes service port when single port service
   port: 80
   targetPort: 80
