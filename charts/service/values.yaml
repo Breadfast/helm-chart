@@ -151,6 +151,12 @@ argorollouts:
   - setWeight: 60
   - pause: {}
 
+istioRouting:
+  virtualService:
+    name: rollout-vsvc   # required
+    routes:
+    - primaryService
+
 # -- Specify deployment rolling strategy: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
 rollingStrategy: RollingUpdate
 

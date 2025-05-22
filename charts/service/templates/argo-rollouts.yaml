@@ -42,6 +42,11 @@ spec:
       trafficRouting:
         nginx:
           stableIngress: {{ include "service.fullname" . }}-ingress
+      {{- if .Values.istioRouting }}
+        istio:
+          {{- toYaml .Values.istioRouting | nindent 12}}
+      {{- end }}
+
       steps:
       {{- with .Values.argorollouts.steps }}
         {{- toYaml . | nindent 8 }}
