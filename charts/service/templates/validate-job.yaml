@@ -28,7 +28,10 @@ spec:
       - image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: argocd-validator-job
-        command: {{ .Values.argoPreSyncValidator.command }}
+        {{- if .Values.argoPreSyncValidator.command }}
+        command:
+          {{- toYaml .Values.argoPreSyncValidator.command | nindent 10 }}
+        {{- end }}
       {{- with $.Values.nodeSelectorLabels }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
