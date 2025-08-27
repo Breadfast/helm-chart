@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.2.54](https://img.shields.io/badge/Version-0.2.54-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.2.55](https://img.shields.io/badge/Version-0.2.55-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes
 
@@ -20,6 +20,7 @@ A Helm chart for Kubernetes
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| argoPreSyncValidator | object | `{"backoffLimit":1,"command":["php","-l","/vault/secrets/wp-config.php"],"enabled":false,"ttlSecondsAfterFinished":60}` | If true, create ArgoCD PreSync job to validate environment variables injected from Vault |
 | argorollouts.dynamicStableScale | bool | `true` |  |
 | argorollouts.enabled | bool | `false` |  |
 | argorollouts.steps[0].setWeight | int | `20` |  |
