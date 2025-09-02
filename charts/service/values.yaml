@@ -174,4 +174,5 @@ argoPreSyncValidator:
   enabled: false
   backoffLimit: 1
   ttlSecondsAfterFinished: 60
+  annotations: {}
   command: ["php", "-l", "/vault/secrets/wp-config.php"]
