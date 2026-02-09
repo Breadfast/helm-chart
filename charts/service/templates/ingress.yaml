@@ -1,4 +1,4 @@
-{{- if .Values.ingress.enabled -}}
+{{- if and .Values.ingress.enabled (or (not .Values.ingress.type) (eq .Values.ingress.type "ingress")) -}}
 {{- $defaultSvcName := printf "%s-service" (include "service.fullname" .) -}}
 {{- $fullName := include "service.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}

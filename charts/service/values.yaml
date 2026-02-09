@@ -73,6 +73,20 @@ extraService:
 # -- (bool) If true, Creats Ingress DNS name to expose the service publicly
 ingress:
   enabled: false
+  # -- Type of ingress: "ingress" (default) or "gateway" (for Gateway API HTTPRoute)
+  type: ingress
+  # -- Gateway API configuration (only used when type is "gateway")
+  gateway:
+    # -- Gateway name for parentRefs (required when type is "gateway")
+    gatewayName: ""
+    # -- Gateway namespace for parentRefs (optional, defaults to gateway-infra if not specified)
+    gatewayNamespace: ""
+    # -- Custom parentRefs (optional, if specified, gatewayName and gatewayNamespace are ignored)
+    # parentRefs:
+    #   - name: breadfast-gateway
+    #     namespace: gateway-infra
+    # -- Additional annotations for HTTPRoute
+    annotations: {}
 
 # -- (bool) If true, Creats Multible Ingresses DNS name to expose the service publicly
 multiIngress:

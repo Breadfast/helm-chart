@@ -1,0 +1,56 @@
+{{- if and .Values.ingress.enabled (eq .Values.ingress.type "gateway") -}}
+{{- $defaultSvcName := printf "%s-service" (include "service.fullname" .) -}}
+{{- $fullName := include "service.fullname" . -}}
+{{- $svcPort := .Values.service.port -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}-route
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "service.labels" . | nindent 4 }}
+  {{- with .Values.ingress.gateway.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+  {{- if .Values.ingress.gateway.parentRefs }}
+  {{- range .Values.ingress.gateway.parentRefs }}
+  - name: {{ .name }}
+    {{- if .namespace }}
+    namespace: {{ .namespace }}
+    {{- end }}
+  {{- end }}
+  {{- else }}
+  - name: {{ .Values.ingress.gateway.gatewayName | required "ingress.gateway.gatewayName is required when type is gateway" }}
+    {{- if .Values.ingress.gateway.gatewayNamespace }}
+    namespace: {{ .Values.ingress.gateway.gatewayNamespace }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.ingress.hosts }}
+  hostnames:
+    {{- range .Values.ingress.hosts }}
+    - {{ .host | quote }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+      {{- range .paths }}
+        {{- $pathType := .pathType | default "Prefix" }}
+        {{- if eq $pathType "Exact" }}
+        {{- $pathType = "Exact" }}
+        {{- else }}
+        {{- $pathType = "PathPrefix" }}
+        {{- end }}
+    - matches:
+      - path:
+          type: {{ $pathType }}
+          value: {{ .path | quote }}
+      backendRefs:
+      - name: {{ .serviceName | default $defaultSvcName }}
+        port: {{ .servicePort | default $svcPort }}
+      {{- end }}
+    {{- end }}
+{{- end }}
+
