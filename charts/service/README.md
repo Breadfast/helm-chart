@@ -2,12 +2,12 @@
 
 ![Version: 0.2.58](https://img.shields.io/badge/Version-0.2.58-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
-A Helm chart for Kubernetes
+A Helm chart for Kubernetes.
 
-When `gateway.enabled` is true, the chart creates **Gateway API** resources separately from Ingress:
+When gateway.enabled is true, the chart creates **Gateway API** resources separately from Ingress:
 
-- **HTTPRoute** (`gateway.networking.k8s.io/v1`) – routes traffic from a Gateway to this service (hostnames and paths from `gateway.hosts`).
-- **HealthCheckPolicy** (`networking.gke.io/v1`) – GKE health check policy for the service when `gateway.healthCheck.enabled` is true (TCP or HTTP).
+- **HTTPRoute** (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service (hostnames and paths from gateway.hosts).
+- **HealthCheckPolicy** (networking.gke.io/v1) – GKE health check policy for the service when gateway.healthCheck.enabled is true (TCP or HTTP).
 
 Ingress resources are unchanged; you can use Ingress only, Gateway only, or both.
 

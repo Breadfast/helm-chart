@@ -1,6 +1,14 @@
 apiVersion: v2
 name: service
-description: A Helm chart for Kubernetes
+description: |
+  A Helm chart for Kubernetes.
+
+  When gateway.enabled is true, the chart creates **Gateway API** resources separately from Ingress:
+
+  - **HTTPRoute** (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service (hostnames and paths from gateway.hosts).
+  - **HealthCheckPolicy** (networking.gke.io/v1) – GKE health check policy for the service when gateway.healthCheck.enabled is true (TCP or HTTP).
+
+  Ingress resources are unchanged; you can use Ingress only, Gateway only, or both.
 type: application
 
 # This is the chart version. This version number should be incremented each time you make changes
