@@ -1,0 +1,33 @@
+{{- if and .Values.gateway.enabled (index .Values "gateway" "healthCheck" "enabled") -}}
+{{- $fullName := include "service.fullname" . -}}
+{{- $svcName := printf "%s-service" $fullName -}}
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: {{ $fullName }}-healthcheck
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "service.labels" . | nindent 4 }}
+spec:
+  default:
+    checkIntervalSec: {{ .Values.gateway.healthCheck.checkIntervalSec | default 30 }}
+    timeoutSec: {{ .Values.gateway.healthCheck.timeoutSec | default 10 }}
+    healthyThreshold: {{ .Values.gateway.healthCheck.healthyThreshold | default 1 }}
+    unhealthyThreshold: {{ .Values.gateway.healthCheck.unhealthyThreshold | default 5 }}
+    config:
+      type: {{ .Values.gateway.healthCheck.type | default "TCP" }}
+      {{- if eq (.Values.gateway.healthCheck.type | default "TCP") "TCP" }}
+      tcpHealthCheck:
+        port: {{ .Values.gateway.healthCheck.port | default .Values.service.port }}
+      {{- else }}
+      httpHealthCheck:
+        port: {{ .Values.gateway.healthCheck.port | default .Values.service.port }}
+        {{- if .Values.gateway.healthCheck.path }}
+        requestPath: {{ .Values.gateway.healthCheck.path }}
+        {{- end }}
+      {{- end }}
+  targetRef:
+    group: ""
+    kind: Service
+    name: {{ $svcName }}
+{{- end }}

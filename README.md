@@ -2,7 +2,7 @@
 
 A Helm chart for Kubernetes
 
-![Version: 0.2.41](https://img.shields.io/badge/Version-0.14.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.2.58](https://img.shields.io/badge/Version-0.14.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 # Breadfast Centralized Helm Repository
 
@@ -23,6 +23,13 @@ Syntax testing and Dry run:
 
 ```bash
 helm template . | kubectl apply --dry-run -f -
+```
+
+After changing `values.yaml` or `Chart.yaml`, regenerate the chart README so the "Check all docs" CI passes:
+
+```bash
+docker run --rm -v "$(pwd):/app" -w /app jnorwood/helm-docs:v1.14.2 helm-docs --log-level warning --template-files README.md.gotmpl
+# Then commit the updated charts/*/README.md
 ```
 
 Packaging and Pushing the helm release tgz file:

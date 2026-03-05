@@ -1,0 +1,89 @@
+{{- $useGatewayBlock := and .Values.gateway.enabled .Values.gateway.hosts -}}
+{{- $useIngressGateway := and .Values.ingress.enabled (eq .Values.ingress.type "gateway") .Values.ingress.hosts -}}
+{{- if or $useGatewayBlock $useIngressGateway -}}
+{{- $defaultSvcName := printf "%s-service" (include "service.fullname" .) -}}
+{{- $fullName := include "service.fullname" . -}}
+{{- $svcPort := .Values.service.port -}}
+{{- $parentRefs := "" -}}
+{{- $hosts := list -}}
+{{- $annotations := dict -}}
+{{- if $useGatewayBlock -}}
+  {{- $hosts = .Values.gateway.hosts -}}
+  {{- $annotations = .Values.gateway.annotations | default dict -}}
+  {{- if .Values.gateway.parentRefs -}}
+    {{- $parentRefs = "gatewayParentRefs" -}}
+  {{- else -}}
+    {{- $parentRefs = "gatewaySimple" -}}
+  {{- end -}}
+{{- else -}}
+  {{- $hosts = .Values.ingress.hosts -}}
+  {{- $annotations = .Values.ingress.gateway.annotations | default dict -}}
+  {{- if .Values.ingress.gateway.parentRefs -}}
+    {{- $parentRefs = "ingressParentRefs" -}}
+  {{- else -}}
+    {{- $parentRefs = "ingressSimple" -}}
+  {{- end -}}
+{{- end -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $fullName }}-httproute
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "service.labels" . | nindent 4 }}
+  {{- with $annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  parentRefs:
+  {{- if eq $parentRefs "gatewayParentRefs" }}
+  {{- range .Values.gateway.parentRefs }}
+  - name: {{ .name }}
+    {{- if .namespace }}
+    namespace: {{ .namespace }}
+    {{- end }}
+  {{- end }}
+  {{- else if eq $parentRefs "gatewaySimple" }}
+  - name: {{ .Values.gateway.gatewayName | required "gateway.gatewayName is required when gateway.enabled is true" }}
+    {{- if .Values.gateway.gatewayNamespace }}
+    namespace: {{ .Values.gateway.gatewayNamespace }}
+    {{- end }}
+  {{- else if eq $parentRefs "ingressParentRefs" }}
+  {{- range .Values.ingress.gateway.parentRefs }}
+  - name: {{ .name }}
+    {{- if .namespace }}
+    namespace: {{ .namespace }}
+    {{- end }}
+  {{- end }}
+  {{- else }}
+  - name: {{ .Values.ingress.gateway.gatewayName | required "ingress.gateway.gatewayName is required when type is gateway" }}
+    {{- if .Values.ingress.gateway.gatewayNamespace }}
+    namespace: {{ .Values.ingress.gateway.gatewayNamespace }}
+    {{- end }}
+  {{- end }}
+  {{- if $hosts }}
+  hostnames:
+    {{- range $hosts }}
+    - {{ .host | quote }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range $hosts }}
+      {{- range .paths }}
+        {{- $pathType := .pathType | default "Prefix" }}
+        {{- if eq $pathType "Exact" }}
+        {{- $pathType = "Exact" }}
+        {{- else }}
+        {{- $pathType = "PathPrefix" }}
+        {{- end }}
+    - matches:
+      - path:
+          type: {{ $pathType }}
+          value: {{ .path | quote }}
+      backendRefs:
+      - name: {{ .serviceName | default $defaultSvcName }}
+        port: {{ .servicePort | default $svcPort }}
+      {{- end }}
+    {{- end }}
+{{- end }}
