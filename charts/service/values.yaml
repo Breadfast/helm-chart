@@ -88,6 +88,38 @@ ingress:
     # -- Additional annotations for HTTPRoute
     annotations: {}
 
+# -- (bool) If true, creates Gateway API resources (HTTPRoute + optional HealthCheckPolicy) separately from Ingress.
+# Ingress can remain enabled for traditional Ingress; gateway resources are independent.
+gateway:
+  enabled: false
+  # -- Gateway name for HTTPRoute parentRefs (e.g. breadfast-gateway)
+  gatewayName: ""
+  # -- Gateway namespace for parentRefs (e.g. gateway-infra)
+  gatewayNamespace: gateway-infra
+  # -- Custom parentRefs (optional; if set, gatewayName and gatewayNamespace are ignored)
+  # parentRefs: []
+  # -- Additional annotations for HTTPRoute
+  annotations: {}
+  # -- Hosts and paths for HTTPRoute (same shape as ingress.hosts)
+  hosts: []
+  # -- GKE HealthCheckPolicy (networking.gke.io/v1). When enabled, creates a HealthCheckPolicy targeting the service.
+  healthCheck:
+    enabled: false
+    # -- Check interval in seconds
+    checkIntervalSec: 30
+    # -- Timeout in seconds
+    timeoutSec: 10
+    # -- Healthy threshold count
+    healthyThreshold: 1
+    # -- Unhealthy threshold count
+    unhealthyThreshold: 5
+    # -- Health check type: TCP or HTTP
+    type: TCP
+    # -- Port for health check (e.g. app port 3000; can differ from service port)
+    port: 80
+    # -- For type: HTTP, optional path (ignored for TCP)
+    # path: /
+
 # -- (bool) If true, Creats Multible Ingresses DNS name to expose the service publicly
 multiIngress:
   enabled: false
