@@ -1,8 +1,15 @@
 # service
 
-![Version: 0.2.57](https://img.shields.io/badge/Version-0.2.57-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.2.58](https://img.shields.io/badge/Version-0.2.58-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes
+
+When `gateway.enabled` is true, the chart creates **Gateway API** resources separately from Ingress:
+
+- **HTTPRoute** (`gateway.networking.k8s.io/v1`) – routes traffic from a Gateway to this service (hostnames and paths from `gateway.hosts`).
+- **HealthCheckPolicy** (`networking.gke.io/v1`) – GKE health check policy for the service when `gateway.healthCheck.enabled` is true (TCP or HTTP).
+
+Ingress resources are unchanged; you can use Ingress only, Gateway only, or both.
 
 **Homepage:** <https://github.com/Breadfast/helm-chart>
 
@@ -41,6 +48,18 @@ A Helm chart for Kubernetes
 | extraService.targetPort | int | `9113` |  |
 | extraService.type | string | `"ClusterIP"` |  |
 | fullnameOverride | string | `""` |  |
+| gateway.enabled | bool | `false` | If true, creates HTTPRoute and optional HealthCheckPolicy (Gateway API); independent of Ingress |
+| gateway.gatewayName | string | `""` | Gateway name for HTTPRoute parentRefs (e.g. breadfast-gateway) |
+| gateway.gatewayNamespace | string | `"gateway-infra"` | Gateway namespace for parentRefs |
+| gateway.annotations | object | `{}` | Additional annotations for HTTPRoute |
+| gateway.hosts | list | `[]` | Hosts and paths for HTTPRoute (same shape as ingress.hosts: host, paths with path, pathType, serviceName, servicePort) |
+| gateway.healthCheck.enabled | bool | `false` | If true, creates GKE HealthCheckPolicy targeting the service |
+| gateway.healthCheck.checkIntervalSec | int | `30` | Health check interval (seconds) |
+| gateway.healthCheck.timeoutSec | int | `10` | Health check timeout (seconds) |
+| gateway.healthCheck.healthyThreshold | int | `1` | Healthy threshold count |
+| gateway.healthCheck.unhealthyThreshold | int | `5` | Unhealthy threshold count |
+| gateway.healthCheck.type | string | `"TCP"` | Health check type: TCP or HTTP |
+| gateway.healthCheck.port | int | `80` | Port for health check (e.g. app port 3000) |
 | gcpVolumeMounts | bool | `{"enabled":false}` | If true, add annotation o enable GCP Volume Mounts (GCSFuse) |
 | goreplay.args[0] | string | `"-input-raw"` |  |
 | goreplay.args[1] | string | `"any:80"` |  |
