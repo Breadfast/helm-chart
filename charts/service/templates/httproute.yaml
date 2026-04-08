@@ -24,13 +24,55 @@
     {{- $parentRefs = "ingressSimple" -}}
   {{- end -}}
 {{- end -}}
+
+{{- /* Collect ALL rules across all hosts into a flat list */ -}}
+{{- $allRules := list -}}
+{{- range $hosts -}}
+  {{- $host := .host -}}
+  {{- range .paths -}}
+    {{- $pathType := .pathType | default "Prefix" -}}
+    {{- if eq $pathType "Exact" -}}
+      {{- $pathType = "Exact" -}}
+    {{- else -}}
+      {{- $pathType = "PathPrefix" -}}
+    {{- end -}}
+    {{- $rule := dict "host" $host "path" .path "pathType" $pathType "serviceName" .serviceName "servicePort" .servicePort -}}
+    {{- $allRules = append $allRules $rule -}}
+  {{- end -}}
+{{- end -}}
+
+{{- /* Split rules into chunks of 16 */ -}}
+{{- $maxRules := 16 -}}
+{{- $totalRules := len $allRules -}}
+{{- $chunkCount := divf $totalRules $maxRules | ceil | int -}}
+{{- if lt $chunkCount 1 -}}{{- $chunkCount = 1 -}}{{- end -}}
+
+{{- range $chunkIdx := until $chunkCount -}}
+  {{- $startIdx := mul $chunkIdx $maxRules -}}
+  {{- $endIdx := min (add $startIdx $maxRules) $totalRules -}}
+  {{- $chunkRules := slice $allRules $startIdx $endIdx -}}
+
+  {{- /* Collect unique hostnames for this chunk */ -}}
+  {{- $chunkHosts := list -}}
+  {{- range $chunkRules -}}
+    {{- if not (has .host $chunkHosts) -}}
+      {{- $chunkHosts = append $chunkHosts .host -}}
+    {{- end -}}
+  {{- end -}}
+
+  {{- /* Name suffix: no suffix for first chunk, -2 / -3 etc for subsequent */ -}}
+  {{- $nameSuffix := "" -}}
+  {{- if gt $chunkIdx 0 -}}
+    {{- $nameSuffix = printf "-%d" (add $chunkIdx 1) -}}
+  {{- end -}}
+---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: {{ $fullName }}-httproute
-  namespace: {{ .Release.Namespace }}
+  name: {{ $fullName }}-httproute{{ $nameSuffix }}
+  namespace: {{ $.Release.Namespace }}
   labels:
-    {{- include "service.labels" . | nindent 4 }}
+    {{- include "service.labels" $ | nindent 4 }}
   {{- with $annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -38,52 +80,43 @@ metadata:
 spec:
   parentRefs:
   {{- if eq $parentRefs "gatewayParentRefs" }}
-  {{- range .Values.gateway.parentRefs }}
+  {{- range $.Values.gateway.parentRefs }}
   - name: {{ .name }}
     {{- if .namespace }}
     namespace: {{ .namespace }}
     {{- end }}
   {{- end }}
   {{- else if eq $parentRefs "gatewaySimple" }}
-  - name: {{ .Values.gateway.gatewayName | required "gateway.gatewayName is required when gateway.enabled is true" }}
-    {{- if .Values.gateway.gatewayNamespace }}
-    namespace: {{ .Values.gateway.gatewayNamespace }}
+  - name: {{ $.Values.gateway.gatewayName | required "gateway.gatewayName is required when gateway.enabled is true" }}
+    {{- if $.Values.gateway.gatewayNamespace }}
+    namespace: {{ $.Values.gateway.gatewayNamespace }}
     {{- end }}
   {{- else if eq $parentRefs "ingressParentRefs" }}
-  {{- range .Values.ingress.gateway.parentRefs }}
+  {{- range $.Values.ingress.gateway.parentRefs }}
   - name: {{ .name }}
     {{- if .namespace }}
     namespace: {{ .namespace }}
     {{- end }}
   {{- end }}
   {{- else }}
-  - name: {{ .Values.ingress.gateway.gatewayName | required "ingress.gateway.gatewayName is required when type is gateway" }}
-    {{- if .Values.ingress.gateway.gatewayNamespace }}
-    namespace: {{ .Values.ingress.gateway.gatewayNamespace }}
+  - name: {{ $.Values.ingress.gateway.gatewayName | required "ingress.gateway.gatewayName is required when type is gateway" }}
+    {{- if $.Values.ingress.gateway.gatewayNamespace }}
+    namespace: {{ $.Values.ingress.gateway.gatewayNamespace }}
     {{- end }}
   {{- end }}
-  {{- if $hosts }}
   hostnames:
-    {{- range $hosts }}
-    - {{ .host | quote }}
+    {{- range $chunkHosts }}
+    - {{ . | quote }}
     {{- end }}
-  {{- end }}
   rules:
-    {{- range $hosts }}
-      {{- range .paths }}
-        {{- $pathType := .pathType | default "Prefix" }}
-        {{- if eq $pathType "Exact" }}
-        {{- $pathType = "Exact" }}
-        {{- else }}
-        {{- $pathType = "PathPrefix" }}
-        {{- end }}
+    {{- range $chunkRules }}
     - matches:
       - path:
-          type: {{ $pathType }}
+          type: {{ .pathType }}
           value: {{ .path | quote }}
       backendRefs:
       - name: {{ .serviceName | default $defaultSvcName }}
         port: {{ .servicePort | default $svcPort }}
-      {{- end }}
     {{- end }}
+{{- end }}
 {{- end }}
