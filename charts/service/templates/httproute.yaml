@@ -7,9 +7,11 @@
 {{- $parentRefs := "" -}}
 {{- $hosts := list -}}
 {{- $annotations := dict -}}
+{{- $maxRules := 16 -}}
 {{- if $useGatewayBlock -}}
   {{- $hosts = .Values.gateway.hosts -}}
   {{- $annotations = .Values.gateway.annotations | default dict -}}
+  {{- $maxRules = int (.Values.gateway.maxRulesPerRoute | default 16) -}}
   {{- if .Values.gateway.parentRefs -}}
     {{- $parentRefs = "gatewayParentRefs" -}}
   {{- else -}}
@@ -18,6 +20,7 @@
 {{- else -}}
   {{- $hosts = .Values.ingress.hosts -}}
   {{- $annotations = .Values.ingress.gateway.annotations | default dict -}}
+  {{- $maxRules = int (.Values.ingress.gateway.maxRulesPerRoute | default 16) -}}
   {{- if .Values.ingress.gateway.parentRefs -}}
     {{- $parentRefs = "ingressParentRefs" -}}
   {{- else -}}
@@ -25,7 +28,7 @@
   {{- end -}}
 {{- end -}}
 
-{{- /* Collect ALL rules across all hosts into a flat list */ -}}
+{{- /* Flat list of rules (host + path + backends) */ -}}
 {{- $allRules := list -}}
 {{- range $hosts -}}
   {{- $host := .host -}}
@@ -41,35 +44,30 @@
   {{- end -}}
 {{- end -}}
 
-{{- /* Split rules into chunks of 16 */ -}}
-{{- $maxRules := 16 -}}
 {{- $totalRules := len $allRules -}}
-{{- $chunkCount := divf $totalRules $maxRules | ceil | int -}}
+{{- $chunkCount := div (add $totalRules (sub $maxRules 1)) $maxRules -}}
 {{- if lt $chunkCount 1 -}}{{- $chunkCount = 1 -}}{{- end -}}
 
-{{- range $chunkIdx := until $chunkCount -}}
-  {{- $startIdx := mul $chunkIdx $maxRules -}}
-  {{- $endIdx := min (add $startIdx $maxRules) $totalRules -}}
-  {{- $chunkRules := slice $allRules $startIdx $endIdx -}}
+{{- range $chunkIdx := until (int $chunkCount) -}}
+{{- $startIdx := mul $chunkIdx $maxRules -}}
+{{- $endIdx := min (add $startIdx $maxRules) $totalRules -}}
+{{- $chunkRules := slice $allRules $startIdx $endIdx -}}
 
-  {{- /* Collect unique hostnames for this chunk */ -}}
-  {{- $chunkHosts := list -}}
-  {{- range $chunkRules -}}
-    {{- if not (has .host $chunkHosts) -}}
-      {{- $chunkHosts = append $chunkHosts .host -}}
-    {{- end -}}
-  {{- end -}}
+{{- /* Unique hostnames for this chunk */ -}}
+{{- $hostSeen := dict -}}
+{{- range $chunkRules -}}
+  {{- $_ := set $hostSeen .host true -}}
+{{- end -}}
+{{- $chunkHosts := keys $hostSeen -}}
 
-  {{- /* Name suffix: no suffix for first chunk, -2 / -3 etc for subsequent */ -}}
-  {{- $nameSuffix := "" -}}
-  {{- if gt $chunkIdx 0 -}}
-    {{- $nameSuffix = printf "-%d" (add $chunkIdx 1) -}}
-  {{- end -}}
+{{- if gt $chunkIdx 0 }}
+
 ---
+{{- end }}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: {{ $fullName }}-httproute{{ $nameSuffix }}
+  name: {{ $fullName }}-httproute{{ if gt $chunkIdx 0 }}-{{ $chunkIdx }}{{ end }}
   namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "service.labels" $ | nindent 4 }}
@@ -117,6 +115,6 @@ spec:
       backendRefs:
       - name: {{ .serviceName | default $defaultSvcName }}
         port: {{ .servicePort | default $svcPort }}
-    {{- end }}
+    {{ end }}
 {{- end }}
 {{- end }}
