@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.2.60](https://img.shields.io/badge/Version-0.2.60-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.2.61](https://img.shields.io/badge/Version-0.2.61-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes.
 
@@ -93,6 +93,7 @@ Ingress resources are unchanged; you can use Ingress only, Gateway only, or both
 | resources | object | `{}` |  |
 | rollingStrategy | string | `"RollingUpdate"` | Specify deployment rolling strategy: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | securityContext | object | `{}` |  |
+| service.annotations | object | `{}` | Additional annotations for the Kubernetes Service |
 | service.name | string | `"http"` | Service port name when single port service |
 | service.port | int | `80` | Kubernetes service port when single port service |
 | service.ports | list | `[]` | Used when the service container requires multiple ports. The port parameter will be ignored if this is set.    Example:       - name: http         port: 8069         targetPort: 8069       - name: websocket         port: 8072         targetPort: 8072       - name: xmlrpc         port: 8071         targetPort: 8071 |
