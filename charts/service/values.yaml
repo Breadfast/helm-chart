@@ -71,6 +71,58 @@ extraService:
   type: ClusterIP
   portName: extraport
 
+# -- NetworkPolicy configuration for controlling pod network traffic
+networkPolicy:
+  # -- (bool) If true, creates a NetworkPolicy for the main service workload pods
+  enabled: false
+  # -- Additional annotations for the NetworkPolicy
+  annotations: {}
+  # -- Custom NetworkPolicy podSelector. When empty, selects the main Deployment/Rollout pods using the chart selector labels
+  podSelector: {}
+  # -- NetworkPolicy policy types. Defaults to Egress only so ingress traffic remains unchanged
+  policyTypes:
+  - Egress
+  # -- Raw ingress rules. Only used when policyTypes includes Ingress or when rules are provided
+  ingress: []
+  # -- Raw additional egress rules appended after the internetOnly rules
+  egress: []
+  # -- Internet-only egress profile. Allows DNS and public internet while excluding private/internal CIDRs
+  internetOnly:
+    # -- (bool) If true, adds DNS and public internet egress rules
+    enabled: false
+    # -- (bool) If true, allows DNS egress to the configured DNS pods
+    allowDNS: true
+    # -- DNS egress target used by the internetOnly profile
+    dns:
+      # -- Namespace selector for DNS pods
+      namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      # -- Pod selector for DNS pods
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+      # -- DNS ports allowed by the internetOnly profile
+      ports:
+      - protocol: UDP
+        port: 53
+      - protocol: TCP
+        port: 53
+    # -- Public egress ipBlock used by the internetOnly profile
+    ipBlock:
+      # -- Public internet CIDR allowed by the internetOnly profile
+      cidr: 0.0.0.0/0
+      # -- CIDRs excluded from public internet egress. Add cluster Pod, Service, and internal VPC CIDRs here if they are outside these defaults
+      except:
+      - 10.0.0.0/8
+      - 172.16.0.0/12
+      - 192.168.0.0/16
+      - 100.64.0.0/10
+      - 127.0.0.0/8
+      - 169.254.0.0/16
+      - 224.0.0.0/4
+      - 240.0.0.0/4
+
 
 # -- (bool) If true, Creats Ingress DNS name to expose the service publicly
 ingress:

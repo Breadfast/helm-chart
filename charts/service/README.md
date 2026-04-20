@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.2.61](https://img.shields.io/badge/Version-0.2.61-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.2.62](https://img.shields.io/badge/Version-0.2.62-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes.
 
@@ -10,6 +10,11 @@ When gateway.enabled is true, the chart creates **Gateway API** resources separa
 - **HealthCheckPolicy** (networking.gke.io/v1) – GKE health check policy for the service when gateway.healthCheck.enabled is true (TCP or HTTP).
 
 Ingress resources are unchanged; you can use Ingress only, Gateway only, or both.
+
+When networkPolicy.enabled and networkPolicy.internetOnly.enabled are true, the chart creates an egress-only
+NetworkPolicy that allows DNS and public internet traffic while excluding common private/internal CIDRs.
+NetworkPolicy works by IP/CIDR, so add the actual cluster Pod, Service, and internal VPC CIDRs to
+networkPolicy.internetOnly.ipBlock.except when they are outside the defaults.
 
 **Homepage:** <https://github.com/Breadfast/helm-chart>
 
@@ -79,6 +84,23 @@ Ingress resources are unchanged; you can use Ingress only, Gateway only, or both
 | livenessProbe | object | `{}` |  |
 | multiIngress | bool | `{"enabled":false}` | If true, Creats Multible Ingresses DNS name to expose the service publicly |
 | nameOverride | string | `""` |  |
+| networkPolicy | object | `{"annotations":{},"egress":[],"enabled":false,"ingress":[],"internetOnly":{"allowDNS":true,"dns":{"namespaceSelector":{"matchLabels":{"kubernetes.io/metadata.name":"kube-system"}},"podSelector":{"matchLabels":{"k8s-app":"kube-dns"}},"ports":[{"port":53,"protocol":"UDP"},{"port":53,"protocol":"TCP"}]},"enabled":false,"ipBlock":{"cidr":"0.0.0.0/0","except":["10.0.0.0/8","172.16.0.0/12","192.168.0.0/16","100.64.0.0/10","127.0.0.0/8","169.254.0.0/16","224.0.0.0/4","240.0.0.0/4"]}},"podSelector":{},"policyTypes":["Egress"]}` | NetworkPolicy configuration for controlling pod network traffic |
+| networkPolicy.annotations | object | `{}` | Additional annotations for the NetworkPolicy |
+| networkPolicy.egress | list | `[]` | Raw additional egress rules appended after the internetOnly rules |
+| networkPolicy.enabled | bool | `false` | If true, creates a NetworkPolicy for the main service workload pods |
+| networkPolicy.ingress | list | `[]` | Raw ingress rules. Only used when policyTypes includes Ingress or when rules are provided |
+| networkPolicy.internetOnly | object | `{"allowDNS":true,"dns":{"namespaceSelector":{"matchLabels":{"kubernetes.io/metadata.name":"kube-system"}},"podSelector":{"matchLabels":{"k8s-app":"kube-dns"}},"ports":[{"port":53,"protocol":"UDP"},{"port":53,"protocol":"TCP"}]},"enabled":false,"ipBlock":{"cidr":"0.0.0.0/0","except":["10.0.0.0/8","172.16.0.0/12","192.168.0.0/16","100.64.0.0/10","127.0.0.0/8","169.254.0.0/16","224.0.0.0/4","240.0.0.0/4"]}}` | Internet-only egress profile. Allows DNS and public internet while excluding private/internal CIDRs |
+| networkPolicy.internetOnly.allowDNS | bool | `true` | If true, allows DNS egress to the configured DNS pods |
+| networkPolicy.internetOnly.dns | object | `{"namespaceSelector":{"matchLabels":{"kubernetes.io/metadata.name":"kube-system"}},"podSelector":{"matchLabels":{"k8s-app":"kube-dns"}},"ports":[{"port":53,"protocol":"UDP"},{"port":53,"protocol":"TCP"}]}` | DNS egress target used by the internetOnly profile |
+| networkPolicy.internetOnly.dns.namespaceSelector | object | `{"matchLabels":{"kubernetes.io/metadata.name":"kube-system"}}` | Namespace selector for DNS pods |
+| networkPolicy.internetOnly.dns.podSelector | object | `{"matchLabels":{"k8s-app":"kube-dns"}}` | Pod selector for DNS pods |
+| networkPolicy.internetOnly.dns.ports | list | `[{"port":53,"protocol":"UDP"},{"port":53,"protocol":"TCP"}]` | DNS ports allowed by the internetOnly profile |
+| networkPolicy.internetOnly.enabled | bool | `false` | If true, adds DNS and public internet egress rules |
+| networkPolicy.internetOnly.ipBlock | object | `{"cidr":"0.0.0.0/0","except":["10.0.0.0/8","172.16.0.0/12","192.168.0.0/16","100.64.0.0/10","127.0.0.0/8","169.254.0.0/16","224.0.0.0/4","240.0.0.0/4"]}` | Public egress ipBlock used by the internetOnly profile |
+| networkPolicy.internetOnly.ipBlock.cidr | string | `"0.0.0.0/0"` | Public internet CIDR allowed by the internetOnly profile |
+| networkPolicy.internetOnly.ipBlock.except | list | `["10.0.0.0/8","172.16.0.0/12","192.168.0.0/16","100.64.0.0/10","127.0.0.0/8","169.254.0.0/16","224.0.0.0/4","240.0.0.0/4"]` | CIDRs excluded from public internet egress. Add cluster Pod, Service, and internal VPC CIDRs here if they are outside these defaults |
+| networkPolicy.podSelector | object | `{}` | Custom NetworkPolicy podSelector. When empty, selects the main Deployment/Rollout pods using the chart selector labels |
+| networkPolicy.policyTypes | list | `["Egress"]` | NetworkPolicy policy types. Defaults to Egress only so ingress traffic remains unchanged |
 | nodeSelectorLabels | object | `{}` | Provide node groups selector |
 | nodeTolerations | list | `[]` | Node Tolerations. Tolerations allow the scheduler to schedule pods with matching taints |
 | pdb.enabled | bool | `false` |  |

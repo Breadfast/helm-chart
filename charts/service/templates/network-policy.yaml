@@ -1,0 +1,62 @@
+{{- if .Values.networkPolicy.enabled }}
+{{- $policyTypes := .Values.networkPolicy.policyTypes | default (list "Egress") -}}
+{{- $renderIngress := or (has "Ingress" $policyTypes) .Values.networkPolicy.ingress -}}
+{{- $renderEgress := or (has "Egress" $policyTypes) .Values.networkPolicy.internetOnly.enabled .Values.networkPolicy.egress -}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "service.fullname" . }}-network-policy
+  labels:
+    {{- include "service.labels" . | nindent 4 }}
+  {{- with .Values.networkPolicy.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  podSelector:
+    {{- if .Values.networkPolicy.podSelector }}
+    {{- toYaml .Values.networkPolicy.podSelector | nindent 4 }}
+    {{- else }}
+    matchLabels:
+      {{- include "service.selectorLabels" . | nindent 6 }}
+    {{- end }}
+  policyTypes:
+    {{- toYaml $policyTypes | nindent 4 }}
+  {{- if $renderIngress }}
+  {{- if .Values.networkPolicy.ingress }}
+  ingress:
+    {{- toYaml .Values.networkPolicy.ingress | nindent 4 }}
+  {{- else }}
+  ingress: []
+  {{- end }}
+  {{- end }}
+  {{- if $renderEgress }}
+  {{- if or .Values.networkPolicy.internetOnly.enabled .Values.networkPolicy.egress }}
+  egress:
+    {{- if .Values.networkPolicy.internetOnly.enabled }}
+    {{- if .Values.networkPolicy.internetOnly.allowDNS }}
+    - to:
+        - namespaceSelector:
+            {{- toYaml .Values.networkPolicy.internetOnly.dns.namespaceSelector | nindent 12 }}
+          podSelector:
+            {{- toYaml .Values.networkPolicy.internetOnly.dns.podSelector | nindent 12 }}
+      ports:
+        {{- toYaml .Values.networkPolicy.internetOnly.dns.ports | nindent 8 }}
+    {{- end }}
+    - to:
+        - ipBlock:
+            cidr: {{ .Values.networkPolicy.internetOnly.ipBlock.cidr | quote }}
+            {{- with .Values.networkPolicy.internetOnly.ipBlock.except }}
+            except:
+              {{- toYaml . | nindent 14 }}
+            {{- end }}
+    {{- end }}
+    {{- with .Values.networkPolicy.egress }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- else }}
+  egress: []
+  {{- end }}
+  {{- end }}
+---
+{{- end }}
