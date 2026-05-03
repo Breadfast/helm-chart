@@ -28,49 +28,91 @@
   {{- end -}}
 {{- end -}}
 
-{{- /* Flat list of rules (host + path + backends) */ -}}
-{{- $allRules := list -}}
-{{- range $hosts -}}
-  {{- $host := .host -}}
-  {{- range .paths -}}
-    {{- $pathType := .pathType | default "Prefix" -}}
-    {{- if eq $pathType "Exact" -}}
-      {{- $pathType = "Exact" -}}
-    {{- else -}}
-      {{- $pathType = "PathPrefix" -}}
+{{- /* One bundle per hostname: { host, rules[] }; chunking is per host (independent HTTPRoute sequences). */ -}}
+{{- $hostBundles := list -}}
+{{- if $useGatewayBlock -}}
+  {{- $gh := .Values.gateway.hosts -}}
+  {{- if and $gh (gt (len $gh) 0) (kindIs "string" (index $gh 0)) -}}
+    {{- $sharedPaths := .Values.gateway.paths | default list -}}
+    {{- if eq (len $sharedPaths) 0 -}}{{- fail "gateway.paths is required (non-empty) when gateway.hosts is a list of hostname strings" -}}{{- end -}}
+    {{- range $gh -}}
+      {{- $h := . -}}
+      {{- $rules := list -}}
+      {{- range $sharedPaths -}}
+        {{- $pathType := .pathType | default "Prefix" -}}
+        {{- if eq $pathType "Exact" -}}
+          {{- $pathType = "Exact" -}}
+        {{- else -}}
+          {{- $pathType = "PathPrefix" -}}
+        {{- end -}}
+        {{- $rule := dict "path" .path "pathType" $pathType "serviceName" .serviceName "servicePort" .servicePort -}}
+        {{- if .filters -}}
+          {{- $_ := set $rule "filters" .filters -}}
+        {{- end -}}
+        {{- $rules = append $rules $rule -}}
+      {{- end -}}
+      {{- $hostBundles = append $hostBundles (dict "host" $h "rules" $rules) -}}
     {{- end -}}
-    {{- $rule := dict "host" $host "path" .path "pathType" $pathType "serviceName" .serviceName "servicePort" .servicePort -}}
-    {{- if .filters -}}
-      {{- $_ := set $rule "filters" .filters -}}
+  {{- else -}}
+    {{- range $hosts -}}
+      {{- $rules := list -}}
+      {{- range .paths -}}
+        {{- $pathType := .pathType | default "Prefix" -}}
+        {{- if eq $pathType "Exact" -}}
+          {{- $pathType = "Exact" -}}
+        {{- else -}}
+          {{- $pathType = "PathPrefix" -}}
+        {{- end -}}
+        {{- $rule := dict "path" .path "pathType" $pathType "serviceName" .serviceName "servicePort" .servicePort -}}
+        {{- if .filters -}}
+          {{- $_ := set $rule "filters" .filters -}}
+        {{- end -}}
+        {{- $rules = append $rules $rule -}}
+      {{- end -}}
+      {{- $hostBundles = append $hostBundles (dict "host" .host "rules" $rules) -}}
     {{- end -}}
-    {{- $allRules = append $allRules $rule -}}
+  {{- end -}}
+{{- else if $useIngressGateway -}}
+  {{- range $hosts -}}
+    {{- $rules := list -}}
+    {{- range .paths -}}
+      {{- $pathType := .pathType | default "Prefix" -}}
+      {{- if eq $pathType "Exact" -}}
+        {{- $pathType = "Exact" -}}
+      {{- else -}}
+        {{- $pathType = "PathPrefix" -}}
+      {{- end -}}
+      {{- $rule := dict "path" .path "pathType" $pathType "serviceName" .serviceName "servicePort" .servicePort -}}
+      {{- if .filters -}}
+        {{- $_ := set $rule "filters" .filters -}}
+      {{- end -}}
+      {{- $rules = append $rules $rule -}}
+    {{- end -}}
+    {{- $hostBundles = append $hostBundles (dict "host" .host "rules" $rules) -}}
   {{- end -}}
 {{- end -}}
 
-{{- $totalRules := len $allRules -}}
-{{- $chunkCount := div (add $totalRules (sub $maxRules 1)) $maxRules -}}
-{{- if lt $chunkCount 1 -}}{{- $chunkCount = 1 -}}{{- end -}}
+{{- $firstHttpRouteDoc := true -}}
+{{- range $hIdx, $bundle := $hostBundles -}}
+  {{- $hostName := $bundle.host -}}
+  {{- $rules := $bundle.rules -}}
+  {{- $nRules := len $rules -}}
+  {{- if gt $nRules 0 -}}
+    {{- $chunkCount := div (add $nRules (sub $maxRules 1)) $maxRules -}}
+    {{- range $cIdx := until (int $chunkCount) -}}
+      {{- $startIdx := mul (int $cIdx) $maxRules -}}
+      {{- $endIdx := min (add $startIdx $maxRules) $nRules -}}
+      {{- $chunkRules := slice $rules $startIdx $endIdx -}}
 
-{{- range $chunkIdx := until (int $chunkCount) -}}
-{{- $startIdx := mul $chunkIdx $maxRules -}}
-{{- $endIdx := min (add $startIdx $maxRules) $totalRules -}}
-{{- $chunkRules := slice $allRules $startIdx $endIdx -}}
-
-{{- /* Unique hostnames for this chunk */ -}}
-{{- $hostSeen := dict -}}
-{{- range $chunkRules -}}
-  {{- $_ := set $hostSeen .host true -}}
-{{- end -}}
-{{- $chunkHosts := keys $hostSeen -}}
-
-{{- if gt $chunkIdx 0 }}
+      {{- if not $firstHttpRouteDoc }}
 
 ---
 {{- end }}
+      {{- $firstHttpRouteDoc = false -}}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: {{ $fullName }}-httproute{{ if gt $chunkIdx 0 }}-{{ $chunkIdx }}{{ end }}
+  name: {{ printf "%s-httproute-%d-%d" $fullName (int $hIdx) (int $cIdx) }}
   namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "service.labels" $ | nindent 4 }}
@@ -106,9 +148,7 @@ spec:
     {{- end }}
   {{- end }}
   hostnames:
-    {{- range $chunkHosts }}
-    - {{ . | quote }}
-    {{- end }}
+    - {{ $hostName | quote }}
   rules:
     {{- range $chunkRules }}
     - matches:
@@ -123,5 +163,7 @@ spec:
       - name: {{ .serviceName | default $defaultSvcName }}
         port: {{ .servicePort | default $svcPort }}
     {{ end }}
-{{- end }}
-{{- end }}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
