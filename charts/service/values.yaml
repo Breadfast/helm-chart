@@ -159,6 +159,20 @@ gateway:
     port: 80
     # -- For type: HTTP, optional path (ignored for TCP)
     # path: /
+  # -- GKE GCPBackendPolicy (networking.gke.io/v1). When enabled, binds a Cloud Armor
+  #    security policy to the backend Service used by the Gateway (e.g. for edge IP
+  #    blocking / rate limiting). The referenced securityPolicy must already exist in
+  #    the same GCP project before this resource is applied.
+  backendPolicy:
+    enabled: false
+    # -- Name of an existing Cloud Armor security policy (required when enabled)
+    securityPolicy: ""
+    # -- Service to attach the policy to; defaults to "<fullname>-service"
+    # serviceName: ""
+    # -- Optional Cloud Armor request logging
+    # logging:
+    #   enabled: true
+    #   sampleRate: 1.0
 
 # -- (bool) If true, Creats Multible Ingresses DNS name to expose the service publicly
 multiIngress:

@@ -7,6 +7,7 @@ description: |
 
   - **HTTPRoute** (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service (hostnames and paths from gateway.hosts).
   - **HealthCheckPolicy** (networking.gke.io/v1) – GKE health check policy for the service when gateway.healthCheck.enabled is true (TCP or HTTP).
+  - **GCPBackendPolicy** (networking.gke.io/v1) – binds a Cloud Armor security policy to the Gateway backend Service when gateway.backendPolicy.enabled is true.
 
   Ingress resources are unchanged; you can use Ingress only, Gateway only, or both.
 
@@ -19,7 +20,7 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.2.64
+version: 0.2.65
 
 home: https://github.com/Breadfast/helm-chart
 sources:
