@@ -1,0 +1,25 @@
+{{- if and .Values.gateway.enabled .Values.gateway.backendPolicy .Values.gateway.backendPolicy.enabled -}}
+{{- $fullName := include "service.fullname" . -}}
+{{- $svcName := .Values.gateway.backendPolicy.serviceName | default (printf "%s-service" $fullName) -}}
+apiVersion: networking.gke.io/v1
+kind: GCPBackendPolicy
+metadata:
+  name: {{ $fullName }}-backendpolicy
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "service.labels" . | nindent 4 }}
+spec:
+  default:
+    securityPolicy: {{ required "gateway.backendPolicy.securityPolicy is required when gateway.backendPolicy.enabled is true" .Values.gateway.backendPolicy.securityPolicy | quote }}
+    {{- with .Values.gateway.backendPolicy.logging }}
+    logging:
+      enabled: {{ .enabled }}
+      {{- if hasKey . "sampleRate" }}
+      sampleRate: {{ .sampleRate }}
+      {{- end }}
+    {{- end }}
+  targetRef:
+    group: ""
+    kind: Service
+    name: {{ $svcName }}
+{{- end }}
