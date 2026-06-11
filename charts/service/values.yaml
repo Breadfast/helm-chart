@@ -165,7 +165,8 @@ gateway:
   #    the same GCP project before this resource is applied.
   backendPolicy:
     enabled: false
-    # -- Name of an existing Cloud Armor security policy (required when enabled)
+    # -- Name of a Cloud Armor security policy. Required when backendPolicy.enabled
+    #    is true UNLESS iap.enabled is true (IAP-only policies need no securityPolicy).
     securityPolicy: ""
     # -- Service to attach the policy to; defaults to "<fullname>-service"
     # serviceName: ""
@@ -173,6 +174,18 @@ gateway:
     # logging:
     #   enabled: true
     #   sampleRate: 1.0
+    # -- Identity-Aware Proxy (IAP) for the Gateway backend Service. The block is
+    #    passed through verbatim to spec.default.iap, so it accepts any field GKE
+    #    supports. Omit oauth2ClientSecret to use a Google-managed OAuth client
+    #    (no secret to store). To use a custom OAuth client, reference a k8s Secret
+    #    by name (the secret value is never stored here). Requires an external
+    #    HTTPS Gateway; grant users roles/iap.httpsResourceAccessor.
+    #    https://cloud.google.com/kubernetes-engine/docs/how-to/configure-gateway-resources#configure_iap
+    # iap:
+    #   enabled: true
+    #   # oauth2ClientSecret:
+    #   #   name: my-iap-oauth-secret
+    #   # clientID: my-oauth-client-id
 
 # -- (bool) If true, Creats Multible Ingresses DNS name to expose the service publicly
 multiIngress:

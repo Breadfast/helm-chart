@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.2.65](https://img.shields.io/badge/Version-0.2.65-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.2.66](https://img.shields.io/badge/Version-0.2.66-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes.
 
@@ -57,7 +57,7 @@ networkPolicy.internetOnly.ipBlock.except when they are outside the defaults.
 | gateway | bool | `{"annotations":{},"backendPolicy":{"enabled":false,"securityPolicy":""},"enabled":false,"gatewayName":"","gatewayNamespace":"gateway-infra","healthCheck":{"checkIntervalSec":30,"enabled":false,"healthyThreshold":1,"port":80,"timeoutSec":10,"type":"TCP","unhealthyThreshold":5},"hosts":[]}` | If true, creates Gateway API resources (HTTPRoute + optional HealthCheckPolicy) separately from Ingress. Ingress can remain enabled for traditional Ingress; gateway resources are independent. |
 | gateway.annotations | object | `{}` | Additional annotations for HTTPRoute |
 | gateway.backendPolicy | object | `{"enabled":false,"securityPolicy":""}` | GKE GCPBackendPolicy (networking.gke.io/v1). When enabled, binds a Cloud Armor    security policy to the backend Service used by the Gateway (e.g. for edge IP    blocking / rate limiting). The referenced securityPolicy must already exist in    the same GCP project before this resource is applied. |
-| gateway.backendPolicy.securityPolicy | string | `""` | Name of an existing Cloud Armor security policy (required when enabled) |
+| gateway.backendPolicy.securityPolicy | string | `""` | Name of a Cloud Armor security policy. Required when backendPolicy.enabled    is true UNLESS iap.enabled is true (IAP-only policies need no securityPolicy). |
 | gateway.gatewayName | string | `""` | Gateway name for HTTPRoute parentRefs (e.g. breadfast-gateway) |
 | gateway.gatewayNamespace | string | `"gateway-infra"` | Gateway namespace for parentRefs (e.g. gateway-infra) |
 | gateway.healthCheck | object | `{"checkIntervalSec":30,"enabled":false,"healthyThreshold":1,"port":80,"timeoutSec":10,"type":"TCP","unhealthyThreshold":5}` | GKE HealthCheckPolicy (networking.gke.io/v1). When enabled, creates a HealthCheckPolicy targeting the service. |
