@@ -12,6 +12,9 @@ metadata:
     {{- include "service.labels" . | nindent 4 }}
 spec:
   default:
+    {{- if hasKey $bp "timeoutSec" }}
+    timeoutSec: {{ $bp.timeoutSec }}
+    {{- end }}
     {{- if $iapEnabled }}
     {{- with $bp.securityPolicy }}
     securityPolicy: {{ . | quote }}
