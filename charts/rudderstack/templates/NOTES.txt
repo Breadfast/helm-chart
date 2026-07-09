@@ -46,6 +46,8 @@ OPERATIONAL CAVEAT - processor failover on hard node failure:
   so the impact is processing/delivery latency, NOT data loss.
 
 First boot on an empty Cloud SQL:
-  gw_* tables are created by the gateway (the writer). The processor opens gw_*
-  read-only and tolerates their absence (its /health Ping is connection-level),
-  so it will not crash-loop before the gateway has started.
+  gw_* tables are created by the GATEWAY (the writer). The processor opens gw_*
+  read-only and PANICS on startup if they don't exist yet (jobsdb
+  recoverFromJournal -> "relation gw_journal does not exist"). The gateway is
+  therefore sequenced BEFORE the processor (sync wave 1 vs 2) so the tables
+  exist first. Once created they persist, so processor restarts are unaffected.

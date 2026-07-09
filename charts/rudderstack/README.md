@@ -1,6 +1,6 @@
 # rudderstack
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.74.1](https://img.shields.io/badge/AppVersion-1.74.1-informational?style=flat-square)
+![Version: 0.2.1](https://img.shields.io/badge/Version-0.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.74.1](https://img.shields.io/badge/AppVersion-1.74.1-informational?style=flat-square)
 
 Breadfast self-hosted RudderStack (Segment-alternative) data plane.
 
@@ -83,7 +83,7 @@ chart carries placeholders only, never plaintext.
 | serviceAccount.annotations | object | `{}` |  |
 | serviceAccount.create | bool | `true` |  |
 | serviceAccount.name | string | `""` |  |
-| syncWaves | object | `{"gateway":"2","prereqs":"-1","processor":"1","transformer":"0"}` | ------------------------------------------------------------------------- |
+| syncWaves | object | `{"gateway":"1","prereqs":"-1","processor":"2","transformer":"0"}` | ------------------------------------------------------------------------- |
 | transformer.affinity | object | `{}` |  |
 | transformer.extraEnvVars | list | `[]` |  |
 | transformer.image.pullPolicy | string | `"IfNotPresent"` |  |
