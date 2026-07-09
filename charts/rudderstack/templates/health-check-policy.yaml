@@ -1,0 +1,40 @@
+{{- if and .Values.gateway.enabled .Values.gateway.healthCheck.enabled -}}
+{{- /*
+GKE health check for the ingestion gateway Service behind the Gateway. Defaults
+to an HTTP check on the gateway web port (/health), matching the rudder-server
+gateway liveness surface.
+*/ -}}
+{{- $hc := .Values.gateway.healthCheck -}}
+{{- $svc := include "gateway.fullname" . -}}
+{{- $port := $hc.port | default .Values.backend.gateway.webPort -}}
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: {{ $svc }}-healthcheck
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "gateway.selectorLabels" . | nindent 4 }}
+    {{- include "rudderstack.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ .Values.syncWaves.gateway | quote }}
+spec:
+  default:
+    checkIntervalSec: {{ $hc.checkIntervalSec | default 30 }}
+    timeoutSec: {{ $hc.timeoutSec | default 10 }}
+    healthyThreshold: {{ $hc.healthyThreshold | default 1 }}
+    unhealthyThreshold: {{ $hc.unhealthyThreshold | default 5 }}
+    config:
+      type: {{ $hc.type | default "HTTP" }}
+      {{- if eq ($hc.type | default "HTTP") "TCP" }}
+      tcpHealthCheck:
+        port: {{ $port }}
+      {{- else }}
+      httpHealthCheck:
+        port: {{ $port }}
+        requestPath: {{ $hc.path | default "/health" }}
+      {{- end }}
+  targetRef:
+    group: ""
+    kind: Service
+    name: {{ $svc }}
+{{- end }}

@@ -1,6 +1,6 @@
 # rudderstack
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.74.1](https://img.shields.io/badge/AppVersion-1.74.1-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.74.1](https://img.shields.io/badge/AppVersion-1.74.1-informational?style=flat-square)
 
 Breadfast self-hosted RudderStack (Segment-alternative) data plane.
 
@@ -51,6 +51,20 @@ chart carries placeholders only, never plaintext.
 | backend.processor | object | `{"affinity":{},"enableProcessor":true,"enableRouter":true,"metricsService":{"enabled":true,"name":"rudder-metrics"},"nodeSelector":{},"persistence":{"accessModes":["ReadWriteOnce"],"annotations":{},"enabled":true,"size":"20Gi"},"podAnnotations":{},"podLabels":{},"resources":{"limits":{"memory":"4096Mi"},"requests":{"cpu":"1","memory":"2048Mi"}},"terminationGracePeriodSeconds":300,"tolerations":[],"topologySpreadConstraints":[],"warehouseMode":"embedded","webPort":8086}` | ----------------------------------------------------------------------- |
 | backend.workspaceTokenKey | string | `"workspace_token"` | Vault key (under vault.path) for the workspace token -> CONFIG_BACKEND_TOKEN. |
 | commonLabels | object | `{}` | Labels applied to every resource in the chart. |
+| gateway.annotations | object | `{}` |  |
+| gateway.backendPolicy.enabled | bool | `false` |  |
+| gateway.enabled | bool | `false` |  |
+| gateway.gatewayName | string | `""` |  |
+| gateway.gatewayNamespace | string | `""` |  |
+| gateway.healthCheck.checkIntervalSec | int | `30` |  |
+| gateway.healthCheck.enabled | bool | `false` |  |
+| gateway.healthCheck.healthyThreshold | int | `1` |  |
+| gateway.healthCheck.path | string | `"/health"` |  |
+| gateway.healthCheck.port | string | `""` |  |
+| gateway.healthCheck.timeoutSec | int | `10` |  |
+| gateway.healthCheck.type | string | `"HTTP"` |  |
+| gateway.healthCheck.unhealthyThreshold | int | `5` |  |
+| gateway.hosts | list | `[]` |  |
 | global.imagePullSecrets | list | `[]` |  |
 | global.storageClass | string | `""` | StorageClass for the processor's RUDDER_TMPDIR PVC ("" = cluster default). |
 | ingress.annotations."kubernetes.io/ingress.class" | string | `"nginx"` |  |
