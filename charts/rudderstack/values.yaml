@@ -35,8 +35,12 @@ vault:
 syncWaves:
   prereqs: "-1"      # PriorityClass, ServiceAccount, ConfigMap, the AVP Secrets
   transformer: "0"   # passed to the transformer subchart as .Values.syncWave
-  processor: "1"     # StatefulSet + governing/metrics Services (runs migrations)
-  gateway: "2"       # Deployment + Service + PDB + Ingress
+  # Gateway MUST come before the processor: the gateway is the writer that
+  # creates the gw_* JobsDB tables (incl. gw_journal). The processor opens gw_*
+  # read-only and PANICS on first boot if those tables don't exist yet
+  # (jobsdb recoverFromJournal -> "relation gw_journal does not exist").
+  gateway: "1"       # Deployment + Service + PDB + HTTPRoute (creates gw_* tables)
+  processor: "2"     # StatefulSet + governing/metrics Services (reads gw_*, writes rt/batch_rt/...)
 
 global:
   imagePullSecrets: []
