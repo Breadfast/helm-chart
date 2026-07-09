@@ -1,0 +1,44 @@
+{{- if and .Values.gateway.enabled .Values.gateway.backendPolicy .Values.gateway.backendPolicy.enabled -}}
+{{- /*
+Optional GCPBackendPolicy for the ingestion gateway Service (Cloud Armor,
+backend timeout, logging). Disabled by default. Mirrors the 'service' chart.
+*/ -}}
+{{- $bp := .Values.gateway.backendPolicy -}}
+{{- $svc := $bp.serviceName | default (include "gateway.fullname" .) -}}
+{{- $iapEnabled := and $bp.iap $bp.iap.enabled -}}
+apiVersion: networking.gke.io/v1
+kind: GCPBackendPolicy
+metadata:
+  name: {{ include "gateway.fullname" . }}-backendpolicy
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "gateway.selectorLabels" . | nindent 4 }}
+    {{- include "rudderstack.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ .Values.syncWaves.gateway | quote }}
+spec:
+  default:
+    {{- if hasKey $bp "timeoutSec" }}
+    timeoutSec: {{ $bp.timeoutSec }}
+    {{- end }}
+    {{- if $iapEnabled }}
+    {{- with $bp.securityPolicy }}
+    securityPolicy: {{ . | quote }}
+    {{- end }}
+    iap:
+      {{- toYaml $bp.iap | nindent 6 }}
+    {{- else }}
+    securityPolicy: {{ required "gateway.backendPolicy.securityPolicy is required when gateway.backendPolicy.enabled is true" $bp.securityPolicy | quote }}
+    {{- end }}
+    {{- with $bp.logging }}
+    logging:
+      enabled: {{ .enabled }}
+      {{- if hasKey . "sampleRate" }}
+      sampleRate: {{ .sampleRate }}
+      {{- end }}
+    {{- end }}
+  targetRef:
+    group: ""
+    kind: Service
+    name: {{ $svc }}
+{{- end }}

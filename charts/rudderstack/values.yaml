@@ -206,10 +206,13 @@ persistence:
   mountPath: /data/rudderstack
 
 # ===========================================================================
-# Ingress (gateway only - ingestion endpoint).
-# Generic defaults; the real hostname / TLS secret / cert-manager issuer are
-# set in the private overlay.
+# Ingestion entrypoint for the GATEWAY (ingestion) Service. Two mutually
+# exclusive options:
+#   1. ingress  (nginx)        - LEGACY, being deprecated.
+#   2. gateway  (GKE Gateway API) - preferred; mirrors the Breadfast 'service'
+#      chart. Enable one, disable the other.
 # ===========================================================================
+# --- Option 1: nginx Ingress (legacy) ---
 ingress:
   enabled: true
   tls: true
@@ -219,6 +222,40 @@ ingress:
   annotations:
     kubernetes.io/ingress.class: nginx
   labels: {}
+
+# --- Option 2: GKE Gateway API (HTTPRoute + HealthCheckPolicy + GCPBackendPolicy) ---
+# Attaches the ingestion gateway Service to a shared Gateway (e.g.
+# breadfast-gateway / gateway-infra). serviceName/servicePort in hosts[].paths[]
+# default to this chart's ingestion gateway Service, so the overlay only needs
+# host + path. TLS is terminated at the Gateway; Cloudflare proxies the domain.
+gateway:
+  enabled: false
+  gatewayName: ""        # e.g. breadfast-gateway
+  gatewayNamespace: ""   # e.g. gateway-infra
+  annotations: {}
+  # hosts:
+  #   - host: events.example.com
+  #     paths:
+  #       - path: /
+  #         pathType: Prefix       # or Exact
+  #         # serviceName/servicePort default to the ingestion gateway Service
+  hosts: []
+  # GCP LB health check for the backend NEG. HTTP /health on the gateway web port.
+  healthCheck:
+    enabled: false
+    type: HTTP             # HTTP or TCP
+    port: ""              # defaults to backend.gateway.webPort (8080)
+    path: /health
+    checkIntervalSec: 30
+    timeoutSec: 10
+    healthyThreshold: 1
+    unhealthyThreshold: 5
+  # Optional Cloud Armor / backend timeout / logging on the ingestion Service.
+  backendPolicy:
+    enabled: false
+    # securityPolicy: "<cloud-armor-policy>"
+    # timeoutSec: 3600
+    # logging: { enabled: true, sampleRate: 1.0 }
 
 # ===========================================================================
 # Transformer subchart (charts/transformer) - HA, gateway readiness depends on it.

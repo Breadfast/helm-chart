@@ -1,0 +1,54 @@
+{{- if and .Values.gateway.enabled .Values.gateway.hosts -}}
+{{- /*
+GKE Gateway API routing for the GATEWAY (ingestion) Service, mirroring the
+Breadfast 'service' chart. Attaches to a shared Gateway (e.g. breadfast-gateway
+in gateway-infra) and replaces the nginx Ingress. serviceName/servicePort default
+to this chart's ingestion gateway Service.
+*/ -}}
+{{- $fullName := include "rudderstack.fullname" . -}}
+{{- $defaultSvc := include "gateway.fullname" . -}}
+{{- $defaultPort := .Values.backend.gateway.service.port -}}
+{{- $ann := .Values.gateway.annotations | default dict -}}
+{{- range $hIdx, $h := .Values.gateway.hosts }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ printf "%s-httproute-%d" $fullName (int $hIdx) }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "gateway.selectorLabels" $ | nindent 4 }}
+    {{- include "rudderstack.labels" $ | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ $.Values.syncWaves.gateway | quote }}
+    {{- with $ann }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: {{ $.Values.gateway.gatewayName | required "gateway.gatewayName is required when gateway.enabled is true" }}
+      {{- with $.Values.gateway.gatewayNamespace }}
+      namespace: {{ . }}
+      {{- end }}
+  hostnames:
+    - {{ $h.host | quote }}
+  rules:
+    {{- range $h.paths }}
+    - matches:
+        - path:
+            type: {{ if eq (.pathType | default "Prefix") "Exact" }}Exact{{ else }}PathPrefix{{ end }}
+            value: {{ .path | quote }}
+      {{- with .filters }}
+      filters:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: {{ .serviceName | default $defaultSvc }}
+          port: {{ .servicePort | default $defaultPort }}
+    {{- end }}
+{{- end }}
+{{- end -}}
