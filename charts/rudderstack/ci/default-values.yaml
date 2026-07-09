@@ -1,0 +1,10 @@
+# chart-testing (ct lint) values: minimal inputs so the chart renders without
+# the private overlay. Satisfies the required backend.db.host. vault.path is
+# left unset so no Secret placeholders render in CI.
+#
+# NOTE: `ct install` cannot bring this DB-backed app to Ready in a kind cluster
+# (no Cloud SQL, no Vault) - it is expected to be excluded from the install
+# stage. See the deployment notes.
+backend:
+  db:
+    host: "127.0.0.1"

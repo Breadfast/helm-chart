@@ -1,0 +1,6 @@
+dependencies:
+- name: transformer
+  repository: file://charts/transformer
+  version: 0.1.0
+digest: sha256:3ce366e9249b41e4d8fc3099bb922cdd586d37ba099825a70786f5dd7f7a46bc
+generated: "2026-07-09T11:45:14.494529+03:00"

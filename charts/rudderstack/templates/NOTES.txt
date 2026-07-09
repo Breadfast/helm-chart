@@ -1,0 +1,51 @@
+Breadfast RudderStack ({{ .Chart.AppVersion }}) deployed as "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}".
+
+Topology (split against EXTERNAL Cloud SQL JobsDB at {{ .Values.backend.db.host | default "<set backend.db.host>" }}:{{ .Values.backend.db.port }}):
+  - transformer : Deployment, {{ .Values.transformer.replicaCount }} replicas, Service "{{ include "transformer.fullname" . }}:{{ .Values.transformer.service.port }}"
+  - processor   : StatefulSet replicas=1 (APP_TYPE=PROCESSOR), health :{{ .Values.backend.processor.webPort }}/health
+  - gateway     : Deployment, {{ .Values.backend.gateway.replicaCount }} replicas (APP_TYPE=GATEWAY), ingress -> :{{ .Values.backend.gateway.webPort }}
+
+Ingestion endpoint:
+{{- if .Values.ingress.enabled }}
+  https://{{ .Values.ingress.hostname }}/  ->  gateway Service "{{ include "gateway.fullname" . }}"
+{{- else }}
+  Ingress disabled. Reach the gateway via Service "{{ include "gateway.fullname" . }}:{{ .Values.backend.gateway.service.port }}".
+{{- end }}
+
+Metrics:
+  Service "{{ .Values.backend.processor.metricsService.name }}" exposes the PROCESSOR's /metrics on :{{ .Values.backend.metricsPort }}
+  for the control plane's single Service-DNS scrape (replaces the old EMBEDDED rudderstack-0 target).
+  NOTE: this targets the single processor only. Gateway-level (ingestion) metrics are NOT aggregated here -
+  a single Service-DNS GET cannot fan out across N gateway replicas. To collect gateway metrics later, either
+  enable backend.gateway.metricsService (rendered HEADLESS) with control-plane endpoint discovery, or run an
+  aggregating collector (OpenTelemetry Collector / Prometheus) scraping all gateway pods on :{{ .Values.backend.metricsPort }}.
+
+Secrets (resolved from Vault via the ArgoCD Vault Plugin at "{{ .Values.vault.path }}"):
+  - {{ .Values.backend.db.userKey }} / {{ .Values.backend.db.passwordKey }}  (Cloud SQL JobsDB user/password)
+  - {{ .Values.backend.workspaceTokenKey }}  (CONFIG_BACKEND_TOKEN)
+
+GCS backups use KEYLESS auth (Workload Identity), NOT a credentials key:
+  workloadIdentity.type={{ .Values.backend.gcs.workloadIdentityType | default "<unset>" }} + GOOGLE_APPLICATION_CREDENTIALS unset => rudder-server uses ADC.
+  PRECONDITIONS (Terraform/human-applied - the chart does NOT create these):
+    1. KSA "{{ include "rudderstack.serviceAccountName" . }}" annotated with the GSA
+       (iam.gke.io/gcp-service-account: <GSA>) - set via serviceAccount.annotations in the overlay.
+    2. GSA granted object access on the backup buckets (e.g. roles/storage.objectAdmin).
+    3. Workload Identity binding: GSA has roles/iam.workloadIdentityUser for
+       serviceAccount:<PROJECT>.svc.id.goog[{{ .Release.Namespace }}/{{ include "rudderstack.serviceAccountName" . }}].
+
+OPERATIONAL CAVEAT - processor failover on hard node failure:
+  The processor is a StatefulSet with replicas=1 and no PDB. On a normal node
+  deletion / cluster-autoscale event it reschedules automatically. But on a HARD
+  node failure (node goes NotReady but the Node/Pod objects are not deleted),
+  Kubernetes will NOT recreate the pod until it is certain the old one is gone -
+  it can stay stuck "Terminating"/NotReady until the Node object is removed or the
+  pod is force-deleted:
+      kubectl -n {{ .Release.Namespace }} delete pod {{ include "processor.fullname" . }}-0 --grace-period=0 --force
+  Recommended alert: "processor pod not Ready > 3-5 min" with the above as the
+  runbook step. Gateways keep buffering events to Cloud SQL during this window,
+  so the impact is processing/delivery latency, NOT data loss.
+
+First boot on an empty Cloud SQL:
+  gw_* tables are created by the gateway (the writer). The processor opens gw_*
+  read-only and tolerates their absence (its /health Ping is connection-level),
+  so it will not crash-loop before the gateway has started.

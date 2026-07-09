@@ -1,0 +1,288 @@
+# Default values for the Breadfast RudderStack chart.
+#
+# This chart is PUBLISHED to the Breadfast public Helm registry and consumed by
+# ArgoCD. Keep this file GENERIC - it must contain NO environment-specific or
+# internal values (no Cloud SQL IP, no real ingress hostname, no bucket/project
+# IDs, no concrete Vault path). All of those live in the PRIVATE per-environment
+# overlay in external-tools (e.g. external-tools/rudderstack/prod/values.yaml),
+# which ArgoCD layers on top via the argocd-vault-plugin-helm-remote CMP.
+---
+
+# -- Labels applied to every resource in the chart.
+commonLabels: {}
+
+# -- Optional override for the workspace-token Secret (CONFIG_BACKEND_TOKEN).
+#    Leave empty to let the chart render its own AVP-backed Secret.
+rudderWorkspaceTokenExistingSecret: ""
+
+# ---------------------------------------------------------------------------
+# Vault / ArgoCD Vault Plugin (AVP)
+# ---------------------------------------------------------------------------
+# All secret material is resolved at ArgoCD sync time from Vault. The chart only
+# ever renders "<path:...#key>" PLACEHOLDERS - never plaintext. The concrete
+# Vault path is INTERNAL and MUST be supplied by the private overlay; left empty
+# here so nothing internal ships in the public chart. The secret templates only
+# render when vault.path is set.
+vault:
+  # -- Vault KV-v2 path holding this app's secrets (no trailing slash).
+  #    Set in the private overlay, e.g. "devops/data/argocd/rudderstack/<env>".
+  path: ""
+
+# ---------------------------------------------------------------------------
+# ArgoCD sync waves (transformer -> processor -> gateway, with prereqs first).
+# Templated onto resource annotations so ordering travels with the chart.
+# ---------------------------------------------------------------------------
+syncWaves:
+  prereqs: "-1"      # PriorityClass, ServiceAccount, ConfigMap, the AVP Secrets
+  transformer: "0"   # passed to the transformer subchart as .Values.syncWave
+  processor: "1"     # StatefulSet + governing/metrics Services (runs migrations)
+  gateway: "2"       # Deployment + Service + PDB + Ingress
+
+global:
+  imagePullSecrets: []
+  # -- StorageClass for the processor's RUDDER_TMPDIR PVC ("" = cluster default).
+  storageClass: ""
+
+# ===========================================================================
+# rudder-server (shared settings + per-role gateway / processor)
+# ===========================================================================
+backend:
+  image:
+    repository: rudderlabs/rudder-server
+    version: "1.74.1"
+    pullPolicy: IfNotPresent
+
+  # -- External Cloud SQL (Postgres) JobsDB. Reached over the PRIVATE IP
+  #    directly: no Cloud SQL Auth Proxy sidecar, no IAM DB auth.
+  #    host/port/name/sslMode come from here; user/password come from Vault.
+  db:
+    host: ""            # Cloud SQL private IP literal - set in values-prod.yaml
+    port: 5432
+    name: jobsdb
+    # sslMode=require encrypts in transit with NO cert management (lib/pq does
+    # not verify the server cert). Works whether or not the instance enforces
+    # SSL. Source default is "disable" (utils/misc/dbutils.go:29 @ v1.74.1);
+    # we harden it. verify-ca/verify-full would require mounting the Cloud SQL
+    # server-ca.pem.
+    sslMode: require
+    # Secret (rendered from Vault) holding the DB user/password. If empty the
+    # chart names it "<release>-rudderstack-db".
+    existingSecret: ""
+    userKey: db_user
+    passwordKey: db_password
+    # Connection-pool sizing. rudder-server opens one pool per role against the
+    # single Cloud SQL instance. Defaults match source:
+    #   gateway   DB.gateway.Pool.maxOpenConnections   = 20 (gatewayAppHandler.go:75)
+    #   processor DB.processor.Pool.maxOpenConnections = 80 (processorAppHandler.go:158)
+    # Peak ~= (gateway.replicas * 20) + 80 + migrator/warehouse overhead (~140
+    # at 2 gateways). Size the Cloud SQL tier's max_connections >= ~200.
+    # Override env (verified via ConfigKeyToEnv @ v1.74.1, camelCase splits):
+    #   RSERVER_DB_GATEWAY_POOL_MAX_OPEN_CONNECTIONS
+    #   RSERVER_DB_PROCESSOR_POOL_MAX_OPEN_CONNECTIONS
+
+  # rudder-server config.yaml overrides (merged over rudder-config.yaml).
+  config:
+    mountPath: /etc/rudderstack
+    overrides: {}
+
+  # Load workspace config from a mounted file instead of the control plane.
+  controlPlaneJSON: false
+
+  # -- Vault key (under vault.path) for the workspace token -> CONFIG_BACKEND_TOKEN.
+  workspaceTokenKey: workspace_token
+
+  # -- Environment shared by BOTH gateway and processor pods.
+  #    (DB.* env and APP_TYPE are injected by the templates, not here.)
+  #    GENERIC defaults only. Helm REPLACES this whole list on override, so the
+  #    private overlay must re-supply the full set INCLUDING the internal bits it
+  #    adds: CONFIG_BACKEND_URL (control plane), JOBS_BACKUP_BUCKET /
+  #    JOB_STATUS_BACKUP_BUCKET (GCS backup buckets), and any BUGSNAG_KEY.
+  extraEnvVars:
+    - name: CONFIG_PATH
+      value: "/etc/rudderstack/config.yaml"
+    - name: RUDDER_TMPDIR
+      value: "/data/rudderstack"
+    - name: JOBS_BACKUP_STORAGE_PROVIDER
+      value: "GCS"
+    # NOTE: GOOGLE_APPLICATION_CREDENTIALS is intentionally NOT set. Leaving it
+    # unset is what lets rudder-server use keyless ADC / Workload Identity for
+    # GCS backups (see backend.gcs.workloadIdentityType). Do not add it back.
+    - name: LOG_LEVEL
+      value: "INFO"
+    - name: RSERVER_GATEWAY_WEBHOOK_SOURCE_LIST_FOR_PARSING_PARAMS
+      value: Shopify
+    # OpenTelemetry Prometheus exporter -> /metrics on :9182 (both roles).
+    - name: RSERVER_OPEN_TELEMETRY_ENABLED
+      value: "true"
+    - name: RSERVER_OPEN_TELEMETRY_METRICS_PROMETHEUS_ENABLED
+      value: "true"
+    - name: RSERVER_OPEN_TELEMETRY_METRICS_PROMETHEUS_PORT
+      value: "9182"
+
+  # -- Port rudder-server exposes Prometheus metrics on (matches the env above).
+  metricsPort: 9182
+
+  # -- Keyless GCS auth for JobsDB backups via Workload Identity.
+  #    "GKE" => rudder-server sets workloadIdentity.type=GKE and uses ADC (the
+  #    pod's KSA -> GSA); no credentials key file. Empty "" disables it (would
+  #    require key-based auth, which this chart no longer wires). The KSA must be
+  #    annotated with the GSA (serviceAccount.annotations, from the overlay) and
+  #    GOOGLE_APPLICATION_CREDENTIALS must stay unset.
+  gcs:
+    workloadIdentityType: "GKE"
+
+  # -------------------------------------------------------------------------
+  # GATEWAY role - Deployment, N replicas, APP_TYPE=GATEWAY, behind the ingress.
+  # -------------------------------------------------------------------------
+  gateway:
+    replicaCount: 2
+    webPort: 8080            # RSERVER_GATEWAY_WEB_PORT (Gateway.webPort default)
+    service:
+      type: ClusterIP
+      port: 80
+      annotations: {}
+      labels: {}
+    # Forward-compatible metrics Service for gateway pods. DISABLED today: a
+    # single Service-DNS GET cannot aggregate N gateway replicas (see NOTES.txt).
+    # When enabled it is rendered HEADLESS for endpoint discovery.
+    metricsService:
+      enabled: false
+      name: rudder-gateway-metrics
+    pdb:
+      enabled: true
+      maxUnavailable: 1
+    resources:
+      requests:
+        memory: "1024Mi"
+        cpu: "500m"
+      limits:
+        memory: "2048Mi"
+    podLabels: {}
+    podAnnotations: {}
+    nodeSelector: {}
+    tolerations: []
+    # Spread gateway replicas across nodes/zones; merged with anti-spot affinity.
+    affinity: {}
+    topologySpreadConstraints: []
+    terminationGracePeriodSeconds: 60
+
+  # -------------------------------------------------------------------------
+  # PROCESSOR role - StatefulSet replicas=1, APP_TYPE=PROCESSOR (the single
+  # processor/router/warehouse "brain"). No PDB (see NOTES.txt).
+  # -------------------------------------------------------------------------
+  processor:
+    webPort: 8086            # RSERVER_PROCESSOR_WEB_PORT (Processor.webPort default)
+    enableProcessor: true    # RSERVER_ENABLE_PROCESSOR
+    enableRouter: true       # RSERVER_ENABLE_ROUTER
+    warehouseMode: embedded  # RSERVER_WAREHOUSE_MODE (off disables warehouse)
+    # Metrics Service for the processor. Enabled: this single, stable endpoint
+    # ("rudder-metrics") replaces the old EMBEDDED rudderstack-0 target so the
+    # control plane's single Service-DNS /metrics scrape keeps working.
+    metricsService:
+      enabled: true
+      name: rudder-metrics
+    persistence:
+      enabled: true
+      size: "20Gi"
+      accessModes:
+        - ReadWriteOnce
+      annotations: {}
+    resources:
+      requests:
+        memory: "2048Mi"
+        cpu: "1"
+      limits:
+        memory: "4096Mi"
+    podLabels: {}
+    podAnnotations: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+    topologySpreadConstraints: []
+    terminationGracePeriodSeconds: 300
+
+# -- Persistent mount path inside both pods for RUDDER_TMPDIR / recovery files.
+persistence:
+  mountPath: /data/rudderstack
+
+# ===========================================================================
+# Ingress (gateway only - ingestion endpoint).
+# Generic defaults; the real hostname / TLS secret / cert-manager issuer are
+# set in the private overlay.
+# ===========================================================================
+ingress:
+  enabled: true
+  tls: true
+  hostname: "rudderstack.local"
+  secretName: ""
+  ingressClassName: nginx
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  labels: {}
+
+# ===========================================================================
+# Transformer subchart (charts/transformer) - HA, gateway readiness depends on it.
+# ===========================================================================
+transformer:
+  replicaCount: 3
+  # ArgoCD sync wave for the transformer subchart resources (wave 0).
+  syncWave: "0"
+  service:
+    type: ClusterIP
+    port: 9090
+  image:
+    repository: rudderstack/rudder-transformer
+    version: "1.74.1"
+    pullPolicy: IfNotPresent
+  # GENERIC default (empty). The private overlay supplies CONFIG_BACKEND_URL
+  # (control-plane URL). Helm replaces this whole list on override.
+  extraEnvVars: []
+  # Sized from observed usage: a single transformer peaked ~1.1 GiB / ~1.15
+  # cores, so the limit must exceed 1 GiB to avoid OOM. With >=3 replicas the
+  # per-pod load is lower, but V8 heap can still spike - keep headroom.
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "2048Mi"
+      cpu: "1500m"
+  # PodDisruptionBudget so a node drain never takes the transformer below 2.
+  pdb:
+    enabled: true
+    minAvailable: 2
+  # Forward-compatible metrics Service for the transformer. DISABLED by default:
+  # the transformer image's Prometheus port/path must be confirmed before wiring.
+  metricsService:
+    enabled: false
+    name: rudder-transformer-metrics
+    port: 9182
+  # Matches priorityClass.name below (created when priorityClass.create=true).
+  priorityClassName: rudderstack-critical
+  affinity: {}
+  topologySpreadConstraints: []
+  nodeSelector: {}
+  tolerations: []
+
+# ===========================================================================
+# PriorityClass for the ingestion-critical workloads (gateway + processor;
+# transformer references it too since gateway readiness depends on it).
+# ===========================================================================
+priorityClass:
+  create: true
+  name: rudderstack-critical
+  value: 1000000000
+  description: "Breadfast RudderStack ingestion/processing - keep off the eviction list."
+
+# KSA used by the gateway + processor pods (they run the GCS backups). Created
+# by the chart so it can be annotated for Workload Identity. The GSA annotation
+# (iam.gke.io/gcp-service-account: <GSA>) is INTERNAL and supplied by the
+# private overlay - never in the public chart.
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# NOTE: the upstream chart's Telegraf statsd sidecar is intentionally dropped.
+# Metrics are exported via the OpenTelemetry Prometheus exporter on
+# /metrics:9182 (see backend.extraEnvVars) and surfaced by the metrics Service.

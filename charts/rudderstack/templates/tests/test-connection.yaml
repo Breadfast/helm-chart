@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "rudderstack.fullname" . }}-test-connection"
+  labels:
+    {{- include "rudderstack.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "gateway.fullname" . }}:{{ .Values.backend.gateway.service.port }}/health']
+  restartPolicy: Never

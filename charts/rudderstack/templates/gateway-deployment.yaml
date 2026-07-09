@@ -1,0 +1,136 @@
+{{- $base := .Values.backend -}}
+{{- $gw := .Values.backend.gateway -}}
+{{- $rudderConfig := mustMergeOverwrite (.Files.Get "rudder-config.yaml" | fromYaml) $base.config.overrides -}}
+---
+# GATEWAY: stateless ingestion. APP_TYPE=GATEWAY builds only the gateway (no
+# processor/router/warehouse). N replicas behind the ingress; writes gw_* to the
+# shared Cloud SQL JobsDB. Readiness depends on the transformer being reachable
+# (the gateway will not bind its web port until backend config + transformer
+# /features have loaded).
+apiVersion: {{ include "statefulset.apiVersion" . }}
+kind: Deployment
+metadata:
+  name: {{ include "gateway.fullname" . }}
+  labels:
+    {{- include "gateway.selectorLabels" . | nindent 4 }}
+    {{- include "rudderstack.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ .Values.syncWaves.gateway | quote }}
+spec:
+  replicas: {{ $gw.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "gateway.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "gateway.selectorLabels" . | nindent 8 }}
+        {{- include "rudderstack.labels" . | nindent 8 }}
+        {{- with $gw.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        checksum/rudder-config: {{ $rudderConfig | toYaml | sha256sum }}
+        {{- with $gw.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "rudderstack.serviceAccountName" . }}
+      {{- if .Values.priorityClass.create }}
+      priorityClassName: {{ .Values.priorityClass.name }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ $gw.terminationGracePeriodSeconds }}
+      {{- with $gw.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $gw.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      affinity:
+        {{- if $gw.affinity }}
+        {{- toYaml $gw.affinity | nindent 8 }}
+        {{- else }}
+        {{- include "rudderstack.antiSpotNodeAffinity" . | nindent 8 }}
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    {{- include "gateway.selectorLabels" . | nindent 20 }}
+        {{- end }}
+      {{- if $gw.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml $gw.topologySpreadConstraints | nindent 8 }}
+      {{- else }}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              {{- include "gateway.selectorLabels" . | nindent 14 }}
+      {{- end }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- include "rudderstack.backendVolumes" . | nindent 8 }}
+        - name: backend-data
+          emptyDir: {}
+      containers:
+        - name: gateway
+          image: "{{ $base.image.repository }}:{{ $base.image.version }}"
+          imagePullPolicy: {{ $base.image.pullPolicy }}
+          command: ["/docker-entrypoint.sh"]
+          args: ["/bin/sh", "-c", "/wait-for $JOBS_DB_HOST:$(JOBS_DB_PORT) -- /rudder-server"]
+          volumeMounts:
+            {{- include "rudderstack.backendVolumeMounts" . | nindent 12 }}
+            - name: backend-data
+              mountPath: {{ .Values.persistence.mountPath }}
+          ports:
+            - name: http
+              containerPort: {{ $gw.webPort }}
+            - name: metrics
+              containerPort: {{ $base.metricsPort }}
+          env:
+            - name: APP_TYPE
+              value: "GATEWAY"
+            - name: RSERVER_GATEWAY_WEB_PORT
+              value: {{ $gw.webPort | quote }}
+            {{- include "rudderstack.sharedEnv" . | nindent 12 }}
+          # startupProbe gives generous grace for first-boot migrations + the
+          # BLOCKING transformer /features fetch, so the pod never crash-loops
+          # while the schema/transformer come up.
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 30
+            timeoutSeconds: 5
+          # readiness = DB-aware /health; the port only binds after backend
+          # config AND transformer features load, so readiness reflects the
+          # transformer dependency.
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 5
+          # liveness = process-level TCP (NOT /health). /health pings JobsDB, so
+          # a Cloud SQL HA failover would otherwise restart the whole fleet
+          # mid-recovery. TCP only checks the process is still listening.
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 15
+            failureThreshold: 6
+            timeoutSeconds: 5
+          resources:
+            {{- toYaml $gw.resources | nindent 12 }}

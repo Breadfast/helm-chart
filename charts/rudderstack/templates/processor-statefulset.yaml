@@ -1,0 +1,158 @@
+{{- $base := .Values.backend -}}
+{{- $proc := .Values.backend.processor -}}
+{{- $rudderConfig := mustMergeOverwrite (.Files.Get "rudder-config.yaml" | fromYaml) $base.config.overrides -}}
+---
+# PROCESSOR: the single processor/router/warehouse "brain". APP_TYPE=PROCESSOR
+# builds processor + router + batch-router + embedded warehouse. StatefulSet
+# replicas=1 gives at-most-one semantics (the replacement pod is not created
+# until the prior one is fully terminated) - critical under DEDICATED static
+# mode to avoid double-processing/double-delivery. No PDB (a minAvailable:1 PDB
+# on a 1-replica workload would block voluntary node drains); failover is by
+# reschedule. See NOTES.txt for the hard-node-failure caveat.
+apiVersion: {{ include "statefulset.apiVersion" . }}
+kind: StatefulSet
+metadata:
+  name: {{ include "processor.fullname" . }}
+  labels:
+    {{- include "processor.selectorLabels" . | nindent 4 }}
+    {{- include "rudderstack.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ .Values.syncWaves.processor | quote }}
+spec:
+  serviceName: {{ include "processor.fullname" . }}
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "processor.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "processor.selectorLabels" . | nindent 8 }}
+        {{- include "rudderstack.labels" . | nindent 8 }}
+        {{- with $proc.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        checksum/rudder-config: {{ $rudderConfig | toYaml | sha256sum }}
+        {{- with $proc.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "rudderstack.serviceAccountName" . }}
+      {{- if .Values.priorityClass.create }}
+      priorityClassName: {{ .Values.priorityClass.name }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ $proc.terminationGracePeriodSeconds }}
+      {{- with $proc.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $proc.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      affinity:
+        {{- if $proc.affinity }}
+        {{- toYaml $proc.affinity | nindent 8 }}
+        {{- else }}
+        {{- include "rudderstack.antiSpotNodeAffinity" . | nindent 8 }}
+        # Keep the single processor off nodes running any other component of
+        # this release (gateways/transformers) so they don't contend for
+        # CPU/memory. Soft - won't block scheduling if capacity is tight. All
+        # rudderstack pods (incl. the transformer subchart) share the instance
+        # label, so this matches every sibling without a component label.
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- end }}
+      {{- with $proc.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        {{- include "rudderstack.backendVolumes" . | nindent 8 }}
+        {{- if not $proc.persistence.enabled }}
+        - name: backend-data
+          emptyDir: {}
+        {{- end }}
+      containers:
+        - name: processor
+          image: "{{ $base.image.repository }}:{{ $base.image.version }}"
+          imagePullPolicy: {{ $base.image.pullPolicy }}
+          command: ["/docker-entrypoint.sh"]
+          args: ["/bin/sh", "-c", "/wait-for $JOBS_DB_HOST:$(JOBS_DB_PORT) -- /rudder-server"]
+          volumeMounts:
+            {{- include "rudderstack.backendVolumeMounts" . | nindent 12 }}
+            - name: backend-data
+              mountPath: {{ .Values.persistence.mountPath }}
+          ports:
+            - name: http
+              containerPort: {{ $proc.webPort }}
+            - name: metrics
+              containerPort: {{ $base.metricsPort }}
+          env:
+            - name: APP_TYPE
+              value: "PROCESSOR"
+            - name: RSERVER_ENABLE_PROCESSOR
+              value: {{ $proc.enableProcessor | quote }}
+            - name: RSERVER_ENABLE_ROUTER
+              value: {{ $proc.enableRouter | quote }}
+            - name: RSERVER_WAREHOUSE_MODE
+              value: {{ $proc.warehouseMode | quote }}
+            - name: RSERVER_PROCESSOR_WEB_PORT
+              value: {{ $proc.webPort | quote }}
+            {{- include "rudderstack.sharedEnv" . | nindent 12 }}
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 30
+            timeoutSeconds: 5
+          # readiness = DB-aware /health (Ping is connection-level, so it stays
+          # green even before gw_* tables exist on a brand-new DB).
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+            timeoutSeconds: 5
+          # liveness = process-level TCP (see gateway-deployment.yaml rationale).
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 15
+            failureThreshold: 6
+            timeoutSeconds: 5
+          resources:
+            {{- toYaml $proc.resources | nindent 12 }}
+  {{- if $proc.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: backend-data
+        {{- with $proc.persistence.annotations }}
+        annotations:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      spec:
+        {{- with .Values.global.storageClass }}
+        storageClassName: {{ . }}
+        {{- end }}
+        accessModes:
+          {{- range $proc.persistence.accessModes }}
+          - {{ . | quote }}
+          {{- end }}
+        resources:
+          requests:
+            storage: {{ $proc.persistence.size | quote }}
+  {{- end }}
