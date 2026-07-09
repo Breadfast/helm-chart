@@ -1,10 +1,12 @@
 {{- $base := .Values.backend -}}
-{{- if $base.processor.metricsService.enabled }}
+{{- if and $base.processor.metricsService.enabled (not .Values.metricsAggregator.enabled) }}
 ---
 # Single, stable metrics endpoint scraped by the control plane via one
 # Service-DNS GET on /metrics:9182. Selects the PROCESSOR pod only (single
 # replica), replacing the old EMBEDDED rudderstack-0 target. Do NOT point this
 # at multiple replicas - a single Service-DNS GET cannot aggregate them.
+# NOTE: when metricsAggregator.enabled, the aggregator owns the rudder-metrics
+# Service instead (it merges gateway + processor metrics), so this is skipped.
 apiVersion: v1
 kind: Service
 metadata:

@@ -74,6 +74,15 @@ app.kubernetes.io/component: processor
 {{- printf "%s-processor" (include "rudderstack.fullname" .) | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{- define "metricsAggregator.fullname" -}}
+{{- printf "%s-metrics-aggregator" (include "rudderstack.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{- define "metricsAggregator.selectorLabels" -}}
+{{ include "rudderstack.selectorLabels" . }}
+app.kubernetes.io/component: metrics-aggregator
+{{- end -}}
+
 {{/*
 Workspace-token Secret name (AVP-backed unless an existing secret is provided).
 */}}
