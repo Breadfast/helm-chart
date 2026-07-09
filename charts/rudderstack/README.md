@@ -1,6 +1,6 @@
 # rudderstack
 
-![Version: 0.2.1](https://img.shields.io/badge/Version-0.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.74.1](https://img.shields.io/badge/AppVersion-1.74.1-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.74.1](https://img.shields.io/badge/AppVersion-1.74.1-informational?style=flat-square)
 
 Breadfast self-hosted RudderStack (Segment-alternative) data plane.
 
@@ -74,6 +74,20 @@ chart carries placeholders only, never plaintext.
 | ingress.labels | object | `{}` |  |
 | ingress.secretName | string | `""` |  |
 | ingress.tls | bool | `true` |  |
+| metricsAggregator.affinity | object | `{}` |  |
+| metricsAggregator.enabled | bool | `false` |  |
+| metricsAggregator.image.pullPolicy | string | `"IfNotPresent"` |  |
+| metricsAggregator.image.repository | string | `"otel/opentelemetry-collector-contrib"` |  |
+| metricsAggregator.image.tag | string | `"0.119.0"` |  |
+| metricsAggregator.nodeSelector | object | `{}` |  |
+| metricsAggregator.podAnnotations | object | `{}` |  |
+| metricsAggregator.port | int | `9182` |  |
+| metricsAggregator.resources.limits.memory | string | `"256Mi"` |  |
+| metricsAggregator.resources.requests.cpu | string | `"100m"` |  |
+| metricsAggregator.resources.requests.memory | string | `"128Mi"` |  |
+| metricsAggregator.scrapeInterval | string | `"30s"` |  |
+| metricsAggregator.serviceName | string | `"rudder-metrics"` |  |
+| metricsAggregator.tolerations | list | `[]` |  |
 | persistence | object | `{"mountPath":"/data/rudderstack"}` | Persistent mount path inside both pods for RUDDER_TMPDIR / recovery files. |
 | priorityClass.create | bool | `true` |  |
 | priorityClass.description | string | `"Breadfast RudderStack ingestion/processing - keep off the eviction list."` |  |

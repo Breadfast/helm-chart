@@ -306,6 +306,38 @@ transformer:
   tolerations: []
 
 # ===========================================================================
+# Metrics aggregator (OpenTelemetry Collector).
+# The control plane scrapes ONE endpoint (rudder-metrics:9182). In the split
+# data plane, gateway pods expose gateway_* (ingestion) and the processor
+# exposes proc_/rt_/warehouse/jobsdb_* - disjoint sets. This Collector scrapes
+# ALL gateway pods + the processor on :9182 and re-exposes a MERGED /metrics on
+# :9182, and the rudder-metrics Service is repointed at it. When enabled, the
+# processor's own rudder-metrics Service is not created (this one takes over the
+# name), so the control plane keeps working unchanged.
+# ===========================================================================
+metricsAggregator:
+  enabled: false
+  serviceName: rudder-metrics   # Service name the control plane scrapes
+  port: 9182                    # merged /metrics port exposed to the control plane
+  scrapeInterval: 30s
+  image:
+    repository: otel/opentelemetry-collector-contrib
+    tag: "0.119.0"
+    pullPolicy: IfNotPresent
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      memory: "256Mi"
+  # Scheduling (defaults: run anywhere; it only needs cluster-network access to
+  # the data-plane pods). Pin to the rudderstack pool via the overlay if desired.
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  podAnnotations: {}
+
+# ===========================================================================
 # PriorityClass for the ingestion-critical workloads (gateway + processor;
 # transformer references it too since gateway readiness depends on it).
 # ===========================================================================

@@ -17,7 +17,7 @@ description: |
 type: application
 
 # Chart version. Bump on every change to the chart/templates.
-version: 0.2.1
+version: 0.3.0
 
 # Deployed rudder-server / rudder-transformer application version (see values).
 appVersion: "1.74.1"
