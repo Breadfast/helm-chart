@@ -1,0 +1,26 @@
+---
+# Gateway ingestion Service (ClusterIP, fronted by the ingress).
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "gateway.fullname" . }}
+  labels:
+    {{- include "gateway.selectorLabels" . | nindent 4 }}
+    {{- include "rudderstack.labels" . | nindent 4 }}
+  {{- with .Values.backend.gateway.service.labels }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ .Values.syncWaves.gateway | quote }}
+    {{- with .Values.backend.gateway.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  type: {{ .Values.backend.gateway.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.backend.gateway.service.port }}
+      targetPort: http
+      protocol: TCP
+  selector:
+    {{- include "gateway.selectorLabels" . | nindent 4 }}

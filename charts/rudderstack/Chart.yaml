@@ -1,0 +1,37 @@
+---
+apiVersion: v2
+name: rudderstack
+description: |
+  Breadfast self-hosted RudderStack (Segment-alternative) data plane.
+
+  Split topology against an EXTERNAL Cloud SQL (Postgres) JobsDB:
+    - transformer : Deployment (>=3 replicas) + ClusterIP Service + PDB (subchart)
+    - processor   : StatefulSet replicas=1, APP_TYPE=PROCESSOR (single "brain":
+                    processor + router + batch-router + embedded warehouse)
+    - gateway     : Deployment (N replicas), APP_TYPE=GATEWAY, behind the ingress
+
+  The in-cluster PostgreSQL subchart from the upstream chart is intentionally
+  removed; JobsDB is an external Cloud SQL instance reached over its private IP.
+  DB credentials are supplied by Vault via the ArgoCD Vault Plugin (AVP) - the
+  chart carries placeholders only, never plaintext.
+type: application
+
+# Chart version. Bump on every change to the chart/templates.
+version: 0.1.0
+
+# Deployed rudder-server / rudder-transformer application version (see values).
+appVersion: "1.74.1"
+
+home: https://github.com/Breadfast/helm-chart
+sources:
+  - https://github.com/Breadfast/helm-chart
+maintainers:
+  - name: DevOps-team
+    email: devops@breadfast.com
+
+# Vendored (unpacked under charts/). The in-cluster PostgreSQL subchart is
+# intentionally absent - JobsDB is an external Cloud SQL instance.
+dependencies:
+  - name: transformer
+    version: "0.1.0"
+    repository: "file://charts/transformer"

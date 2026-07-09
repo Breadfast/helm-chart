@@ -1,0 +1,39 @@
+{{- if .Values.ingress.enabled -}}
+---
+# Ingestion ingress -> GATEWAY service only. The processor has no ingestion port.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "rudderstack.fullname" . }}
+  labels:
+    {{- include "rudderstack.labels" . | nindent 4 }}
+  {{- with .Values.ingress.labels }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ .Values.syncWaves.gateway | quote }}
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- with .Values.ingress.ingressClassName }}
+  ingressClassName: {{ . }}
+  {{- end }}
+{{- if .Values.ingress.tls }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.hostname | quote }}
+      secretName: {{ .Values.ingress.secretName | default (printf "%s-tls" (include "rudderstack.fullname" .)) }}
+{{- end }}
+  rules:
+    - host: {{ .Values.ingress.hostname }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "gateway.fullname" . }}
+                port:
+                  number: {{ .Values.backend.gateway.service.port }}
+{{- end -}}

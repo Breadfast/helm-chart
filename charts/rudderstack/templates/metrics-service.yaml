@@ -1,0 +1,51 @@
+{{- $base := .Values.backend -}}
+{{- if $base.processor.metricsService.enabled }}
+---
+# Single, stable metrics endpoint scraped by the control plane via one
+# Service-DNS GET on /metrics:9182. Selects the PROCESSOR pod only (single
+# replica), replacing the old EMBEDDED rudderstack-0 target. Do NOT point this
+# at multiple replicas - a single Service-DNS GET cannot aggregate them.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $base.processor.metricsService.name }}
+  labels:
+    {{- include "processor.selectorLabels" . | nindent 4 }}
+    {{- include "rudderstack.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ .Values.syncWaves.processor | quote }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: metrics
+      port: {{ $base.metricsPort }}
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    {{- include "processor.selectorLabels" . | nindent 4 }}
+{{- end }}
+{{- if $base.gateway.metricsService.enabled }}
+---
+# Forward-compatible gateway metrics Service. HEADLESS so a future
+# endpoint-discovery scraper (or an aggregating collector) can reach every
+# gateway replica - a single Service-DNS GET cannot aggregate N gateways.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $base.gateway.metricsService.name }}
+  labels:
+    {{- include "gateway.selectorLabels" . | nindent 4 }}
+    {{- include "rudderstack.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/sync-wave: {{ .Values.syncWaves.gateway | quote }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: metrics
+      port: {{ $base.metricsPort }}
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    {{- include "gateway.selectorLabels" . | nindent 4 }}
+{{- end }}
