@@ -71,9 +71,11 @@ jobs:
         if: steps.list-changed.outputs.changed == 'true'
         uses: helm/kind-action@v1.8.0
 
-      # Install-test changed charts EXCEPT rudderstack: it is DB/Vault-backed
-      # (external Cloud SQL + AVP-resolved secrets) and cannot reach Ready in a
-      # kind cluster. It is still linted in the lint job above.
+      # Install-test changed charts EXCEPT rudderstack and oneuptime: both are
+      # DB/Vault-backed (external Cloud SQL/Memorystore + AVP-resolved secrets)
+      # and cannot reach Ready in a kind cluster. oneuptime additionally needs
+      # ClickHouse + operator subcharts and external Postgres/Redis, so its app
+      # never becomes Ready in kind. Both are still linted in the lint job above.
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
-        run: ct install --target-branch ${{ github.event.repository.default_branch }} --excluded-charts rudderstack
+        run: ct install --target-branch ${{ github.event.repository.default_branch }} --excluded-charts rudderstack,oneuptime
