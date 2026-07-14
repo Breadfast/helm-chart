@@ -33,9 +33,16 @@ jobs:
           fi
 
       # Lint ALL changed charts, including rudderstack.
+      # --chart-repos registers the remote subchart repos so `ct`'s pre-lint
+      # `helm dependency build` resolves them (oneuptime depends on keda /
+      # cloudnative-pg / altinity from remote repos; without this ct fails with
+      # "no repository definition"). rudderstack's dep is a local file:// chart,
+      # so it never needed this.
       - name: Run chart-testing (lint)
         if: steps.list-changed.outputs.changed == 'true'
-        run: ct lint --target-branch ${{ github.event.repository.default_branch }}
+        run: >-
+          ct lint --target-branch ${{ github.event.repository.default_branch }}
+          --chart-repos keda=https://kedacore.github.io/charts,cloudnative-pg=https://cloudnative-pg.github.io/charts,altinity-clickhouse-operator=https://helm.altinity.com/
 
   install:
     runs-on: ubuntu-latest
