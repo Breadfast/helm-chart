@@ -27,7 +27,7 @@ image:
   ## Enterprise edition images are hardened for more security and compliance, but you need a valid license to use them.
   ## Please contact sales@oneuptime.com for more information.
   type: community-edition
-  
+
   restartPolicy: Always
 # imagePullSecrets:
 #   - name: MyCustomSecretNameWithDockerCredentials
@@ -106,7 +106,7 @@ nginx:
   containerSecurityContext: {}
 
 postgresql:
-  enabled: true # Set this to false if you're using an external postgresql database.
+  enabled: true  # Set this to false if you're using an external postgresql database.
   image:
     repository: postgres
     tag: latest
@@ -121,7 +121,7 @@ postgresql:
       type: ClusterIP
       ports:
         postgresql: "5432"
-    terminationGracePeriodSeconds: 0 # We do this because we do not want to wait for the pod to terminate in case of node failure. https://medium.com/tailwinds-navigator/kubernetes-tip-how-statefulsets-behave-differently-than-deployments-when-node-fails-d29e36bca7d5
+    terminationGracePeriodSeconds: 0  # We do this because we do not want to wait for the pod to terminate in case of node failure. https://medium.com/tailwinds-navigator/kubernetes-tip-how-statefulsets-behave-differently-than-deployments-when-node-fails-d29e36bca7d5
     persistence:
       enabled: true
       size: 25Gi
@@ -471,8 +471,6 @@ redis:
     save ""
     maxmemory-policy noeviction
 
-
-
 autoscaling:
   enabled: false
   minReplicas: 1
@@ -487,7 +485,7 @@ billing:
   publicKey:
   privateKey:
   # Stripe webhook secret for automatic invoice emails (get from Stripe Dashboard > Developers > Webhooks)
-  webhookSecret: 
+  webhookSecret:
   smsDefaultValueInCents:
   whatsAppTextDefaultValueInCents:
   callDefaultValueInCentsPerMinute:
@@ -511,7 +509,6 @@ subscriptionPlan:
 analytics:
   host:
   key:
-
 
 # CAPTCHA Configuration
 # We support hCaptcha. You can get site key and secret key from https://hcaptcha.com/
@@ -741,7 +738,7 @@ script:
 # are evaluated as a template and can use template expansions and functions. All
 # other objects are used as yaml.
 extraTemplates:
-  #- |
+  # - |
   #    apiVersion: v1
   #    kind: ConfigMap
   #    metadata:
@@ -830,18 +827,18 @@ notifications:
       onCreateProject:
       onSubscriptionUpdate:
 
-startupProbe: # Startup probe configuration
+startupProbe:  # Startup probe configuration
   enabled: true
   periodSeconds: 60
   failureThreshold: 18
 
-livenessProbe: # Liveness probe configuration
+livenessProbe:  # Liveness probe configuration
   enabled: true
   periodSeconds: 60
   timeoutSeconds: 120
   initialDelaySeconds: 10
 
-readinessProbe: # Readiness probe configuration
+readinessProbe:  # Readiness probe configuration
   enabled: true
   periodSeconds: 60
   initialDelaySeconds: 10
@@ -860,7 +857,6 @@ home:
   podSecurityContext: {}
   hostAliases: []
   containerSecurityContext: {}
-
 
 app:
   enabled: true
