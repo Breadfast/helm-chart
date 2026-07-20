@@ -12,43 +12,6 @@ When gateway.enabled is true, the chart creates **Gateway API** resources separa
 
 Ingress resources are unchanged; you can use Ingress only, Gateway only, or both.
 
-## Argo Rollouts canary traffic routing
-
-`argorollouts.trafficRouting` selects how `setWeight` steps shift traffic:
-
-- **`nginx`** (default, legacy): `trafficRouting.nginx.stableIngress` — only shifts traffic that flows
-  through the nginx Ingress. Use for services still fronted by nginx.
-- **`gatewayAPI`**: uses the [`argoproj-labs/gatewayAPI`](https://github.com/argoproj-labs/rollouts-plugin-trafficrouter-gatewayapi)
-  plugin. The Rollout weights the **stable** (`<fullname>-service`) vs **canary**
-  (`<fullname>-service-canary`) backendRefs on this service's Gateway API HTTPRoute(s), so `setWeight`
-  shifts **real** Gateway traffic. This makes `dynamicStableScale` safe (stable capacity tracks real
-  traffic). Use for services whose real traffic flows through a GKE Gateway.
-
-Requirements / behavior for `gatewayAPI`:
-
-- `gateway.enabled: true` (or `ingress.type: gateway`) must render the HTTPRoute(s), and the
-  `argoproj-labs/gatewayAPI` plugin must be installed in the argo-rollouts controller.
-- When `argorollouts.enabled` **and** `trafficRouting: gatewayAPI`, every HTTPRoute rule that targets
-  this service's own Service is rendered with **both** stable+canary backendRefs (weights `100`/`0` at
-  rest; the plugin owns them during a rollout). This is required — the plugin errors on any managed
-  rule missing the canary ref. Rules targeting a *different* service are left single-ref (do not point
-  a canaried route's rules at another service).
-- The Rollout's plugin block auto-derives the list of HTTPRoute names the chart renders (per host,
-  chunked at `gateway.maxRulesPerRoute`). Override with `argorollouts.gatewayAPI.httpRoutes` /
-  `httpRouteNamespace` only if needed.
-- **GitOps note:** the plugin patches HTTPRoute `backendRefs[].weight` in place. If your ArgoCD
-  Application has `selfHeal: true`, add an `ignoreDifferences` for
-  `gateway.networking.k8s.io/HTTPRoute` at `.spec.rules[].backendRefs[].weight`, or ArgoCD will revert
-  the plugin mid-rollout.
-
-Example:
-
-```yaml
-argorollouts:
-  enabled: true
-  trafficRouting: gatewayAPI   # default is nginx
-```
-
 When networkPolicy.enabled and networkPolicy.internetOnly.enabled are true, the chart creates an egress-only
 NetworkPolicy that allows DNS and public internet traffic while excluding common private/internal CIDRs.
 NetworkPolicy works by IP/CIDR, so add the actual cluster Pod, Service, and internal VPC CIDRs to
@@ -73,10 +36,13 @@ networkPolicy.internetOnly.ipBlock.except when they are outside the defaults.
 | argoPreSyncValidator | object | `{"annotations":{},"backoffLimit":1,"command":["php","-l","/vault/secrets/wp-config.php"],"enabled":false,"ttlSecondsAfterFinished":60}` | If true, create ArgoCD PreSync job to validate environment variables injected from Vault |
 | argorollouts.dynamicStableScale | bool | `true` |  |
 | argorollouts.enabled | bool | `false` |  |
+| argorollouts.gatewayAPI.httpRouteNamespace | string | `""` | Namespace of the HTTPRoute(s) the plugin manages. Empty = the release namespace. |
+| argorollouts.gatewayAPI.httpRoutes | list | `[]` | Explicit list of HTTPRoute names for the plugin to manage. Leave empty (recommended) to    auto-derive the names from the HTTPRoutes this chart renders (matches the chunking in    httproute.yaml). Set only to override. |
 | argorollouts.steps[0].setWeight | int | `20` |  |
 | argorollouts.steps[1].pause.duration | string | `"1m"` |  |
 | argorollouts.steps[2].setWeight | int | `60` |  |
 | argorollouts.steps[3].pause | object | `{}` |  |
+| argorollouts.trafficRouting | string | `"nginx"` | Canary traffic router. "nginx" (default, legacy) keeps the historical    trafficRouting.nginx.stableIngress behavior. "gatewayAPI" switches the Rollout to the    argoproj-labs/gatewayAPI plugin, which weights the stable vs canary backendRefs on this    service's Gateway API HTTPRoute(s) so setWeight shifts REAL traffic. "gatewayAPI" requires    gateway.enabled=true (or ingress.type=gateway) AND the plugin installed in the controller. |
 | autoscaling.enabled | bool | `false` |  |
 | containerEnv | map | `[]` | Environment variable map |
 | cronJob | bool | `{"create":false}` | If true, Creates CronJob resource |
