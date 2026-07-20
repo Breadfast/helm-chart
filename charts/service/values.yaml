@@ -257,6 +257,19 @@ nodeTolerations: []
 argorollouts:
   dynamicStableScale: true
   enabled: false
+  # -- Canary traffic router. "nginx" (default, legacy) keeps the historical
+  #    trafficRouting.nginx.stableIngress behavior. "gatewayAPI" switches the Rollout to the
+  #    argoproj-labs/gatewayAPI plugin, which weights the stable vs canary backendRefs on this
+  #    service's Gateway API HTTPRoute(s) so setWeight shifts REAL traffic. "gatewayAPI" requires
+  #    gateway.enabled=true (or ingress.type=gateway) AND the plugin installed in the controller.
+  trafficRouting: nginx
+  gatewayAPI:
+    # -- Namespace of the HTTPRoute(s) the plugin manages. Empty = the release namespace.
+    httpRouteNamespace: ""
+    # -- Explicit list of HTTPRoute names for the plugin to manage. Leave empty (recommended) to
+    #    auto-derive the names from the HTTPRoutes this chart renders (matches the chunking in
+    #    httproute.yaml). Set only to override.
+    httpRoutes: []
   steps:
   - setWeight: 20
   - pause:

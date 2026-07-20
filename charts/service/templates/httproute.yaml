@@ -4,6 +4,11 @@
 {{- $defaultSvcName := printf "%s-service" (include "service.fullname" .) -}}
 {{- $fullName := include "service.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}
+{{- /* When the Rollout uses the gatewayAPI trafficRouter plugin, every rule that targets the
+       stable Service must also carry the canary Service backendRef (the plugin errors on any
+       managed rule lacking it) and both must be weighted; the plugin owns the weights at runtime. */ -}}
+{{- $gwCanary := and .Values.argorollouts.enabled (eq (.Values.argorollouts.trafficRouting | default "nginx") "gatewayAPI") -}}
+{{- $canarySvcName := printf "%s-service-canary" $fullName -}}
 {{- $parentRefs := "" -}}
 {{- $hosts := list -}}
 {{- $annotations := dict -}}
@@ -159,9 +164,20 @@ spec:
       filters:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- $stableName := .serviceName | default $defaultSvcName }}
+      {{- $port := .servicePort | default $svcPort }}
+      {{- $canaryOnRule := and $gwCanary (eq $stableName $defaultSvcName) }}
       backendRefs:
-      - name: {{ .serviceName | default $defaultSvcName }}
-        port: {{ .servicePort | default $svcPort }}
+      - name: {{ $stableName }}
+        port: {{ $port }}
+        {{- if $canaryOnRule }}
+        weight: 100
+        {{- end }}
+      {{- if $canaryOnRule }}
+      - name: {{ $canarySvcName }}
+        port: {{ $port }}
+        weight: 0
+      {{- end }}
     {{ end }}
     {{- end -}}
   {{- end -}}

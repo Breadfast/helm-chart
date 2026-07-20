@@ -40,8 +40,24 @@ spec:
           app.kubernetes.io/part-of: canary
           role: canary
       trafficRouting:
+      {{- if eq (.Values.argorollouts.trafficRouting | default "nginx") "gatewayAPI" }}
+        {{- $explicit := .Values.argorollouts.gatewayAPI.httpRoutes | default list }}
+        {{- $derived := splitList "," (include "service.httpRouteNames" .) | compact }}
+        {{- $routes := ternary $explicit $derived (gt (len $explicit) 0) }}
+        {{- if not $routes }}
+          {{- fail "argorollouts.trafficRouting=gatewayAPI requires either gateway/ingress-gateway HTTPRoutes to be rendered or an explicit argorollouts.gatewayAPI.httpRoutes list" }}
+        {{- end }}
+        plugins:
+          argoproj-labs/gatewayAPI:
+            httpRoutes:
+            {{- range $routes }}
+              - name: {{ . }}
+            {{- end }}
+            namespace: {{ .Values.argorollouts.gatewayAPI.httpRouteNamespace | default .Release.Namespace }}
+      {{- else }}
         nginx:
           stableIngress: {{ include "service.fullname" . }}-ingress
+      {{- end }}
       steps:
       {{- with .Values.argorollouts.steps }}
         {{- toYaml . | nindent 8 }}

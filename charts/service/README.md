@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.2.67](https://img.shields.io/badge/Version-0.2.67-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes.
 
@@ -11,6 +11,43 @@ When gateway.enabled is true, the chart creates **Gateway API** resources separa
 - **GCPBackendPolicy** (networking.gke.io/v1) – binds a Cloud Armor security policy to the Gateway backend Service when gateway.backendPolicy.enabled is true.
 
 Ingress resources are unchanged; you can use Ingress only, Gateway only, or both.
+
+## Argo Rollouts canary traffic routing
+
+`argorollouts.trafficRouting` selects how `setWeight` steps shift traffic:
+
+- **`nginx`** (default, legacy): `trafficRouting.nginx.stableIngress` — only shifts traffic that flows
+  through the nginx Ingress. Use for services still fronted by nginx.
+- **`gatewayAPI`**: uses the [`argoproj-labs/gatewayAPI`](https://github.com/argoproj-labs/rollouts-plugin-trafficrouter-gatewayapi)
+  plugin. The Rollout weights the **stable** (`<fullname>-service`) vs **canary**
+  (`<fullname>-service-canary`) backendRefs on this service's Gateway API HTTPRoute(s), so `setWeight`
+  shifts **real** Gateway traffic. This makes `dynamicStableScale` safe (stable capacity tracks real
+  traffic). Use for services whose real traffic flows through a GKE Gateway.
+
+Requirements / behavior for `gatewayAPI`:
+
+- `gateway.enabled: true` (or `ingress.type: gateway`) must render the HTTPRoute(s), and the
+  `argoproj-labs/gatewayAPI` plugin must be installed in the argo-rollouts controller.
+- When `argorollouts.enabled` **and** `trafficRouting: gatewayAPI`, every HTTPRoute rule that targets
+  this service's own Service is rendered with **both** stable+canary backendRefs (weights `100`/`0` at
+  rest; the plugin owns them during a rollout). This is required — the plugin errors on any managed
+  rule missing the canary ref. Rules targeting a *different* service are left single-ref (do not point
+  a canaried route's rules at another service).
+- The Rollout's plugin block auto-derives the list of HTTPRoute names the chart renders (per host,
+  chunked at `gateway.maxRulesPerRoute`). Override with `argorollouts.gatewayAPI.httpRoutes` /
+  `httpRouteNamespace` only if needed.
+- **GitOps note:** the plugin patches HTTPRoute `backendRefs[].weight` in place. If your ArgoCD
+  Application has `selfHeal: true`, add an `ignoreDifferences` for
+  `gateway.networking.k8s.io/HTTPRoute` at `.spec.rules[].backendRefs[].weight`, or ArgoCD will revert
+  the plugin mid-rollout.
+
+Example:
+
+```yaml
+argorollouts:
+  enabled: true
+  trafficRouting: gatewayAPI   # default is nginx
+```
 
 When networkPolicy.enabled and networkPolicy.internetOnly.enabled are true, the chart creates an egress-only
 NetworkPolicy that allows DNS and public internet traffic while excluding common private/internal CIDRs.
