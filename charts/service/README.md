@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.2.67](https://img.shields.io/badge/Version-0.2.67-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes.
 
@@ -36,10 +36,13 @@ networkPolicy.internetOnly.ipBlock.except when they are outside the defaults.
 | argoPreSyncValidator | object | `{"annotations":{},"backoffLimit":1,"command":["php","-l","/vault/secrets/wp-config.php"],"enabled":false,"ttlSecondsAfterFinished":60}` | If true, create ArgoCD PreSync job to validate environment variables injected from Vault |
 | argorollouts.dynamicStableScale | bool | `true` |  |
 | argorollouts.enabled | bool | `false` |  |
+| argorollouts.gatewayAPI.httpRouteNamespace | string | `""` | Namespace of the HTTPRoute(s) the plugin manages. Empty = the release namespace. |
+| argorollouts.gatewayAPI.httpRoutes | list | `[]` | Explicit list of HTTPRoute names for the plugin to manage. Leave empty (recommended) to    auto-derive the names from the HTTPRoutes this chart renders (matches the chunking in    httproute.yaml). Set only to override. |
 | argorollouts.steps[0].setWeight | int | `20` |  |
 | argorollouts.steps[1].pause.duration | string | `"1m"` |  |
 | argorollouts.steps[2].setWeight | int | `60` |  |
 | argorollouts.steps[3].pause | object | `{}` |  |
+| argorollouts.trafficRouting | string | `"nginx"` | Canary traffic router. "nginx" (default, legacy) keeps the historical    trafficRouting.nginx.stableIngress behavior. "gatewayAPI" switches the Rollout to the    argoproj-labs/gatewayAPI plugin, which weights the stable vs canary backendRefs on this    service's Gateway API HTTPRoute(s) so setWeight shifts REAL traffic. "gatewayAPI" requires    gateway.enabled=true (or ingress.type=gateway) AND the plugin installed in the controller. |
 | autoscaling.enabled | bool | `false` |  |
 | containerEnv | map | `[]` | Environment variable map |
 | cronJob | bool | `{"create":false}` | If true, Creates CronJob resource |
