@@ -1,6 +1,6 @@
 # rudderstack
 
-![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.74.1](https://img.shields.io/badge/AppVersion-1.74.1-informational?style=flat-square)
+![Version: 0.3.1](https://img.shields.io/badge/Version-0.3.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.74.1](https://img.shields.io/badge/AppVersion-1.74.1-informational?style=flat-square)
 
 Breadfast self-hosted RudderStack (Segment-alternative) data plane.
 
@@ -74,6 +74,7 @@ chart carries placeholders only, never plaintext.
 | ingress.labels | object | `{}` |  |
 | ingress.secretName | string | `""` |  |
 | ingress.tls | bool | `true` |  |
+| metricsAggregator.addMetricSuffixes | bool | `false` |  |
 | metricsAggregator.affinity | object | `{}` |  |
 | metricsAggregator.enabled | bool | `false` |  |
 | metricsAggregator.image.pullPolicy | string | `"IfNotPresent"` |  |
