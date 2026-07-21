@@ -103,6 +103,7 @@ data:
       prometheus:
         endpoint: 0.0.0.0:{{ $agg.port }}
         metric_expiration: 5m
+        add_metric_suffixes: {{ $agg.addMetricSuffixes }}
         resource_to_telemetry_conversion:
           enabled: false
     extensions:
@@ -136,7 +137,7 @@ spec:
         {{- include "metricsAggregator.selectorLabels" . | nindent 8 }}
         {{- include "rudderstack.labels" . | nindent 8 }}
       annotations:
-        checksum/config: {{ .Files.Get "rudder-config.yaml" | sha256sum | trunc 8 }}-{{ $agg.scrapeInterval }}
+        checksum/config: {{ printf "%s-%s" (toYaml $agg) (toString .Values.backend.metricsPort) | sha256sum | trunc 8 }}
         {{- with $agg.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}

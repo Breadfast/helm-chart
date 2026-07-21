@@ -320,6 +320,13 @@ metricsAggregator:
   serviceName: rudder-metrics   # Service name the control plane scrapes
   port: 9182                    # merged /metrics port exposed to the control plane
   scrapeInterval: 30s
+  # Keep the merged endpoint's metric names identical to the direct rudder-server
+  # /metrics output. The Prometheus exporter default appends type/unit suffixes
+  # (for example `_total` on counters), which breaks consumers that were written
+  # against the direct RudderStack exposition used by the all-in-one topology.
+  # NOTE: pinned collector 0.119.0 supports add_metric_suffixes; newer collector
+  # versions prefer translation_strategy: UnderscoreEscapingWithoutSuffixes.
+  addMetricSuffixes: false
   image:
     repository: otel/opentelemetry-collector-contrib
     tag: "0.119.0"

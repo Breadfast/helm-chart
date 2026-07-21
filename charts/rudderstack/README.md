@@ -75,6 +75,7 @@ chart carries placeholders only, never plaintext.
 | ingress.secretName | string | `""` |  |
 | ingress.tls | bool | `true` |  |
 | metricsAggregator.affinity | object | `{}` |  |
+| metricsAggregator.addMetricSuffixes | bool | `false` |  |
 | metricsAggregator.enabled | bool | `false` |  |
 | metricsAggregator.image.pullPolicy | string | `"IfNotPresent"` |  |
 | metricsAggregator.image.repository | string | `"otel/opentelemetry-collector-contrib"` |  |
