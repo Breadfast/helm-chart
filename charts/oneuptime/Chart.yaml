@@ -27,7 +27,7 @@ type: application
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
 # Fork pin: upstream OneUptime 11.0.1 chart + Breadfast serviceAccount/googleChat
 # additions. `-bf.N` mirrors the image-tag convention; bump N on every re-sync.
-version: 11.0.1-bf.1
+version: 11.0.1-bf.2
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to

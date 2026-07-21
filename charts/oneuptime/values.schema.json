@@ -2274,6 +2274,18 @@
                         "string",
                         "null"
                     ]
+                },
+                "incidentResponderSpaceName": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "incidentUpdatesSpaceName": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 }
             },
             "additionalProperties": false

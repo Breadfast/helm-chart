@@ -1018,6 +1018,8 @@ googleChat:
   projectNumber: ""
   customerId: "customers/my_customer"
   onCallCommandId: ""
+  incidentResponderSpaceName: ""
+  incidentUpdatesSpaceName: ""
 
 # GitHub Example Configuration
 # gitHubApp:
