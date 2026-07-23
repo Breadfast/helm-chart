@@ -1,4 +1,36 @@
-{{ if .Values.virtualService.enabled }}
+{{- if and .Values.argorollouts.enabled .Values.argorollouts.istio.enabled }}
+{{- /* Canary-ready VirtualService for Istio east-west traffic routing. The "primary" route holds
+       two weighted subset destinations (stable/canary); Argo Rollouts sets the weights each step.
+       timeout/retries provide resilience to in-cluster callers (e.g. picker-service -> node-app). */}}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ include "service.fullname" . }}
+  labels:
+    {{- include "service.labels" . | nindent 4 }}
+spec:
+  hosts:
+    - {{ include "service.fullname" . }}-service
+  http:
+    - name: primary
+      {{- with .Values.argorollouts.istio.timeout }}
+      timeout: {{ . }}
+      {{- end }}
+      {{- with .Values.argorollouts.istio.retries }}
+      retries:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      route:
+        - destination:
+            host: {{ include "service.fullname" . }}-service
+            subset: stable
+          weight: 100
+        - destination:
+            host: {{ include "service.fullname" . }}-service
+            subset: canary
+          weight: 0
+---
+{{- else if .Values.virtualService.enabled }}
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -13,4 +45,4 @@ spec:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 ---
-{{ end }}
+{{- end }}
