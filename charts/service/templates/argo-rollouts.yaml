@@ -62,10 +62,10 @@ spec:
         nginx:
           stableIngress: {{ include "service.fullname" . }}-ingress
       {{- end }}
-      {{- if .Values.argorollouts.istio.enabled }}
+      {{- if .Values.istio.enabled }}
         {{- /* East-west (in-cluster) canary via Istio, composed with the north-south router above.
-               Argo Rollouts weights the VirtualService "primary" route and manages the
-               DestinationRule subsets (canary/stable) in lockstep with the north-south weight. */}}
+               The VirtualService/DestinationRule themselves are defined by the top-level `istio`
+               block (independent of rollouts); here the Rollout just drives their canary weights. */}}
         istio:
           virtualService:
             name: {{ include "service.fullname" . }}

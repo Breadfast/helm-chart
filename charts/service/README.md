@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.5.0](https://img.shields.io/badge/Version-0.5.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes.
 
@@ -38,10 +38,6 @@ networkPolicy.internetOnly.ipBlock.except when they are outside the defaults.
 | argorollouts.enabled | bool | `false` |  |
 | argorollouts.gatewayAPI.httpRouteNamespace | string | `""` | Namespace of the HTTPRoute(s) the plugin manages. Empty = the release namespace. |
 | argorollouts.gatewayAPI.httpRoutes | list | `[]` | Explicit list of HTTPRoute names for the plugin to manage. Leave empty (recommended) to    auto-derive the names from the HTTPRoutes this chart renders (matches the chunking in    httproute.yaml). Set only to override. |
-| argorollouts.istio | object | `{"enabled":false,"retries":{},"timeout":"","trafficPolicy":{}}` | Istio EAST-WEST canary. When enabled (with argorollouts.enabled), the Rollout also weights    in-cluster (service-to-service) traffic via Istio, composed with the north-south router    (trafficRouting above). The chart renders a canary-ready VirtualService ("primary" route with    stable/canary weighted subsets) and a DestinationRule (subsets stable/canary). Requires the    workload to run in an Istio-injected namespace. The VirtualService timeout/retries and the    DestinationRule trafficPolicy also provide resilience (timeouts, circuit breaking) to callers. |
-| argorollouts.istio.retries | object | `{}` | HTTP retries on the VirtualService (Istio HTTPRetry), e.g.    {attempts: 2, perTryTimeout: "800ms", retryOn: "5xx,reset,connect-failure"} |
-| argorollouts.istio.timeout | string | `""` | HTTP route timeout on the VirtualService (e.g. "2s"). Empty = no timeout. |
-| argorollouts.istio.trafficPolicy | object | `{}` | DestinationRule trafficPolicy for resilience/circuit breaking (connectionPool +    outlierDetection). Argo Rollouts only edits the subsets, leaving this intact. |
 | argorollouts.steps[0].setWeight | int | `20` |  |
 | argorollouts.steps[1].pause.duration | string | `"1m"` |  |
 | argorollouts.steps[2].setWeight | int | `60` |  |
@@ -91,6 +87,11 @@ networkPolicy.internetOnly.ipBlock.except when they are outside the defaults.
 | image.tag | string | `""` |  |
 | imagePullSecrets | list | `[]` |  |
 | ingress | bool | `{"enabled":false}` | If true, Creats Ingress DNS name to expose the service publicly |
+| istio | object | `{"enabled":false,"hosts":[],"retries":{},"timeout":"","trafficPolicy":{}}` | Istio traffic management (VirtualService + DestinationRule), INDEPENDENT of Argo Rollouts.    When istio.enabled, the chart renders a VirtualService + DestinationRule for this service,    including resilience (timeouts, retries, circuit breaking) — usable even with argorollouts disabled.    When argorollouts.enabled is ALSO true, the chart makes them canary-aware (stable/canary subsets +    a weighted "primary" route that Argo Rollouts drives) and wires trafficRouting.istio into the    Rollout; otherwise it renders a plain route (100% -> the service) with the same resilience.    Requires the workload to run in an Istio-injected namespace. |
+| istio.hosts | list | `[]` | Hosts for the VirtualService. Empty defaults to ["<fullname>-service"] (in-cluster east-west). |
+| istio.retries | object | `{}` | Istio HTTPRetry, e.g. {attempts: 2, perTryTimeout: "800ms", retryOn: "5xx,reset,connect-failure"} |
+| istio.timeout | string | `""` | HTTP route timeout (e.g. "2s"). Empty = no timeout. |
+| istio.trafficPolicy | object | `{}` | DestinationRule trafficPolicy for resilience / circuit breaking (connectionPool,    outlierDetection, tls, ...). Argo Rollouts only edits the subsets, leaving this intact. |
 | livenessProbe | object | `{}` |  |
 | multiIngress | bool | `{"enabled":false}` | If true, Creats Multible Ingresses DNS name to expose the service publicly |
 | nameOverride | string | `""` |  |
