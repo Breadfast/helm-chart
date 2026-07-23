@@ -1,8 +1,8 @@
-{{- if and .Values.argorollouts.enabled .Values.argorollouts.istio.enabled }}
-{{- /* Canary-ready DestinationRule for Istio east-west traffic routing.
-       Argo Rollouts updates the subsets with the rollouts-pod-template-hash at each step; the
-       `version` labels below (also set on the pods via canary/stableMetadata) give correct
-       selection before/independent of that. trafficPolicy carries resilience (circuit breaking). */}}
+{{- if .Values.istio.enabled }}
+{{- /* Istio DestinationRule for this service (independent of Argo Rollouts). Carries resilience
+       (trafficPolicy: connectionPool / outlierDetection). When argorollouts is enabled, it also
+       gets canary/stable subsets that Argo Rollouts updates with the pod-template-hash each step;
+       the `version` labels (also set on pods via canary/stableMetadata) give correct selection. */}}
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
@@ -11,6 +11,7 @@ metadata:
     {{- include "service.labels" . | nindent 4 }}
 spec:
   host: {{ include "service.fullname" . }}-service
+  {{- if .Values.argorollouts.enabled }}
   subsets:
     - name: stable
       labels:
@@ -18,7 +19,8 @@ spec:
     - name: canary
       labels:
         version: canary
-  {{- with .Values.argorollouts.istio.trafficPolicy }}
+  {{- end }}
+  {{- with .Values.istio.trafficPolicy }}
   trafficPolicy:
     {{- toYaml . | nindent 4 }}
   {{- end }}

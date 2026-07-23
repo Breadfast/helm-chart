@@ -270,22 +270,6 @@ argorollouts:
     #    auto-derive the names from the HTTPRoutes this chart renders (matches the chunking in
     #    httproute.yaml). Set only to override.
     httpRoutes: []
-  # -- Istio EAST-WEST canary. When enabled (with argorollouts.enabled), the Rollout also weights
-  #    in-cluster (service-to-service) traffic via Istio, composed with the north-south router
-  #    (trafficRouting above). The chart renders a canary-ready VirtualService ("primary" route with
-  #    stable/canary weighted subsets) and a DestinationRule (subsets stable/canary). Requires the
-  #    workload to run in an Istio-injected namespace. The VirtualService timeout/retries and the
-  #    DestinationRule trafficPolicy also provide resilience (timeouts, circuit breaking) to callers.
-  istio:
-    enabled: false
-    # -- HTTP route timeout on the VirtualService (e.g. "2s"). Empty = no timeout.
-    timeout: ""
-    # -- HTTP retries on the VirtualService (Istio HTTPRetry), e.g.
-    #    {attempts: 2, perTryTimeout: "800ms", retryOn: "5xx,reset,connect-failure"}
-    retries: {}
-    # -- DestinationRule trafficPolicy for resilience/circuit breaking (connectionPool +
-    #    outlierDetection). Argo Rollouts only edits the subsets, leaving this intact.
-    trafficPolicy: {}
   steps:
   - setWeight: 20
   - pause:
@@ -304,6 +288,25 @@ virtualService:
   enabled: false
   hosts: []
   http: {}
+
+# -- Istio traffic management (VirtualService + DestinationRule), INDEPENDENT of Argo Rollouts.
+#    When istio.enabled, the chart renders a VirtualService + DestinationRule for this service,
+#    including resilience (timeouts, retries, circuit breaking) — usable even with argorollouts disabled.
+#    When argorollouts.enabled is ALSO true, the chart makes them canary-aware (stable/canary subsets +
+#    a weighted "primary" route that Argo Rollouts drives) and wires trafficRouting.istio into the
+#    Rollout; otherwise it renders a plain route (100% -> the service) with the same resilience.
+#    Requires the workload to run in an Istio-injected namespace.
+istio:
+  enabled: false
+  # -- Hosts for the VirtualService. Empty defaults to ["<fullname>-service"] (in-cluster east-west).
+  hosts: []
+  # -- HTTP route timeout (e.g. "2s"). Empty = no timeout.
+  timeout: ""
+  # -- Istio HTTPRetry, e.g. {attempts: 2, perTryTimeout: "800ms", retryOn: "5xx,reset,connect-failure"}
+  retries: {}
+  # -- DestinationRule trafficPolicy for resilience / circuit breaking (connectionPool,
+  #    outlierDetection, tls, ...). Argo Rollouts only edits the subsets, leaving this intact.
+  trafficPolicy: {}
 
 goreplay:
   enabled: false

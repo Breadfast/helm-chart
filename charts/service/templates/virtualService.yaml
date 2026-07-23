@@ -1,7 +1,8 @@
-{{- if and .Values.argorollouts.enabled .Values.argorollouts.istio.enabled }}
-{{- /* Canary-ready VirtualService for Istio east-west traffic routing. The "primary" route holds
-       two weighted subset destinations (stable/canary); Argo Rollouts sets the weights each step.
-       timeout/retries provide resilience to in-cluster callers (e.g. picker-service -> node-app). */}}
+{{- if .Values.istio.enabled }}
+{{- /* Istio VirtualService for this service (independent of Argo Rollouts). Carries resilience
+       (timeout / retries). When argorollouts is enabled, the "primary" route holds weighted
+       stable/canary subset destinations that Argo Rollouts drives; otherwise it routes 100% to the
+       service. Default host is <fullname>-service (in-cluster east-west); override via istio.hosts. */}}
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -10,17 +11,24 @@ metadata:
     {{- include "service.labels" . | nindent 4 }}
 spec:
   hosts:
+    {{- if .Values.istio.hosts }}
+    {{- range .Values.istio.hosts }}
+    - {{ . | quote }}
+    {{- end }}
+    {{- else }}
     - {{ include "service.fullname" . }}-service
+    {{- end }}
   http:
     - name: primary
-      {{- with .Values.argorollouts.istio.timeout }}
+      {{- with .Values.istio.timeout }}
       timeout: {{ . }}
       {{- end }}
-      {{- with .Values.argorollouts.istio.retries }}
+      {{- with .Values.istio.retries }}
       retries:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       route:
+        {{- if .Values.argorollouts.enabled }}
         - destination:
             host: {{ include "service.fullname" . }}-service
             subset: stable
@@ -29,6 +37,10 @@ spec:
             host: {{ include "service.fullname" . }}-service
             subset: canary
           weight: 0
+        {{- else }}
+        - destination:
+            host: {{ include "service.fullname" . }}-service
+        {{- end }}
 ---
 {{- else if .Values.virtualService.enabled }}
 apiVersion: networking.istio.io/v1beta1
