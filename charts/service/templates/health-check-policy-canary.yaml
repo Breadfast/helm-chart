@@ -1,0 +1,37 @@
+{{- if and .Values.argorollouts.enabled .Values.gateway.enabled (index .Values "gateway" "healthCheck" "enabled") -}}
+{{- $fullName := include "service.fullname" . -}}
+{{- $canarySvcName := printf "%s-service-canary" $fullName -}}
+# Canary counterpart of the stable HealthCheckPolicy. Without this, the GKE Gateway health-checks the
+# canary backend service with its default probe (HTTP GET / -> 404 for most apps), so canary pods never
+# satisfy the cloud.google.com/load-balancer-neg-ready gate and the Rollout stalls at the first step that
+# needs a second canary pod. Mirrors the stable policy so canary NEG endpoints health-check identically.
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: {{ $fullName }}-canary-healthcheck
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "service.labels" . | nindent 4 }}
+spec:
+  default:
+    checkIntervalSec: {{ .Values.gateway.healthCheck.checkIntervalSec | default 30 }}
+    timeoutSec: {{ .Values.gateway.healthCheck.timeoutSec | default 10 }}
+    healthyThreshold: {{ .Values.gateway.healthCheck.healthyThreshold | default 1 }}
+    unhealthyThreshold: {{ .Values.gateway.healthCheck.unhealthyThreshold | default 5 }}
+    config:
+      type: {{ .Values.gateway.healthCheck.type | default "TCP" }}
+      {{- if eq (.Values.gateway.healthCheck.type | default "TCP") "TCP" }}
+      tcpHealthCheck:
+        port: {{ .Values.gateway.healthCheck.port | default .Values.service.port }}
+      {{- else }}
+      httpHealthCheck:
+        port: {{ .Values.gateway.healthCheck.port | default .Values.service.port }}
+        {{- if .Values.gateway.healthCheck.path }}
+        requestPath: {{ .Values.gateway.healthCheck.path }}
+        {{- end }}
+      {{- end }}
+  targetRef:
+    group: ""
+    kind: Service
+    name: {{ $canarySvcName }}
+{{- end }}
