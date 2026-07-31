@@ -70,6 +70,8 @@ app/worker pod specs so a created SA and its consumers always agree on the name.
   value: {{ $.Values.googleChat.incidentResponderSpaceName | default "" | quote }}
 - name: GOOGLE_CHAT_INCIDENT_UPDATES_SPACE_NAME
   value: {{ $.Values.googleChat.incidentUpdatesSpaceName | default "" | quote }}
+- name: GOOGLE_CHAT_DIRECTORY_IMPERSONATION_SUBJECT
+  value: {{ $.Values.googleChat.directoryImpersonationSubject | default "" | quote }}
 
 {{- if $.Values.openTelemetryExporter.endpoint }}
 - name: OPENTELEMETRY_EXPORTER_OTLP_ENDPOINT

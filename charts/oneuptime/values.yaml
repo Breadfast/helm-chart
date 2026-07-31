@@ -1020,6 +1020,10 @@ googleChat:
   onCallCommandId: ""
   incidentResponderSpaceName: ""
   incidentUpdatesSpaceName: ""
+  # Workspace user the Chat service account impersonates (domain-wide delegation)
+  # to resolve an on-call engineer's email to their Google Chat mention id.
+  # Empty = directory resolution disabled (/oncall falls back to plain @email).
+  directoryImpersonationSubject: ""
 
 # GitHub Example Configuration
 # gitHubApp:

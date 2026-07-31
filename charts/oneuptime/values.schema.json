@@ -2286,6 +2286,12 @@
                         "string",
                         "null"
                     ]
+                },
+                "directoryImpersonationSubject": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
                 }
             },
             "additionalProperties": false
