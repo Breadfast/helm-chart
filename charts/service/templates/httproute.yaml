@@ -164,6 +164,13 @@ spec:
       filters:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- $requestRedirect := false }}
+      {{- range (.filters | default list) }}
+        {{- if eq .type "RequestRedirect" }}
+          {{- $requestRedirect = true }}
+        {{- end }}
+      {{- end }}
+      {{- if not $requestRedirect }}
       {{- $stableName := .serviceName | default $defaultSvcName }}
       {{- $port := .servicePort | default $svcPort }}
       {{- $canaryOnRule := and $gwCanary (eq $stableName $defaultSvcName) }}
@@ -177,6 +184,7 @@ spec:
       - name: {{ $canarySvcName }}
         port: {{ $port }}
         weight: 0
+      {{- end }}
       {{- end }}
     {{ end }}
     {{- end -}}
