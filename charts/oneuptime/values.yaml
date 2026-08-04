@@ -1018,6 +1018,7 @@ googleChat:
   projectNumber: ""
   customerId: "customers/my_customer"
   onCallCommandId: ""
+  groupCommandId: ""
   incidentResponderSpaceName: ""
   incidentUpdatesSpaceName: ""
   # Workspace user the Chat service account impersonates (domain-wide delegation)

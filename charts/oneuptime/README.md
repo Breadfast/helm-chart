@@ -1,6 +1,6 @@
 # oneuptime
 
-![Version: 11.0.1-bf.3](https://img.shields.io/badge/Version-11.0.1--bf.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 11.0.1](https://img.shields.io/badge/AppVersion-11.0.1-informational?style=flat-square)
+![Version: 11.0.1-bf.4](https://img.shields.io/badge/Version-11.0.1--bf.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 11.0.1](https://img.shields.io/badge/AppVersion-11.0.1-informational?style=flat-square)
 
 The Complete Open-Source Observability Platform
 
@@ -226,6 +226,7 @@ The Complete Open-Source Observability Platform
 | global.storageClass | string | `nil` |  |
 | googleChat.customerId | string | `"customers/my_customer"` |  |
 | googleChat.directoryImpersonationSubject | string | `""` |  |
+| googleChat.groupCommandId | string | `""` |  |
 | googleChat.incidentResponderSpaceName | string | `""` |  |
 | googleChat.incidentUpdatesSpaceName | string | `""` |  |
 | googleChat.onCallCommandId | string | `""` |  |

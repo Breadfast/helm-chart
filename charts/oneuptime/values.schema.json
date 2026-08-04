@@ -2275,6 +2275,12 @@
                         "null"
                     ]
                 },
+                "groupCommandId": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "incidentResponderSpaceName": {
                     "type": [
                         "string",
