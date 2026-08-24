@@ -3,6 +3,9 @@
 {{- $bp := .Values.gateway.backendPolicy -}}
 {{- $svcName := $bp.serviceName | default (printf "%s-service" $fullName) -}}
 {{- $iapEnabled := and $bp.iap $bp.iap.enabled -}}
+{{- $draining := $bp.connectionDraining | default dict -}}
+{{- $drainingSet := hasKey $draining "drainingTimeoutSec" -}}
+{{- $needSecurityPolicy := not (or $iapEnabled $drainingSet) -}}
 apiVersion: networking.gke.io/v1
 kind: GCPBackendPolicy
 metadata:
@@ -15,14 +18,20 @@ spec:
     {{- if hasKey $bp "timeoutSec" }}
     timeoutSec: {{ $bp.timeoutSec }}
     {{- end }}
-    {{- if $iapEnabled }}
+    {{- if $needSecurityPolicy }}
+    securityPolicy: {{ required "gateway.backendPolicy.securityPolicy is required when gateway.backendPolicy.enabled is true unless iap.enabled or connectionDraining.drainingTimeoutSec is set" $bp.securityPolicy | quote }}
+    {{- else }}
     {{- with $bp.securityPolicy }}
     securityPolicy: {{ . | quote }}
     {{- end }}
+    {{- end }}
+    {{- if $iapEnabled }}
     iap:
       {{- toYaml $bp.iap | nindent 6 }}
-    {{- else }}
-    securityPolicy: {{ required "gateway.backendPolicy.securityPolicy is required when gateway.backendPolicy.enabled is true" $bp.securityPolicy | quote }}
+    {{- end }}
+    {{- if $drainingSet }}
+    connectionDraining:
+      drainingTimeoutSec: {{ $draining.drainingTimeoutSec }}
     {{- end }}
     {{- with $bp.logging }}
     logging:

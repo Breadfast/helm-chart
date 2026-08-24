@@ -166,8 +166,18 @@ gateway:
   backendPolicy:
     enabled: false
     # -- Name of a Cloud Armor security policy. Required when backendPolicy.enabled
-    #    is true UNLESS iap.enabled is true (IAP-only policies need no securityPolicy).
+    #    is true UNLESS iap.enabled is true OR connectionDraining.drainingTimeoutSec
+    #    is set (IAP-only or draining-only policies need no securityPolicy).
     securityPolicy: ""
+    # -- Connection draining for the Gateway backend Service. When drainingTimeoutSec
+    #    is set, the load balancer keeps existing connections open for up to this many
+    #    seconds after a backend is removed (rolling update, scale-down, termination),
+    #    letting in-flight requests finish before the connection is dropped. Leave empty
+    #    to disable (default); nothing is rendered unless drainingTimeoutSec is set.
+    #    Valid range 0-3600 seconds.
+    #    https://cloud.google.com/kubernetes-engine/docs/how-to/configure-gateway-resources#configure_draining_timeout
+    connectionDraining: {}
+    #   drainingTimeoutSec: 60
     # -- Service to attach the policy to; defaults to "<fullname>-service"
     # serviceName: ""
     # -- Optional Cloud Armor request logging
