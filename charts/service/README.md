@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.5.3](https://img.shields.io/badge/Version-0.5.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.5.4](https://img.shields.io/badge/Version-0.5.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes.
 
@@ -137,6 +137,7 @@ networkPolicy.internetOnly.ipBlock.except when they are outside the defaults.
 | serviceAccount.create | bool | `false` | If true, creates service account |
 | serviceAccount.name | string | `""` |  |
 | startupProbe | object | `{}` |  |
+| topologySpreadConstraints | list | `[]` | Spread replicas across nodes or zones. See the comment above for how this differs from podAntiAffinity. |
 | vaultAgent | bool | `{"enabled":false}` | If true, It will inject Vault Agent to get secrets from Vault |
 | virtualService.enabled | bool | `false` |  |
 | virtualService.hosts | list | `[]` |  |
