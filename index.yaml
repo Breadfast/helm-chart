@@ -10,7 +10,7 @@ entries:
         url: https://keybase.io/oneuptime/pgp_keys.asc
     apiVersion: v2
     appVersion: 11.0.1
-    created: "2026-08-24T09:09:07.718532135Z"
+    created: "2026-09-03T10:45:33.178473353Z"
     dependencies:
     - condition: keda.enabled
       name: keda
@@ -44,7 +44,7 @@ entries:
         url: https://keybase.io/oneuptime/pgp_keys.asc
     apiVersion: v2
     appVersion: 11.0.1
-    created: "2026-08-24T09:09:07.701127502Z"
+    created: "2026-09-03T10:45:33.160221594Z"
     dependencies:
     - condition: keda.enabled
       name: keda
@@ -78,7 +78,7 @@ entries:
         url: https://keybase.io/oneuptime/pgp_keys.asc
     apiVersion: v2
     appVersion: 11.0.1
-    created: "2026-08-24T09:09:07.68156275Z"
+    created: "2026-09-03T10:45:33.14328811Z"
     dependencies:
     - condition: keda.enabled
       name: keda
@@ -112,7 +112,7 @@ entries:
         url: https://keybase.io/oneuptime/pgp_keys.asc
     apiVersion: v2
     appVersion: 11.0.1
-    created: "2026-08-24T09:09:07.665197839Z"
+    created: "2026-09-03T10:45:33.125379537Z"
     dependencies:
     - condition: keda.enabled
       name: keda
@@ -140,7 +140,7 @@ entries:
   rudderstack:
   - apiVersion: v2
     appVersion: 1.74.1
-    created: "2026-08-24T09:09:07.725601014Z"
+    created: "2026-09-03T10:45:33.185744563Z"
     dependencies:
     - name: transformer
       repository: file://charts/transformer
@@ -169,7 +169,7 @@ entries:
     version: 0.3.1
   - apiVersion: v2
     appVersion: 1.74.1
-    created: "2026-08-24T09:09:07.724041885Z"
+    created: "2026-09-03T10:45:33.184074481Z"
     dependencies:
     - name: transformer
       repository: file://charts/transformer
@@ -198,7 +198,7 @@ entries:
     version: 0.3.0
   - apiVersion: v2
     appVersion: 1.74.1
-    created: "2026-08-24T09:09:07.722563216Z"
+    created: "2026-09-03T10:45:33.182591784Z"
     dependencies:
     - name: transformer
       repository: file://charts/transformer
@@ -227,7 +227,7 @@ entries:
     version: 0.2.1
   - apiVersion: v2
     appVersion: 1.74.1
-    created: "2026-08-24T09:09:07.72119853Z"
+    created: "2026-09-03T10:45:33.181216358Z"
     dependencies:
     - name: transformer
       repository: file://charts/transformer
@@ -256,7 +256,7 @@ entries:
     version: 0.2.0
   - apiVersion: v2
     appVersion: 1.74.1
-    created: "2026-08-24T09:09:07.719820048Z"
+    created: "2026-09-03T10:45:33.179832177Z"
     dependencies:
     - name: transformer
       repository: file://charts/transformer
@@ -285,7 +285,36 @@ entries:
     version: 0.1.0
   service:
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.773459165Z"
+    created: "2026-09-03T10:45:33.231688117Z"
+    description: 'A Helm chart for Kubernetes.  When gateway.enabled is true, the
+      chart creates **Gateway API** resources separately from Ingress:  - **HTTPRoute**
+      (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service
+      (hostnames and paths from gateway.hosts). - **HealthCheckPolicy** (networking.gke.io/v1)
+      – GKE health check policy for the service when gateway.healthCheck.enabled is
+      true (TCP or HTTP). - **GCPBackendPolicy** (networking.gke.io/v1) – configures
+      the Gateway backend Service when gateway.backendPolicy.enabled is true: binds
+      a Cloud Armor security policy, optional IAP, and optional connection draining
+      (gateway.backendPolicy.connectionDraining.drainingTimeoutSec) so in-flight requests
+      finish before a backend is removed.  Ingress resources are unchanged; you can
+      use Ingress only, Gateway only, or both.  When networkPolicy.enabled and networkPolicy.internetOnly.enabled
+      are true, the chart creates an egress-only NetworkPolicy that allows DNS and
+      public internet traffic while excluding common private/internal CIDRs. NetworkPolicy
+      works by IP/CIDR, so add the actual cluster Pod, Service, and internal VPC CIDRs
+      to networkPolicy.internetOnly.ipBlock.except when they are outside the defaults. '
+    digest: 17885c892a5dabd23fdce459171512c4d40d462631e20449f8ac75167b3d3cd1
+    home: https://github.com/Breadfast/helm-chart
+    maintainers:
+    - email: devops@breadfast.com
+      name: DevOps-team
+    name: service
+    sources:
+    - https://github.com/Breadfast/helm-chart
+    type: application
+    urls:
+    - https://breadfast.github.io/helm-chart/service-0.5.4.tgz
+    version: 0.5.4
+  - apiVersion: v2
+    created: "2026-09-03T10:45:33.230649046Z"
     description: 'A Helm chart for Kubernetes.  When gateway.enabled is true, the
       chart creates **Gateway API** resources separately from Ingress:  - **HTTPRoute**
       (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service
@@ -314,7 +343,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.5.3.tgz
     version: 0.5.3
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.77243269Z"
+    created: "2026-09-03T10:45:33.229609494Z"
     description: 'A Helm chart for Kubernetes.  When gateway.enabled is true, the
       chart creates **Gateway API** resources separately from Ingress:  - **HTTPRoute**
       (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service
@@ -341,7 +370,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.5.2.tgz
     version: 0.5.2
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.770624341Z"
+    created: "2026-09-03T10:45:33.228558101Z"
     description: 'A Helm chart for Kubernetes.  When gateway.enabled is true, the
       chart creates **Gateway API** resources separately from Ingress:  - **HTTPRoute**
       (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service
@@ -368,7 +397,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.5.1.tgz
     version: 0.5.1
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.769167539Z"
+    created: "2026-09-03T10:45:33.227572611Z"
     description: 'A Helm chart for Kubernetes.  When gateway.enabled is true, the
       chart creates **Gateway API** resources separately from Ingress:  - **HTTPRoute**
       (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service
@@ -395,7 +424,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.5.0.tgz
     version: 0.5.0
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.768061586Z"
+    created: "2026-09-03T10:45:33.22657583Z"
     description: 'A Helm chart for Kubernetes.  When gateway.enabled is true, the
       chart creates **Gateway API** resources separately from Ingress:  - **HTTPRoute**
       (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service
@@ -422,7 +451,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.4.0.tgz
     version: 0.4.0
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.767100834Z"
+    created: "2026-09-03T10:45:33.22510131Z"
     description: 'A Helm chart for Kubernetes.  When gateway.enabled is true, the
       chart creates **Gateway API** resources separately from Ingress:  - **HTTPRoute**
       (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service
@@ -449,7 +478,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.3.0.tgz
     version: 0.3.0
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.763186079Z"
+    created: "2026-09-03T10:45:33.222627376Z"
     description: 'A Helm chart for Kubernetes.  When gateway.enabled is true, the
       chart creates **Gateway API** resources separately from Ingress:  - **HTTPRoute**
       (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service
@@ -476,7 +505,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.67.tgz
     version: 0.2.67
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.761778053Z"
+    created: "2026-09-03T10:45:33.221742706Z"
     description: 'A Helm chart for Kubernetes.  When gateway.enabled is true, the
       chart creates **Gateway API** resources separately from Ingress:  - **HTTPRoute**
       (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service
@@ -503,7 +532,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.66.tgz
     version: 0.2.66
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.75993281Z"
+    created: "2026-09-03T10:45:33.220889927Z"
     description: 'A Helm chart for Kubernetes.  When gateway.enabled is true, the
       chart creates **Gateway API** resources separately from Ingress:  - **HTTPRoute**
       (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service
@@ -530,7 +559,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.65.tgz
     version: 0.2.65
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.759072755Z"
+    created: "2026-09-03T10:45:33.220027991Z"
     description: 'A Helm chart for Kubernetes.  When gateway.enabled is true, the
       chart creates **Gateway API** resources separately from Ingress:  - **HTTPRoute**
       (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service
@@ -555,7 +584,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.64.tgz
     version: 0.2.64
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.758216378Z"
+    created: "2026-09-03T10:45:33.219170322Z"
     description: 'A Helm chart for Kubernetes.  When gateway.enabled is true, the
       chart creates **Gateway API** resources separately from Ingress:  - **HTTPRoute**
       (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service
@@ -580,7 +609,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.63.tgz
     version: 0.2.63
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.757384736Z"
+    created: "2026-09-03T10:45:33.217532973Z"
     description: 'A Helm chart for Kubernetes.  When gateway.enabled is true, the
       chart creates **Gateway API** resources separately from Ingress:  - **HTTPRoute**
       (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service
@@ -605,7 +634,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.62.tgz
     version: 0.2.62
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.756554928Z"
+    created: "2026-09-03T10:45:33.216632501Z"
     description: 'A Helm chart for Kubernetes.  When gateway.enabled is true, the
       chart creates **Gateway API** resources separately from Ingress:  - **HTTPRoute**
       (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service
@@ -626,7 +655,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.61.tgz
     version: 0.2.61
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.755865862Z"
+    created: "2026-09-03T10:45:33.21597471Z"
     description: 'A Helm chart for Kubernetes.  When gateway.enabled is true, the
       chart creates **Gateway API** resources separately from Ingress:  - **HTTPRoute**
       (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service
@@ -647,7 +676,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.60.tgz
     version: 0.2.60
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.75476599Z"
+    created: "2026-09-03T10:45:33.214967109Z"
     description: 'A Helm chart for Kubernetes.  When gateway.enabled is true, the
       chart creates **Gateway API** resources separately from Ingress:  - **HTTPRoute**
       (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service
@@ -668,7 +697,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.59.tgz
     version: 0.2.59
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.754054352Z"
+    created: "2026-09-03T10:45:33.214292826Z"
     description: 'A Helm chart for Kubernetes.  When gateway.enabled is true, the
       chart creates **Gateway API** resources separately from Ingress:  - **HTTPRoute**
       (gateway.networking.k8s.io/v1) – routes traffic from a Gateway to this service
@@ -689,7 +718,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.58.tgz
     version: 0.2.58
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.752482059Z"
+    created: "2026-09-03T10:45:33.213620788Z"
     description: A Helm chart for Kubernetes
     digest: 740525e1ef93e3ed93f0863de4c289fe721ba98216ac7b54174083614f007cf3
     home: https://github.com/Breadfast/helm-chart
@@ -704,7 +733,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.57.tgz
     version: 0.2.57
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.751595094Z"
+    created: "2026-09-03T10:45:33.21307584Z"
     description: A Helm chart for Kubernetes
     digest: b5d46d26bfd2031402a92a92dcbbd08ef0ab5b7d2c7ec4d1f5e0b8029a95195e
     home: https://github.com/Breadfast/helm-chart
@@ -719,7 +748,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.56.tgz
     version: 0.2.56
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.751054175Z"
+    created: "2026-09-03T10:45:33.212490636Z"
     description: A Helm chart for Kubernetes
     digest: 1bc0e132e74d8723be0f54c867f6984c84531ef69c69fd9436be9f150a4d13e1
     home: https://github.com/Breadfast/helm-chart
@@ -734,7 +763,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.55.tgz
     version: 0.2.55
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.75047259Z"
+    created: "2026-09-03T10:45:33.211797348Z"
     description: A Helm chart for Kubernetes
     digest: c67af14b72b477b97336b396422a94adc4bf5f10df100bd78694d12f712df663
     home: https://github.com/Breadfast/helm-chart
@@ -749,7 +778,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.54.tgz
     version: 0.2.54
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.749927873Z"
+    created: "2026-09-03T10:45:33.210467291Z"
     description: A Helm chart for Kubernetes
     digest: f0aa9ddc2683abb9fe6b54851411369799b88c1cd8c5398d34c8009d53da01df
     home: https://github.com/Breadfast/helm-chart
@@ -764,7 +793,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.53.tgz
     version: 0.2.53
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.749413063Z"
+    created: "2026-09-03T10:45:33.209957739Z"
     description: A Helm chart for Kubernetes
     digest: 8c1a4a85ffdbdb9af57e02f9f7bdb253ffdd769ecd0f9c12319589937a6109c1
     home: https://github.com/Breadfast/helm-chart
@@ -779,7 +808,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.52.tgz
     version: 0.2.52
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.7488488Z"
+    created: "2026-09-03T10:45:33.209429362Z"
     description: A Helm chart for Kubernetes
     digest: a6447c6f729fcd377a1bc550dd59c1d5d6f368c42fbb70025195a47d8155e236
     home: https://github.com/Breadfast/helm-chart
@@ -794,7 +823,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.51.tgz
     version: 0.2.51
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.748347014Z"
+    created: "2026-09-03T10:45:33.208930361Z"
     description: A Helm chart for Kubernetes
     digest: f4ff02b376a6d11866a7110da94c3f186038a57c81711ac33bed0a734051a056
     home: https://github.com/Breadfast/helm-chart
@@ -809,7 +838,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.50.tgz
     version: 0.2.50
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.747454519Z"
+    created: "2026-09-03T10:45:33.208045291Z"
     description: A Helm chart for Kubernetes
     digest: ad436671700cba79d9099e05c2ea49e8ce0b3c06dec9a6d3c8e33e071cc5c5f9
     home: https://github.com/Breadfast/helm-chart
@@ -824,7 +853,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.49.tgz
     version: 0.2.49
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.746885697Z"
+    created: "2026-09-03T10:45:33.207527314Z"
     description: A Helm chart for Kubernetes
     digest: 9cee1e6955249e249801a5cdb53471efd2d6dacfe7ca6a54b185e686bd15b7d7
     home: https://github.com/Breadfast/helm-chart
@@ -839,7 +868,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.48.tgz
     version: 0.2.48
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.745259882Z"
+    created: "2026-09-03T10:45:33.207010969Z"
     description: A Helm chart for Kubernetes
     digest: 74cf005fe2b8da270a5b4eb00b770fb0edae4c2ec11381ed5568a6fed5a4cbd4
     home: https://github.com/Breadfast/helm-chart
@@ -854,7 +883,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.47.tgz
     version: 0.2.47
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.744656246Z"
+    created: "2026-09-03T10:45:33.20646002Z"
     description: A Helm chart for Kubernetes
     digest: 10492ad0d10dea11825e7d8ad5d0a1f9253fdaacb5a07690df1068a19761e900
     home: https://github.com/Breadfast/helm-chart
@@ -869,7 +898,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.46.tgz
     version: 0.2.46
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.74407439Z"
+    created: "2026-09-03T10:45:33.205933376Z"
     description: A Helm chart for Kubernetes
     digest: 4c976d0fcdeece6e256c13dddca9fb7c02bd0148e84a271350eccacd0db2007a
     home: https://github.com/Breadfast/helm-chart
@@ -884,7 +913,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.45.tgz
     version: 0.2.45
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.743454834Z"
+    created: "2026-09-03T10:45:33.205374642Z"
     description: A Helm chart for Kubernetes
     digest: 6644c5e11dd55cc3cb1aee51b41d29fc588f833d2fadebf7d5f2fc7c209821b2
     home: https://github.com/Breadfast/helm-chart
@@ -899,7 +928,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.44.tgz
     version: 0.2.44
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.742839977Z"
+    created: "2026-09-03T10:45:33.204034217Z"
     description: A Helm chart for Kubernetes
     digest: bb76c2c9ef6a766b31c8c83c7155bacc21e7119f443eefede6f4189bb6915b26
     home: https://github.com/Breadfast/helm-chart
@@ -914,7 +943,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.43.tgz
     version: 0.2.43
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.74226792Z"
+    created: "2026-09-03T10:45:33.203208089Z"
     description: A Helm chart for Kubernetes
     digest: df815808a104407726ba330ca9db9b77c5a4f2a758f0026aed8be0aa60773fcb
     home: https://github.com/Breadfast/helm-chart
@@ -929,7 +958,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.42.tgz
     version: 0.2.42
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.741721771Z"
+    created: "2026-09-03T10:45:33.202710019Z"
     description: A Helm chart for Kubernetes
     digest: 562e9cde4f8d05c3b1272487add422ecb5e910d2ead1f82bfd790015e8069a1a
     home: https://github.com/Breadfast/helm-chart
@@ -944,7 +973,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.41.tgz
     version: 0.2.41
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.741180441Z"
+    created: "2026-09-03T10:45:33.202273185Z"
     description: A Helm chart for Kubernetes
     digest: 6a6b12a8ad68ad4019364c11af6820606cf30ca1e9701f9892bb2cc120d122b5
     home: https://github.com/Breadfast/helm-chart
@@ -959,7 +988,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.40.tgz
     version: 0.2.40
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.740260875Z"
+    created: "2026-09-03T10:45:33.201487953Z"
     description: A Helm chart for Kubernetes
     digest: 3fbc467df30e585725c1ff8193e279f7d3b4e0cc31be46ffd2c480c71d3213cf
     home: https://github.com/Breadfast/helm-chart
@@ -974,7 +1003,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.39.tgz
     version: 0.2.39
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.739726248Z"
+    created: "2026-09-03T10:45:33.201076777Z"
     description: A Helm chart for Kubernetes
     digest: 284181df85b204921301f3278fb0be58fdd5c404cff37ca15d6bfe0f9567af70
     home: https://github.com/Breadfast/helm-chart
@@ -989,7 +1018,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.38.tgz
     version: 0.2.38
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.739251672Z"
+    created: "2026-09-03T10:45:33.200652015Z"
     description: A Helm chart for Kubernetes
     digest: c0150c6686485afc4e26223828adafc2aea9b62332d3dae0d03b43d63d7462e0
     home: https://github.com/Breadfast/helm-chart
@@ -1004,7 +1033,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.35.tgz
     version: 0.2.35
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.738645471Z"
+    created: "2026-09-03T10:45:33.200238626Z"
     description: A Helm chart for Kubernetes
     digest: 045f0c30ef747b91311956157e3b095278faac2f64adf6f4d05d2fc46530285f
     home: https://github.com/Breadfast/helm-chart
@@ -1019,7 +1048,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.34.tgz
     version: 0.2.34
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.737634044Z"
+    created: "2026-09-03T10:45:33.199806881Z"
     description: A Helm chart for Kubernetes
     digest: 09a09d4ec0d5143093aa0a01629d037d9d4dc0739b8f7ad26a8835707fa3259c
     home: https://github.com/Breadfast/helm-chart
@@ -1034,7 +1063,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.33.tgz
     version: 0.2.33
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.736892521Z"
+    created: "2026-09-03T10:45:33.199398941Z"
     description: A Helm chart for Kubernetes
     digest: 316349823ba8ab79e8f8060ff8f78c4be380e44cba503155308b0faef30d32ef
     home: https://github.com/Breadfast/helm-chart
@@ -1049,7 +1078,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.31.tgz
     version: 0.2.31
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.736510508Z"
+    created: "2026-09-03T10:45:33.198973599Z"
     description: A Helm chart for Kubernetes
     digest: 9078a381ccbed8bfc2c1fb9f2c6cdabd0badf49127b038a12abdaedccbed75b7
     home: https://github.com/Breadfast/helm-chart
@@ -1064,7 +1093,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.30.tgz
     version: 0.2.30
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.735756582Z"
+    created: "2026-09-03T10:45:33.197389407Z"
     description: A Helm chart for Kubernetes
     digest: a2dccfe0f52391e4fad69c6fb402880f4ca9f5375058ca6d304400c5b80996d9
     home: https://github.com/Breadfast/helm-chart
@@ -1079,7 +1108,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.29.tgz
     version: 0.2.29
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.735368257Z"
+    created: "2026-09-03T10:45:33.196466684Z"
     description: A Helm chart for Kubernetes
     digest: 4ffaf24c8a2323b25e199484d4410b974865dc270651ba565ca09301e082e8a6
     home: https://github.com/Breadfast/helm-chart
@@ -1094,7 +1123,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.28.tgz
     version: 0.2.28
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.734845161Z"
+    created: "2026-09-03T10:45:33.196066619Z"
     description: A Helm chart for Kubernetes
     digest: 3989e6315a1b60806e1cfba38a07c8a133cd74d88243ef7f43807e8b097a8952
     home: https://github.com/Breadfast/helm-chart
@@ -1109,7 +1138,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.27.tgz
     version: 0.2.27
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.734461605Z"
+    created: "2026-09-03T10:45:33.195622361Z"
     description: A Helm chart for Kubernetes
     digest: f1c7d51331fd8a6fce4f0a04cb8f2e71c195efbd932a6440ebc49667df859317
     home: https://github.com/Breadfast/helm-chart
@@ -1124,7 +1153,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.26.tgz
     version: 0.2.26
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.734074553Z"
+    created: "2026-09-03T10:45:33.195238877Z"
     description: A Helm chart for Kubernetes
     digest: 841c7c5c228f3b433e8570458712cfccfe462fda376788808fdf25a403cd6f87
     home: https://github.com/Breadfast/helm-chart
@@ -1139,7 +1168,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.25.tgz
     version: 0.2.25
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.733651484Z"
+    created: "2026-09-03T10:45:33.194831057Z"
     description: A Helm chart for Kubernetes
     digest: 813f248b1edcbaa67231d9f90722e7682546faf68313b0bb94fb52d292df15a9
     home: https://github.com/Breadfast/helm-chart
@@ -1154,7 +1183,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.24.tgz
     version: 0.2.24
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.733260915Z"
+    created: "2026-09-03T10:45:33.194410294Z"
     description: A Helm chart for Kubernetes
     digest: c8d1e370272cf911e890a5574f17c6ef60cc1032cf4d0ed57f9727b49ccf0eec
     home: https://github.com/Breadfast/helm-chart
@@ -1169,7 +1198,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.23.tgz
     version: 0.2.23
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.732853605Z"
+    created: "2026-09-03T10:45:33.194009708Z"
     description: A Helm chart for Kubernetes
     digest: e03b0f4f98878577eff203af97a629d047f87c85f31db84677e6d074181b15fb
     home: https://github.com/Breadfast/helm-chart
@@ -1184,7 +1213,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.22.tgz
     version: 0.2.22
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.73241159Z"
+    created: "2026-09-03T10:45:33.193586018Z"
     description: A Helm chart for Kubernetes
     digest: 5dff3f38a4afb3dc26be1268321059c297464ffbfb9fcbeccd89784df073b602
     home: https://github.com/Breadfast/helm-chart
@@ -1199,7 +1228,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.21.tgz
     version: 0.2.21
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.731981007Z"
+    created: "2026-09-03T10:45:33.19316296Z"
     description: A Helm chart for Kubernetes
     digest: 6cc3b0936d6673147667a272f86ec0a80d8cf9301df2dba9d3544cad387981ad
     home: https://github.com/Breadfast/helm-chart
@@ -1214,7 +1243,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.20.tgz
     version: 0.2.20
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.730332471Z"
+    created: "2026-09-03T10:45:33.192371467Z"
     description: A Helm chart for Kubernetes
     digest: 6c2307a2999d39337ca3faaefed24a9717c563cb61c09c481b2437014a5d1c82
     home: https://github.com/Breadfast/helm-chart
@@ -1229,7 +1258,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.19.tgz
     version: 0.2.19
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.729908941Z"
+    created: "2026-09-03T10:45:33.191917861Z"
     description: A Helm chart for Kubernetes
     digest: d83262219125932dc7e1e6659afc243f2ea9303d3bbd1889d84d79e978c2f60a
     home: https://github.com/Breadfast/helm-chart
@@ -1244,7 +1273,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.18.tgz
     version: 0.2.18
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.729529633Z"
+    created: "2026-09-03T10:45:33.191169606Z"
     description: A Helm chart for Kubernetes
     digest: 7680cf4d92f35683c6167c2ccc88491d197cffd9f42c7faf774015613d598217
     home: https://github.com/Breadfast/helm-chart
@@ -1259,7 +1288,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.17.tgz
     version: 0.2.17
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.729135869Z"
+    created: "2026-09-03T10:45:33.190055417Z"
     description: A Helm chart for Kubernetes
     digest: 9e281d53c2e49c8b9e9cd8654f3563e5b4cfd5f4ce9257b397280d2ec99f6707
     home: https://github.com/Breadfast/helm-chart
@@ -1274,7 +1303,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.16.tgz
     version: 0.2.16
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.728738107Z"
+    created: "2026-09-03T10:45:33.189552327Z"
     description: A Helm chart for Kubernetes
     digest: 32e4381d0c66985d44455a474304318f760fb81de3c2711a2e0759f49c6960df
     home: https://github.com/Breadfast/helm-chart
@@ -1289,7 +1318,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.15.tgz
     version: 0.2.15
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.728339633Z"
+    created: "2026-09-03T10:45:33.189087711Z"
     description: A Helm chart for Kubernetes
     digest: 6143f64b9cd1fa8b3badf866c32b63f466aa7db9bd7dbc0aae9ec9fb218f7376
     home: https://github.com/Breadfast/helm-chart
@@ -1304,7 +1333,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.14.tgz
     version: 0.2.14
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.72792505Z"
+    created: "2026-09-03T10:45:33.188532854Z"
     description: A Helm chart for Kubernetes
     digest: caa24b685f796f855ebf987a8e579bff3345e87230ef97b97f35400305baa382
     home: https://github.com/Breadfast/helm-chart
@@ -1319,7 +1348,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.13.tgz
     version: 0.2.13
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.727545852Z"
+    created: "2026-09-03T10:45:33.188130144Z"
     description: A Helm chart for Kubernetes
     digest: b673a7f66bce0b074f3f115e7c696450942c9f930c4c79be7acd95bda893ffe9
     home: https://github.com/Breadfast/helm-chart
@@ -1334,7 +1363,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.12.tgz
     version: 0.2.12
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.727140496Z"
+    created: "2026-09-03T10:45:33.187644167Z"
     description: A Helm chart for Kubernetes
     digest: 95f44fb2060f19dde9edb00eee116b846f3c3eede8628e1f63a3992bc20eebc3
     home: https://github.com/Breadfast/helm-chart
@@ -1349,7 +1378,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.11.tgz
     version: 0.2.11
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.726701337Z"
+    created: "2026-09-03T10:45:33.187095492Z"
     description: A Helm chart for Kubernetes
     digest: 5a8f8e113099cb4b152013c7b179cc03a6f57fdcb216d2adbe4156e9b338e163
     home: https://github.com/Breadfast/helm-chart
@@ -1364,7 +1393,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.10.tgz
     version: 0.2.10
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.765520595Z"
+    created: "2026-09-03T10:45:33.223660114Z"
     description: A Helm chart for Kubernetes
     digest: d0099d66a46afb6457099831976fc41bcf601586c06815a22ecfb3be8a630cda
     home: https://github.com/Breadfast/helm-chart
@@ -1379,7 +1408,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.9.tgz
     version: 0.2.9
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.764861505Z"
+    created: "2026-09-03T10:45:33.223325984Z"
     description: A Helm chart for Kubernetes
     digest: 57f29035be02e18cde3343a17eacbe6d7d9c888155687c18c2f66efaea86bcb6
     home: https://github.com/Breadfast/helm-chart
@@ -1394,7 +1423,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.8.tgz
     version: 0.2.8
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.763828117Z"
+    created: "2026-09-03T10:45:33.222985551Z"
     description: A Helm chart for Kubernetes
     digest: cd96006b07ee17b193362f59e3e70e05f960bc59320d16757cb1632035b2ff39
     home: https://github.com/Breadfast/helm-chart
@@ -1409,7 +1438,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.7.tgz
     version: 0.2.7
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.755155537Z"
+    created: "2026-09-03T10:45:33.215302391Z"
     description: A Helm chart for Kubernetes
     digest: 2067e663fd69ab47725360af684b6ac760b3a783ad6a1fcb7db8da6e6caf8a8e
     home: https://github.com/Breadfast/helm-chart
@@ -1424,7 +1453,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.6.tgz
     version: 0.2.6
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.747795475Z"
+    created: "2026-09-03T10:45:33.208384561Z"
     description: A Helm chart for Kubernetes
     digest: b81b2e8432267fa1aae47716802aab7ce305f80fb2e9e9ec1eb0c84e2082f9bc
     home: https://github.com/Breadfast/helm-chart
@@ -1439,7 +1468,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.5.tgz
     version: 0.2.5
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.740629723Z"
+    created: "2026-09-03T10:45:33.201838414Z"
     description: A Helm chart for Kubernetes
     digest: b84dfd1a9251ee8f7b6e1aa023eafba492d434f7ca5eae8888a0ff0fadd9c95d
     home: https://github.com/Breadfast/helm-chart
@@ -1454,7 +1483,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.4.tgz
     version: 0.2.4
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.736119218Z"
+    created: "2026-09-03T10:45:33.198443568Z"
     description: A Helm chart for Kubernetes
     digest: af306c24db5f8e3a61b63d6c9a49bdd04d44c21409b39c4edeee576da25e53a4
     home: https://github.com/Breadfast/helm-chart
@@ -1469,7 +1498,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.3.tgz
     version: 0.2.3
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.73122139Z"
+    created: "2026-09-03T10:45:33.192745653Z"
     description: A Helm chart for Kubernetes
     digest: a6073decf6b42c1a6509fcef1ac5aa51e984df3cb571361961732ba7cf63a1ba
     home: https://github.com/Breadfast/helm-chart
@@ -1484,7 +1513,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.2.tgz
     version: 0.2.2
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.726313944Z"
+    created: "2026-09-03T10:45:33.186574008Z"
     description: A Helm chart for Kubernetes
     digest: 63f0fd7216afd9f119b98c2a1379de51cce1962078fcf2c45a46863ed7bee44b
     home: https://github.com/Breadfast/helm-chart
@@ -1499,7 +1528,7 @@ entries:
     - https://breadfast.github.io/helm-chart/service-0.2.1.tgz
     version: 0.2.1
   - apiVersion: v2
-    created: "2026-08-24T09:09:07.725972547Z"
+    created: "2026-09-03T10:45:33.186165036Z"
     description: A Helm chart for Kubernetes
     digest: 011ce7ac2f4031e62a3311005b0ddd7fb4f23eb6a61b565dfd64f1ca5dfe7b9b
     home: https://github.com/Breadfast/helm-chart
@@ -1513,4 +1542,4 @@ entries:
     urls:
     - https://breadfast.github.io/helm-chart/service-0.2.0.tgz
     version: 0.2.0
-generated: "2026-08-24T09:09:07.640559919Z"
+generated: "2026-09-03T10:45:33.107197822Z"
