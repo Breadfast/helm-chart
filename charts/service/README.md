@@ -122,6 +122,7 @@ networkPolicy.internetOnly.ipBlock.except when they are outside the defaults.
 | podAntiAffinity | object | `{}` |  |
 | podLabels | object | `{}` |  |
 | podSecurityContext | object | `{}` |  |
+| priorityClassName | string | `""` | Name of an existing PriorityClass. Empty means cluster default (priority 0). |
 | readinessProbe | object | `{}` |  |
 | replicaCount | int | `1` |  |
 | resources | object | `{}` |  |
