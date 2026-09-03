@@ -253,6 +253,25 @@ entrypointOverride:
 podAffinity: {}
 podAntiAffinity: {}
 
+# -- (list) Pod topology spread constraints. Prefer this over podAntiAffinity for
+# spreading replicas: skew is evaluated across the topology domains that are
+# actually eligible for the pod, so with `maxSkew: 1` a 5-replica Deployment lands
+# 3/2 across two usable nodes instead of going Pending, where a `required`
+# podAntiAffinity would demand one node per replica or refuse to schedule.
+# `whenUnsatisfiable: ScheduleAnyway` keeps it advisory but still skew-aware;
+# `DoNotSchedule` makes it a hard guarantee within the maxSkew tolerance.
+# Note matchLabelKeys requires k8s >= 1.27 (this cluster is on 1.35).
+# https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+# Example:
+#   topologySpreadConstraints:
+#     - maxSkew: 1
+#       topologyKey: kubernetes.io/hostname
+#       whenUnsatisfiable: DoNotSchedule
+#       labelSelector:
+#         matchLabels:
+#           app.kubernetes.io/name: my-service
+topologySpreadConstraints: []
+
 # -- (bool) If true, Creates CronJob resource
 cronJob:
   create: false
