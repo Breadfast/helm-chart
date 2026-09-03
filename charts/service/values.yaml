@@ -253,6 +253,48 @@ entrypointOverride:
 podAffinity: {}
 podAntiAffinity: {}
 
+# Prefer this over podAntiAffinity when spreading replicas across nodes.
+#
+# Skew is evaluated across the topology domains actually eligible for the pod, so
+# `maxSkew: 1` lands a 5-replica Deployment 3/2 across two usable nodes. A
+# `required` podAntiAffinity instead demands one node per replica and leaves the
+# rest Pending, which on a saturated pool forces continuous autoscaler scale-up.
+#
+# whenUnsatisfiable: ScheduleAnyway keeps it advisory but still skew-aware;
+# DoNotSchedule makes it a hard guarantee within the maxSkew tolerance.
+#
+# Example:
+#   topologySpreadConstraints:
+#     - maxSkew: 1
+#       topologyKey: kubernetes.io/hostname
+#       whenUnsatisfiable: DoNotSchedule
+#       labelSelector:
+#         matchLabels:
+#           app.kubernetes.io/name: my-service
+#
+# Docs: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+# -- (list) Spread replicas across nodes or zones. See the comment above for how this differs from podAntiAffinity.
+topologySpreadConstraints: []
+
+# Assign a PriorityClass so the scheduler knows which pods matter when the cluster
+# is short on room. Unset means priority 0 — the same as every workload today,
+# since no PriorityClass in this cluster sets globalDefault.
+#
+# The PriorityClass must already exist in the cluster; `kubectl get priorityclasses`
+# lists them. Raising a workload's priority lets the scheduler PREEMPT (evict)
+# lower-priority pods to make room for it, so treat a value above 0 as a decision
+# about which of your OWN services get displaced, not a free win. Use
+# preemptionPolicy: Never on the PriorityClass to get ordering without eviction.
+#
+# WATCH OUT: a name that does not exist fails LATE and quietly. The Deployment is
+# accepted by the API (verified against the live 1.35 apiserver), so ArgoCD reports
+# Synced/Healthy, but every Pod is then rejected with
+#   forbidden: no PriorityClass with name <x> was found
+# so the new ReplicaSet sits at 0 replicas while maxUnavailable keeps the old pods
+# serving. Confirm the name with `kubectl get priorityclasses` before setting it.
+# -- (string) Name of an existing PriorityClass. Empty means cluster default (priority 0).
+priorityClassName: ""
+
 # -- (bool) If true, Creates CronJob resource
 cronJob:
   create: false
