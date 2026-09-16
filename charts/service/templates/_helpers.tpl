@@ -97,6 +97,47 @@ Used by the Rollout gatewayAPI trafficRouting plugin block to reference every ro
 {{- end }}
 
 {{/*
+Autoscaler scaling behavior, shared by the HPA (templates/hpa.yaml) and the KEDA
+ScaledObject (templates/keda-scaledobject.yaml) so the two cannot drift: a service
+that flips keda.enabled keeps the scaling dynamics it had under the HPA.
+
+Call with a dict of the two knobs from the RELEVANT values block - autoscaling.* for
+the HPA, keda.* for the ScaledObject - so neither block silently tunes the other:
+  (dict "scaledownStabilization" .Values.autoscaling.scaledownStabilization
+        "podsIncrease"           .Values.autoscaling.podsIncrease)
+
+Renders the bare HorizontalPodAutoscalerBehavior body; the caller supplies the
+`behavior:` key and the indentation. KEDA's advanced.horizontalPodAutoscalerConfig
+.behavior takes the same schema as autoscaling/v2, so one definition serves both.
+*/}}
+{{- define "service.autoscalingBehavior" -}}
+scaleDown:
+{{- if .scaledownStabilization }}
+  stabilizationWindowSeconds: {{ .scaledownStabilization }}
+{{- end }}
+  policies:
+    - type: Pods
+      value: 1
+      periodSeconds: 120
+scaleUp:
+  stabilizationWindowSeconds: 0
+{{- if .podsIncrease }}
+  policies:
+  - type: Pods
+    value: {{ .podsIncrease }}
+    periodSeconds: 60
+{{- else }}
+  policies:
+  - type: Pods
+    value: 2
+    periodSeconds: 60
+  - type: Percent
+    value: 10
+    periodSeconds: 60
+{{- end }}
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "service.serviceAccountName" -}}
