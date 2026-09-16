@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.5.4](https://img.shields.io/badge/Version-0.5.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.5.5](https://img.shields.io/badge/Version-0.5.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes.
 
@@ -93,6 +93,8 @@ networkPolicy.internetOnly.ipBlock.except when they are outside the defaults.
 | istio.retries | object | `{}` | Istio HTTPRetry, e.g. {attempts: 2, perTryTimeout: "800ms", retryOn: "5xx,reset,connect-failure"} |
 | istio.timeout | string | `""` | HTTP route timeout (e.g. "2s"). Empty = no timeout. |
 | istio.trafficPolicy | object | `{}` | DestinationRule trafficPolicy for resilience / circuit breaking (connectionPool,    outlierDetection, tls, ...). Argo Rollouts only edits the subsets, leaving this intact. |
+| keda.enabled | bool | `false` | If true, create a KEDA ScaledObject and suppress the chart-generated HPA. |
+| keda.triggers | list | `[]` | KEDA triggers, passed through to the ScaledObject as written. Required when keda.enabled is true. |
 | livenessProbe | object | `{}` |  |
 | multiIngress | bool | `{"enabled":false}` | If true, Creats Multible Ingresses DNS name to expose the service publicly |
 | nameOverride | string | `""` |  |
