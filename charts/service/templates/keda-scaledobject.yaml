@@ -32,4 +32,23 @@ spec:
   {{- end }}
   triggers:
     {{- toYaml .Values.keda.triggers | nindent 4 }}
+  {{- /*
+  Scaling behavior. KEDA drives the workload through an HPA it owns, and that HPA gets
+  Kubernetes' stock behavior unless we say otherwise - scale down up to 100% at once
+  after the 300s stabilization window. The chart's own HPA instead drains one pod per
+  120s, so without this block a service would silently change scaling dynamics the
+  moment it flipped keda.enabled. The shared helper renders the same body for both.
+  keda.advanced is merged over the result, so a service can add scalingModifiers or
+  restoreToOriginalReplicaCount without losing the default behavior, and an explicit
+  behavior inside keda.advanced replaces it outright.
+  */}}
+  {{- $advanced := deepCopy (.Values.keda.advanced | default dict) }}
+  {{- $hpaConfig := deepCopy (get $advanced "horizontalPodAutoscalerConfig" | default dict) }}
+  {{- if not (hasKey $hpaConfig "behavior") }}
+    {{- $behavior := fromYaml (include "service.autoscalingBehavior" (dict "scaledownStabilization" .Values.keda.scaledownStabilization "podsIncrease" .Values.keda.podsIncrease)) }}
+    {{- $_ := set $hpaConfig "behavior" $behavior }}
+  {{- end }}
+  {{- $_ := set $advanced "horizontalPodAutoscalerConfig" $hpaConfig }}
+  advanced:
+    {{- toYaml $advanced | nindent 4 }}
 {{- end }}

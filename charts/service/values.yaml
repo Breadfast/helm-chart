@@ -257,6 +257,31 @@ autoscaling:
 # Triggers are evaluated together: KEDA scales to the highest replica count any
 # trigger asks for, which is how cron and cpu combine in one ScaledObject.
 #
+# SCALING BEHAVIOR. KEDA drives the workload through an HPA it creates, and that HPA
+# would otherwise get Kubernetes' stock behavior - scale down up to 100% at once once
+# the 300s stabilization window passes - while the chart's own HPA drains one pod per
+# 120s. So the chart gives the ScaledObject the SAME behavior body it gives the HPA,
+# and a service that flips keda.enabled keeps the scaling dynamics it already had.
+#
+# keda.scaledownStabilization and keda.podsIncrease are the KEDA-side knobs, mirroring
+# autoscaling.scaledownStabilization and autoscaling.podsIncrease. They are deliberately
+# separate keys: the autoscaling block never tunes the KEDA path and vice versa, so a
+# service migrating to KEDA states its scaling behavior explicitly under `keda`.
+# Unset means the shared defaults: scale down 1 pod / 120s, scale up 2 pods / 60s plus
+# 10% / 60s with no scale-up stabilization.
+#
+# keda.advanced is merged OVER that generated block and passed through as written, so
+# it also covers scalingModifiers and restoreToOriginalReplicaCount. Adding either of
+# those keeps the default behavior; supplying your own
+# advanced.horizontalPodAutoscalerConfig.behavior replaces it outright.
+# Docs: https://keda.sh/docs/latest/reference/scaledobject-spec/#advanced
+# Example:
+#   keda:
+#     scaledownStabilization: 600
+#     podsIncrease: 5
+#     advanced:
+#       restoreToOriginalReplicaCount: true
+#
 # minReplicaCount, maxReplicaCount, pollingInterval and cooldownPeriod are optional
 # and unset by default; each renders only when you set it, otherwise KEDA's defaults
 # apply (0, 100, 30s and 300s respectively). pollingInterval and cooldownPeriod only
@@ -288,6 +313,8 @@ keda:
   enabled: false
   # -- (list) KEDA triggers, passed through to the ScaledObject as written. Required when keda.enabled is true.
   triggers: []
+  # -- (object) Extra ScaledObject `advanced` config, merged over the scaling behavior the chart generates.
+  advanced: {}
 
 # -- (bool) If true, It will inject Vault Agent to get secrets from Vault
 vaultAgent:

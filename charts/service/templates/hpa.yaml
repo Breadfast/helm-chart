@@ -35,29 +35,6 @@ spec:
           averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
     {{- end }}
   behavior:
-    scaleDown:
-    {{- if .Values.autoscaling.scaledownStabilization }}
-      stabilizationWindowSeconds: {{ .Values.autoscaling.scaledownStabilization }}
-    {{- end }}
-      policies:
-        - type: Pods
-          value: 1
-          periodSeconds: 120
-    scaleUp:
-      stabilizationWindowSeconds: 0
-    {{- if .Values.autoscaling.podsIncrease }}
-      policies:
-      - type: Pods
-        value: {{ .Values.autoscaling.podsIncrease }}
-        periodSeconds: 60
-    {{- else }}
-      policies:
-      - type: Pods
-        value: 2
-        periodSeconds: 60
-      - type: Percent
-        value: 10
-        periodSeconds: 60
-    {{- end }}
+    {{- include "service.autoscalingBehavior" (dict "scaledownStabilization" .Values.autoscaling.scaledownStabilization "podsIncrease" .Values.autoscaling.podsIncrease) | nindent 4 }}
 
 {{- end }}
