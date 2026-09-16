@@ -241,6 +241,54 @@ gcpVolumeMounts:
 autoscaling:
   enabled: false
 
+# KEDA (keda.sh) event-driven autoscaling, as an alternative to the HPA above.
+#
+# keda.enabled TAKES PRECEDENCE: when it is true the chart renders a ScaledObject
+# and does NOT render the autoscaling HPA, even if autoscaling.enabled is also true.
+# KEDA builds its own HPA under the hood, so letting both manage one workload gives
+# odd scaling behaviour. Either way, the Deployment/Rollout omits spec.replicas so the
+# autoscaler owns the replica count and GitOps does not fight it.
+#
+# Entries in `triggers` are passed to the ScaledObject verbatim, so any KEDA scaler
+# works without a chart change — cron, cpu, memory, prometheus, datadog, kafka,
+# gcp-pubsub, and so on. Each entry takes KEDA's own trigger fields: `type` and
+# `metadata` are required, plus optional `name`, `metricType`, `authenticationRef`
+# and `useCachedMetrics`. All `metadata` values are strings, so quote numbers.
+# Triggers are evaluated together: KEDA scales to the highest replica count any
+# trigger asks for, which is how cron and cpu combine in one ScaledObject.
+#
+# minReplicaCount, maxReplicaCount, pollingInterval and cooldownPeriod are optional
+# and unset by default; each renders only when you set it, otherwise KEDA's defaults
+# apply (0, 100, 30s and 300s respectively). pollingInterval and cooldownPeriod only
+# govern the scale-to-zero path: KEDA's admission webhook warns they are "not relevant"
+# unless minReplicaCount is 0 (or idleReplicaCount is 0, or useCachedMetrics is set),
+# because scaling between 1 and N is handled by the HPA that KEDA creates. A cpu or
+# memory trigger needs resource requests on the container, and cannot scale to zero
+# unless a non-cpu/memory trigger is present alongside it.
+#
+# Docs: https://keda.sh/docs/latest/reference/scaledobject-spec/
+# Example:
+#   keda:
+#     enabled: true
+#     minReplicaCount: 2
+#     maxReplicaCount: 20
+#     triggers:
+#       - type: cron
+#         metadata:
+#           timezone: Africa/Cairo
+#           start: "0 8 * * *"
+#           end: "0 12 * * *"
+#           desiredReplicas: "10"
+#       - type: cpu
+#         metricType: Utilization
+#         metadata:
+#           value: "80"
+keda:
+  # -- (bool) If true, create a KEDA ScaledObject and suppress the chart-generated HPA.
+  enabled: false
+  # -- (list) KEDA triggers, passed through to the ScaledObject as written. Required when keda.enabled is true.
+  triggers: []
+
 # -- (bool) If true, It will inject Vault Agent to get secrets from Vault
 vaultAgent:
   enabled: false

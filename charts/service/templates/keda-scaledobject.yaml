@@ -1,0 +1,35 @@
+{{- if .Values.keda.enabled }}
+{{- if not .Values.keda.triggers }}
+{{- fail "keda.enabled requires at least one entry in keda.triggers; a ScaledObject with no triggers is rejected by the KEDA CRD." }}
+{{- end }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "service.fullname" . }}
+  labels:
+    {{- include "service.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+  {{- if .Values.argorollouts.enabled }}
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
+  {{- else}}
+    apiVersion: apps/v1
+    kind: Deployment
+  {{- end}}
+    name: {{ include "service.fullname" . }}
+  {{- if hasKey .Values.keda "minReplicaCount" }}
+  minReplicaCount: {{ .Values.keda.minReplicaCount }}
+  {{- end }}
+  {{- if hasKey .Values.keda "maxReplicaCount" }}
+  maxReplicaCount: {{ .Values.keda.maxReplicaCount }}
+  {{- end }}
+  {{- if hasKey .Values.keda "pollingInterval" }}
+  pollingInterval: {{ .Values.keda.pollingInterval }}
+  {{- end }}
+  {{- if hasKey .Values.keda "cooldownPeriod" }}
+  cooldownPeriod: {{ .Values.keda.cooldownPeriod }}
+  {{- end }}
+  triggers:
+    {{- toYaml .Values.keda.triggers | nindent 4 }}
+{{- end }}
