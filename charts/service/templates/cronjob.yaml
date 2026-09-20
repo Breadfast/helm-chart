@@ -14,11 +14,19 @@ spec:
   jobTemplate:
     spec:
       template:
-        {{- with .annotations }}
+        # metadata is emitted unconditionally: the pod template MUST carry
+        # app.kubernetes.io/name or GKE cost allocation cannot attribute these pods to a
+        # workload, and they land in "[Charges for other usage]" in the Billing report.
+        # (Previously this block only rendered when .annotations was set, so every CronJob
+        # pod from this chart was unlabelled.) Mirrors the Deployment pod template, which
+        # uses the same selectorLabels helper.
         metadata:
+          labels:
+            {{- include "service.selectorLabels" $ | nindent 12 }}
+          {{- with .annotations }}
           annotations:
             {{- toYaml . | nindent 12 }}
-        {{- end }}
+          {{- end }}
         spec:
           {{- with .serviceAccount }}
           serviceAccountName: {{ . }}
