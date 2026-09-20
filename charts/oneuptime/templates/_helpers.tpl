@@ -717,6 +717,9 @@ spec:
     metadata:
       labels:
         app: {{ printf "%s-%s" $.Release.Name $.ServiceName  }}
+        # Carries GKE cost allocation. Pod-template only -- spec.selector is
+        # immutable, so it keeps matching on `app` and is left untouched.
+        app.kubernetes.io/name: {{ printf "%s-%s" $.Release.Name $.ServiceName  }}
         {{- if $.Values.deployment.includeTimestampLabel }}
         date: "{{ now | unixEpoch }}"
         {{- end }}
