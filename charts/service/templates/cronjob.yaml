@@ -17,12 +17,18 @@ spec:
         # metadata is emitted unconditionally: the pod template MUST carry
         # app.kubernetes.io/name or GKE cost allocation cannot attribute these pods to a
         # workload, and they land in "[Charges for other usage]" in the Billing report.
-        # (Previously this block only rendered when .annotations was set, so every CronJob
-        # pod from this chart was unlabelled.) Mirrors the Deployment pod template, which
-        # uses the same selectorLabels helper.
+        #
+        # The value is the CRON's own name, NOT service.selectorLabels. The chart's
+        # Service, HPA and PDB all select on `app.kubernetes.io/name: <service name>`
+        # with no other key, so giving cron pods the service's own name made every
+        # running cron pod match those selectors: it joined the Service NEG and took
+        # production traffic despite serving no HTTP, broke the HPA
+        # (FailedGetResourceMetric -- cron containers declare no requests) and broke the
+        # PDB (jobs.batch has no scale subresource). Using the cron name keeps the pods
+        # attributable in billing while matching nothing that selects the service.
         metadata:
           labels:
-            {{- include "service.selectorLabels" $ | nindent 12 }}
+            app.kubernetes.io/name: {{ .name }}
           {{- with .annotations }}
           annotations:
             {{- toYaml . | nindent 12 }}
