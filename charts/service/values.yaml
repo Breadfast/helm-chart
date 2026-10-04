@@ -140,7 +140,18 @@ gateway:
   # parentRefs: []
   # -- Additional annotations for HTTPRoute
   annotations: {}
-  # -- Hosts and paths for HTTPRoute (same shape as ingress.hosts)
+  # -- Hosts and paths for HTTPRoute. Each path may include Gateway API queryParams
+  #    matchers with type Exact or RegularExpression.
+  #    Example:
+  #    hosts:
+  #      - host: www.example.com
+  #        paths:
+  #          - path: /navigator
+  #            pathType: Prefix
+  #            queryParams:
+  #              - name: warehouseId
+  #                type: Exact
+  #                value: warehouse-id
   hosts: []
   # -- GKE HealthCheckPolicy (networking.gke.io/v1). When enabled, creates a HealthCheckPolicy targeting the service.
   healthCheck:

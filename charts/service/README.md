@@ -71,7 +71,7 @@ networkPolicy.internetOnly.ipBlock.except when they are outside the defaults.
 | gateway.healthCheck.timeoutSec | int | `10` | Timeout in seconds |
 | gateway.healthCheck.type | string | `"TCP"` | Health check type: TCP or HTTP |
 | gateway.healthCheck.unhealthyThreshold | int | `5` | Unhealthy threshold count |
-| gateway.hosts | list | `[]` | Hosts and paths for HTTPRoute (same shape as ingress.hosts) |
+| gateway.hosts | list | `[]` | Hosts and paths for HTTPRoute. Each path may include Gateway API queryParams matchers with type Exact or RegularExpression. |
 | gcpVolumeMounts | bool | `{"enabled":false}` | If true, add annotation o enable GCP Volume Mounts (GCSFuse) |
 | goreplay.args[0] | string | `"-input-raw"` |  |
 | goreplay.args[1] | string | `"any:80"` |  |
