@@ -51,6 +51,9 @@
           {{- $pathType = "PathPrefix" -}}
         {{- end -}}
         {{- $rule := dict "path" .path "pathType" $pathType "serviceName" .serviceName "servicePort" .servicePort -}}
+        {{- if .queryParams -}}
+          {{- $_ := set $rule "queryParams" .queryParams -}}
+        {{- end -}}
         {{- if .filters -}}
           {{- $_ := set $rule "filters" .filters -}}
         {{- end -}}
@@ -69,6 +72,9 @@
           {{- $pathType = "PathPrefix" -}}
         {{- end -}}
         {{- $rule := dict "path" .path "pathType" $pathType "serviceName" .serviceName "servicePort" .servicePort -}}
+        {{- if .queryParams -}}
+          {{- $_ := set $rule "queryParams" .queryParams -}}
+        {{- end -}}
         {{- if .filters -}}
           {{- $_ := set $rule "filters" .filters -}}
         {{- end -}}
@@ -88,6 +94,9 @@
         {{- $pathType = "PathPrefix" -}}
       {{- end -}}
       {{- $rule := dict "path" .path "pathType" $pathType "serviceName" .serviceName "servicePort" .servicePort -}}
+      {{- if .queryParams -}}
+        {{- $_ := set $rule "queryParams" .queryParams -}}
+      {{- end -}}
       {{- if .filters -}}
         {{- $_ := set $rule "filters" .filters -}}
       {{- end -}}
@@ -160,6 +169,10 @@ spec:
       - path:
           type: {{ .pathType }}
           value: {{ .path | quote }}
+        {{- with .queryParams }}
+        queryParams:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
       {{- with .filters }}
       filters:
         {{- toYaml . | nindent 8 }}
