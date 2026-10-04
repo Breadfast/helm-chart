@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.5.8](https://img.shields.io/badge/Version-0.5.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.5.9](https://img.shields.io/badge/Version-0.5.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes.
 
@@ -71,7 +71,7 @@ networkPolicy.internetOnly.ipBlock.except when they are outside the defaults.
 | gateway.healthCheck.timeoutSec | int | `10` | Timeout in seconds |
 | gateway.healthCheck.type | string | `"TCP"` | Health check type: TCP or HTTP |
 | gateway.healthCheck.unhealthyThreshold | int | `5` | Unhealthy threshold count |
-| gateway.hosts | list | `[]` | Hosts and paths for HTTPRoute. Each path may include Gateway API queryParams matchers with type Exact or RegularExpression. |
+| gateway.hosts | list | `[]` | Hosts and paths for HTTPRoute. Each path may include Gateway API queryParams    matchers with type Exact or RegularExpression.    Example:    hosts:      - host: www.example.com        paths:          - path: /navigator            pathType: Prefix            queryParams:              - name: warehouseId                type: Exact                value: warehouse-id |
 | gcpVolumeMounts | bool | `{"enabled":false}` | If true, add annotation o enable GCP Volume Mounts (GCSFuse) |
 | goreplay.args[0] | string | `"-input-raw"` |  |
 | goreplay.args[1] | string | `"any:80"` |  |
