@@ -41,7 +41,14 @@ spec:
           serviceAccountName: {{ . }}
           {{- end }}
           containers:
-          {{- toYaml .containers | nindent 12 }}
+          {{- $containers := deepCopy .containers }}
+          {{- if .useDeploymentImage }}
+          {{- $deploymentImage := printf "%s:%s" $.Values.image.repository ($.Values.image.tag | default $.Chart.AppVersion) }}
+          {{- range $container := $containers }}
+          {{- $_ := set $container "image" $deploymentImage }}
+          {{- end }}
+          {{- end }}
+          {{- toYaml $containers | nindent 12 }}
           restartPolicy: {{ .restartPolicy }}
           {{- with $.Values.nodeSelectorLabels }}
           nodeSelector:
