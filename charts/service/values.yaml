@@ -381,9 +381,11 @@ topologySpreadConstraints: []
 # -- (string) Name of an existing PriorityClass. Empty means cluster default (priority 0).
 priorityClassName: ""
 
-# -- (bool) If true, Creates CronJob resource
 cronJob:
+  # -- (bool) If true, creates CronJob resources from `cronJob.crons`
   create: false
+  # -- (list) CronJob definitions. Each entry supports `name`, `schedule`, optional `suspend`, optional `concurrencyPolicy`, optional `useDeploymentImage`, `restartPolicy`, `serviceAccount`, `annotations`, and `containers`. When `useDeploymentImage` is true, every container uses the main Deployment's image repository and tag.
+  crons: []
 
 # -- (bool) If true, Add datadog labels to pods and deployments
 datadog:

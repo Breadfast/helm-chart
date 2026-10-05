@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.5.9](https://img.shields.io/badge/Version-0.5.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.5.10](https://img.shields.io/badge/Version-0.5.10-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes.
 
@@ -45,7 +45,8 @@ networkPolicy.internetOnly.ipBlock.except when they are outside the defaults.
 | argorollouts.trafficRouting | string | `"nginx"` | Canary traffic router. "nginx" (default, legacy) keeps the historical    trafficRouting.nginx.stableIngress behavior. "gatewayAPI" switches the Rollout to the    argoproj-labs/gatewayAPI plugin, which weights the stable vs canary backendRefs on this    service's Gateway API HTTPRoute(s) so setWeight shifts REAL traffic. "gatewayAPI" requires    gateway.enabled=true (or ingress.type=gateway) AND the plugin installed in the controller. |
 | autoscaling.enabled | bool | `false` |  |
 | containerEnv | map | `[]` | Environment variable map |
-| cronJob | bool | `{"create":false}` | If true, Creates CronJob resource |
+| cronJob.create | bool | `false` | If true, creates CronJob resources from `cronJob.crons` |
+| cronJob.crons | list | `[]` | CronJob definitions. Each entry supports `name`, `schedule`, optional `suspend`, optional `concurrencyPolicy`, optional `useDeploymentImage`, `restartPolicy`, `serviceAccount`, `annotations`, and `containers`. When `useDeploymentImage` is true, every container uses the main Deployment's image repository and tag. |
 | datadog | bool | `{"enabled":false}` | If true, Add datadog labels to pods and deployments |
 | deploymentLabels | object | `{}` |  |
 | destinationRule.enabled | bool | `false` |  |
