@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.5.10](https://img.shields.io/badge/Version-0.5.10-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.5.11](https://img.shields.io/badge/Version-0.5.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes.
 
@@ -46,7 +46,7 @@ networkPolicy.internetOnly.ipBlock.except when they are outside the defaults.
 | autoscaling.enabled | bool | `false` |  |
 | containerEnv | map | `[]` | Environment variable map |
 | cronJob.create | bool | `false` | If true, creates CronJob resources from `cronJob.crons` |
-| cronJob.crons | list | `[]` | CronJob definitions. Each entry supports `name`, `schedule`, optional `suspend`, optional `concurrencyPolicy`, `restartPolicy`, `serviceAccount`, `annotations`, and `containers` |
+| cronJob.crons | list | `[]` | CronJob definitions. Each entry supports `name`, `schedule`, optional `suspend`, optional `concurrencyPolicy`, optional `useDeploymentImage`, `restartPolicy`, `serviceAccount`, `annotations`, and `containers`. When `useDeploymentImage` is true, every container uses the main Deployment's image repository and tag. |
 | datadog | bool | `{"enabled":false}` | If true, Add datadog labels to pods and deployments |
 | deploymentLabels | object | `{}` |  |
 | destinationRule.enabled | bool | `false` |  |
