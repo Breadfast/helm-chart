@@ -1,0 +1,130 @@
+# Default values for odoo.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# -- This will set the replicaset count, it will be ignored if autoscaling is enabled.
+replicaCount: 1
+
+image:
+  # -- Docker image repository for Odoo
+  repository: repo/image
+  # -- Kubernetes imagePullPolicy (IfNotPresent, Always, etc.)
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+# -- Provide node groups selector
+nodeSelector: {}
+# -- Node Tolerations. Tolerations allow the scheduler to schedule pods with matching taints
+tolerations: []
+# -- Configure Kubernetes node‑ and pod‑affinity (and anti‑affinity) rules for scheduling
+affinity: {}
+
+serviceAccount:
+  # -- Whether to create a new ServiceAccount for Odoo
+  create: false
+  # -- Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use.
+  #    If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# -- This is for setting Kubernetes Annotations to a Pod.
+podAnnotations: {}
+# -- This is for setting Kubernetes Labels to a Pod.
+podLabels: {}
+# -- Pod-level security context applied to all containers in the pod
+podSecurityContext: {}
+# -- Container‑level security settings for the Odoo container
+securityContext: {}
+
+ingress:
+  # -- Enable creating an Ingress resource
+  enabled: true
+  # -- className to use for this resource (e.g. nginx, traefik)
+  className: ""
+  # -- Annotations to add to the Ingress (e.g. cert-manager, auth, websocket)
+  annotations: {}
+  # -- Define the hostnames and paths for the HTTP routes
+  hosts:
+    - host: odoo-example.local
+  # -- TLS configuration for securing the host(s)
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - odoo-example.local
+
+# -- Resource requests and limits for the Odoo container
+resources: {}
+
+# -- Liveness probe: checks if the Odoo container is still running; restarts if unhealthy
+livenessProbe: {}
+# -- Readiness probe: checks if the Odoo container is ready to serve traffic
+readinessProbe: {}
+  # httpGet:
+  #   path: /web/health
+  #   port: 8069
+  # initialDelaySeconds: 5
+  # periodSeconds: 10
+  # timeoutSeconds: 2
+
+autoscaling:
+  # -- Enable or disable the Horizontal Pod Autoscaler
+  enabled: false
+  # -- Minimum number of Odoo pod replicas
+  minReplicas: 2
+  # -- Maximum number of Odoo pod replicas
+  maxReplicas: 5
+  # -- Target average CPU utilization percentage for scaling
+  targetCPUUtilizationPercentage: 80
+  # -- Target average memory utilization percentage for scaling (if supported)
+  #    Set to null to disable memory‐based scaling
+  targetMemoryUtilizationPercentage: 80
+
+vaultAgent:
+  # -- (bool) If true, It will inject Vault Agent to get secrets from Vault
+  enabled: false
+  # -- Service account that will be used by the vault agent injector
+  serviceAccount: ""
+  # -- Annotations added for vault agent injector
+  annotations: {}
+
+# -- (bool) If true, add annotation o enable GCP Volume Mounts (GCSFuse)
+gcpVolumeMounts:
+  enabled: true
+
+# -- Additional volumes on the output Deployment definition.
+volumes: []
+  # - name: odoo-data
+  #   csi:
+  #     driver: gcsfuse.csi.storage.gke.io
+  #     volumeAttributes:
+  #       bucketName: odoo17-data
+  #       mountOptions: "implicit-dirs,file-system:file-mode:511,file-system:dir-mode:511,file-cache:enable-parallel-downloads:true,file-cache:download-chunk-size-mb:3"
+  #       gcsfuseLoggingSeverity: warning
+  # - name: foo
+  #   secret:
+  #     secretName: mysecret
+  #     optional: false
+
+# -- Additional volumeMounts on the output Deployment definition.
+volumeMounts:
+  # - name: odoo-data
+  #   mountPath: /var/lib/odoo
+  # - name: foo
+  #   mountPath: "/etc/foo"
+  #   readOnly: true
+
+datadog:
+  # -- (bool) If true, datadog annotations will be added to Odoo deployment and pods.
+  enabled: true
+
+# -- (map) Environment variable map for Odoo container
+containerEnv: []
+  # - name: SESSION_DB_URI
+  #   value: session_db

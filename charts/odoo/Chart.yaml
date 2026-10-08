@@ -1,0 +1,15 @@
+apiVersion: v2
+name: odoo
+description: A Helm chart for deploying Odoo ERP System
+# Chart type (application/library)
+type: application
+# Chart version (increment for each chart update)
+version: 0.1.0
+# Odoo application version
+appVersion: "17.0"
+home: https://github.com/Breadfast/helm-chart
+sources:
+- https://github.com/Breadfast/helm-chart
+maintainers:
+- name: DevOps-team
+  email: devops@breadfast.com
