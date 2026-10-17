@@ -143,7 +143,7 @@ networkPolicy.internetOnly.ipBlock.except when they are outside the defaults.
 | serviceAccount.name | string | `""` |  |
 | stableBurst.burst.maxReplicas | int | `nil` | Maximum burst replicas. Defaults to the autoscaler maximum minus the stable replicas. |
 | stableBurst.burst.minReplicas | int | `1` | Minimum burst replicas. The HPA needs >= 1; KEDA may use 0. |
-| stableBurst.enabled | bool | `false` | If true, render a stable and a burst Deployment (see the block comment above). |
+| stableBurst.enabled | bool | `false` | If true, render a stable and a burst Deployment: baseline replicas on on-demand nodes, overflow on spot (see the stableBurst comment in values.yaml). |
 | stableBurst.onDemand | string | `"preferred"` | "preferred" (stable pods fall back to spot when on-demand is full) or "required" (they stay Pending). |
 | stableBurst.priorityClassName | string | `""` | PriorityClass for the stable pods, e.g. prod-baseline-critical or prod-baseline. Required when enabled; the class must already exist in the cluster. |
 | stableBurst.stableReplicas | int | `nil` | Fixed replica count of the stable Deployment. Defaults to autoscaling.minReplicas, or keda.minReplicaCount. |

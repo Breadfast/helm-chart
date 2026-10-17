@@ -361,7 +361,7 @@ keda:
 # at least 1, so total capacity does not dip when the stable Deployment shrinks to its fixed
 # size; lower it once the stable pods are confirmed on on-demand nodes.
 stableBurst:
-  # -- (bool) If true, render a stable and a burst Deployment (see the block comment above).
+  # -- (bool) If true, render a stable and a burst Deployment: baseline replicas on on-demand nodes, overflow on spot (see the stableBurst comment in values.yaml).
   enabled: false
   # -- (int) Fixed replica count of the stable Deployment. Defaults to autoscaling.minReplicas, or keda.minReplicaCount.
   stableReplicas: null
