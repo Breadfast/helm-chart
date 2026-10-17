@@ -17,12 +17,19 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
   {{- end}}
-    name: {{ include "service.fullname" . }}
+    name: {{ include "service.scaleTargetName" . }}
+  {{- if .Values.stableBurst.enabled }}
+  minReplicaCount: {{ .Values.stableBurst.burst.minReplicas }}
+  {{- with (include "service.burstMaxReplicas" .) }}
+  maxReplicaCount: {{ . }}
+  {{- end }}
+  {{- else }}
   {{- if hasKey .Values.keda "minReplicaCount" }}
   minReplicaCount: {{ .Values.keda.minReplicaCount }}
   {{- end }}
   {{- if hasKey .Values.keda "maxReplicaCount" }}
   maxReplicaCount: {{ .Values.keda.maxReplicaCount }}
+  {{- end }}
   {{- end }}
   {{- if hasKey .Values.keda "pollingInterval" }}
   pollingInterval: {{ .Values.keda.pollingInterval }}
@@ -31,7 +38,7 @@ spec:
   cooldownPeriod: {{ .Values.keda.cooldownPeriod }}
   {{- end }}
   triggers:
-    {{- toYaml .Values.keda.triggers | nindent 4 }}
+    {{- include "service.kedaTriggers" . | nindent 4 }}
   {{- /*
   Scaling behavior. KEDA drives the workload through an HPA it owns, and that HPA gets
   Kubernetes' stock behavior unless we say otherwise - scale down up to 100% at once

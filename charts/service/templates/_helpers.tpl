@@ -217,3 +217,47 @@ whether or not Argo Rollouts is enabled, so every misconfiguration fails the ren
 {{- end -}}
 {{- end -}}
 {{- end }}
+
+{{/*
+Name of the workload the autoscaler (HPA or KEDA ScaledObject) scales: the burst Deployment
+when stableBurst is enabled, otherwise the service's only Deployment.
+*/}}
+{{- define "service.scaleTargetName" -}}
+{{- if .Values.stableBurst.enabled -}}
+{{- include "service.burstName" . -}}
+{{- else -}}
+{{- include "service.fullname" . -}}
+{{- end -}}
+{{- end }}
+
+{{/*
+KEDA triggers for the ScaledObject. Unchanged unless stableBurst is enabled, in which case
+the autoscaler only sees the burst Deployment, so:
+  cron      desiredReplicas is a TOTAL; subtract the stable replicas (floored at 0).
+  cpu/mem   per-pod averages are representative; passed through.
+  others    (datadog, prometheus, kafka, ...) compute ceil(service-wide value / target), which
+            would size burst for ALL traffic. They must reference {{ .burstDeployment }} so the
+            query counts burst pods only; the placeholder is rendered here.
+*/}}
+{{- define "service.kedaTriggers" -}}
+{{- if not .Values.stableBurst.enabled -}}
+{{- toYaml .Values.keda.triggers -}}
+{{- else -}}
+{{- $stable := int (include "service.stableReplicas" .) -}}
+{{- $ctx := dict "burstDeployment" (include "service.burstName" .) "stableReplicas" $stable -}}
+{{- $out := list -}}
+{{- range $trigger := .Values.keda.triggers -}}
+{{- $t := deepCopy $trigger -}}
+{{- if eq $t.type "cron" -}}
+{{- $_ := set $t.metadata "desiredReplicas" (max 0 (sub (int $t.metadata.desiredReplicas) $stable) | toString) -}}
+{{- else if not (has $t.type (list "cpu" "memory")) -}}
+{{- if not (contains ".burstDeployment" (toYaml $t)) -}}
+{{- fail (printf "keda trigger of type %q must reference {{ .burstDeployment }} when stableBurst.enabled: the autoscaler only sees the burst Deployment, so a service-wide query would size burst for all traffic." $t.type) -}}
+{{- end -}}
+{{- $t = fromYaml (tpl (toYaml $t) $ctx) -}}
+{{- end -}}
+{{- $out = append $out $t -}}
+{{- end -}}
+{{- toYaml $out -}}
+{{- end -}}
+{{- end }}
