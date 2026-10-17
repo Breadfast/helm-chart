@@ -147,3 +147,73 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Name of the burst Deployment. The stable Deployment keeps service.fullname so enabling
+stableBurst does not delete and recreate it. Truncated so the suffix still fits in 63 chars.
+*/}}
+{{- define "service.burstName" -}}
+{{- printf "%s-burst" (include "service.fullname" . | trunc 56 | trimSuffix "-") }}
+{{- end }}
+
+{{/*
+Number of baseline (stable) replicas: stableBurst.stableReplicas, else the autoscaler's
+minimum (keda.minReplicaCount or autoscaling.minReplicas).
+*/}}
+{{- define "service.stableReplicas" -}}
+{{- if .Values.stableBurst.stableReplicas -}}
+{{- .Values.stableBurst.stableReplicas -}}
+{{- else if .Values.keda.enabled -}}
+{{- .Values.keda.minReplicaCount | default 0 -}}
+{{- else -}}
+{{- .Values.autoscaling.minReplicas | default 0 -}}
+{{- end -}}
+{{- end }}
+
+{{/*
+Burst Deployment's maximum replicas: stableBurst.burst.maxReplicas, else the autoscaler's
+maximum minus the stable replicas. Empty when KEDA has no maxReplicaCount (KEDA's own default applies).
+*/}}
+{{- define "service.burstMaxReplicas" -}}
+{{- if .Values.stableBurst.burst.maxReplicas -}}
+{{- .Values.stableBurst.burst.maxReplicas -}}
+{{- else if .Values.keda.enabled -}}
+{{- if hasKey .Values.keda "maxReplicaCount" -}}
+{{- sub (int .Values.keda.maxReplicaCount) (int (include "service.stableReplicas" .)) -}}
+{{- end -}}
+{{- else -}}
+{{- sub (int .Values.autoscaling.maxReplicas) (int (include "service.stableReplicas" .)) -}}
+{{- end -}}
+{{- end }}
+
+{{/*
+Render-time validation for stableBurst. Included from deployment.yaml, which renders
+whether or not Argo Rollouts is enabled, so every misconfiguration fails the render.
+*/}}
+{{- define "service.stableBurstValidate" -}}
+{{- if .Values.stableBurst.enabled -}}
+{{- if .Values.argorollouts.enabled -}}
+{{- fail "stableBurst.enabled is not supported together with argorollouts.enabled." -}}
+{{- end -}}
+{{- if not .Values.stableBurst.priorityClassName -}}
+{{- fail "stableBurst.enabled requires stableBurst.priorityClassName (prod-baseline-critical or prod-baseline). A name that does not exist makes every pod fail admission while ArgoCD still reports Synced." -}}
+{{- end -}}
+{{- if not (has .Values.stableBurst.onDemand (list "preferred" "required")) -}}
+{{- fail "stableBurst.onDemand must be \"preferred\" or \"required\"." -}}
+{{- end -}}
+{{- if not (or .Values.autoscaling.enabled .Values.keda.enabled) -}}
+{{- fail "stableBurst.enabled requires autoscaling.enabled or keda.enabled: the burst Deployment is sized by the autoscaler." -}}
+{{- end -}}
+{{- $stable := int (include "service.stableReplicas" .) -}}
+{{- if lt $stable 1 -}}
+{{- fail "stableBurst needs at least 1 stable replica: set stableBurst.stableReplicas, autoscaling.minReplicas or keda.minReplicaCount." -}}
+{{- end -}}
+{{- $burstMax := include "service.burstMaxReplicas" . -}}
+{{- if and $burstMax (lt (int $burstMax) 1) -}}
+{{- fail (printf "stableBurst leaves no room for burst: stable replicas (%d) must be below the autoscaler maximum." $stable) -}}
+{{- end -}}
+{{- if and (not .Values.keda.enabled) (lt (int .Values.stableBurst.burst.minReplicas) 1) -}}
+{{- fail "stableBurst.burst.minReplicas must be >= 1 with the HPA; only KEDA can scale the burst Deployment to 0." -}}
+{{- end -}}
+{{- end -}}
+{{- end }}

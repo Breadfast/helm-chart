@@ -1,0 +1,50 @@
+suite: stableBurst validation
+templates:
+  - deployment.yaml
+set:
+  fullnameOverride: svc
+  image: {repository: nginx, tag: stable}
+  autoscaling: {enabled: true, minReplicas: 4, maxReplicas: 12}
+  stableBurst: {enabled: true, priorityClassName: prod-baseline}
+tests:
+  - it: rejects Argo Rollouts
+    template: deployment.yaml
+    set: {argorollouts: {enabled: true}}
+    asserts:
+      - failedTemplate: {errorPattern: "not supported together with argorollouts"}
+
+  - it: requires a priorityClassName
+    template: deployment.yaml
+    set: {stableBurst: {enabled: true, priorityClassName: ""}}
+    asserts:
+      - failedTemplate: {errorPattern: "requires stableBurst.priorityClassName"}
+
+  - it: rejects an unknown onDemand mode
+    template: deployment.yaml
+    set: {stableBurst: {enabled: true, priorityClassName: prod-baseline, onDemand: maybe}}
+    asserts:
+      - failedTemplate: {errorPattern: "onDemand must be"}
+
+  - it: requires an autoscaler
+    template: deployment.yaml
+    set: {autoscaling: {enabled: false}}
+    asserts:
+      - failedTemplate: {errorPattern: "requires autoscaling.enabled or keda.enabled"}
+
+  - it: requires at least one stable replica
+    template: deployment.yaml
+    set: {autoscaling: {enabled: true, minReplicas: 0, maxReplicas: 12}}
+    asserts:
+      - failedTemplate: {errorPattern: "at least 1 stable replica"}
+
+  - it: requires room for burst
+    template: deployment.yaml
+    set: {stableBurst: {enabled: true, priorityClassName: prod-baseline, stableReplicas: 12}}
+    asserts:
+      - failedTemplate: {errorPattern: "leaves no room for burst"}
+
+  - it: rejects burst.minReplicas 0 with the HPA
+    template: deployment.yaml
+    set: {stableBurst: {enabled: true, priorityClassName: prod-baseline, burst: {minReplicas: 0}}}
+    asserts:
+      - failedTemplate: {errorPattern: "only KEDA can scale"}
