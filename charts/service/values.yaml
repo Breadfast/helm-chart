@@ -327,6 +327,54 @@ keda:
   # -- (object) Extra ScaledObject `advanced` config, merged over the scaling behavior the chart generates.
   advanced: {}
 
+# stableBurst splits one service into a STABLE and a BURST Deployment so its baseline replicas
+# keep running on on-demand nodes while only the overflow runs on spot.
+#
+# Why: a ComputeClass lists an on-demand pool first and a spot pool second, but nothing
+# stops every replica of one Deployment from landing on spot, where a single preemption
+# wave removes all of them.
+#
+# When stableBurst.enabled the chart renders TWO Deployments behind the same Service:
+#   <fullname>        STABLE. Fixed replicas (stableReplicas), priorityClassName, and a
+#                     node affinity for on-demand nodes (gke-provisioning=standard):
+#                     "preferred" falls back to spot if on-demand has no room, "required"
+#                     stays Pending instead.
+#   <fullname>-burst  BURST. Autoscaled between burst.minReplicas and burst.maxReplicas,
+#                     spot nodes only (gke-spot=true), strict one-skew spread across nodes.
+# The HPA / KEDA ScaledObject scales the BURST Deployment only. The Service and the PDB
+# select on app.kubernetes.io/name, which matches both, so traffic and disruption
+# budgets cover all pods.
+#
+# AUTOSCALING CONSEQUENCES (the autoscaler only sees burst pods):
+#   cpu / memory Utilization triggers and the plain HPA   work unchanged (per-pod averages).
+#   keda cron triggers   desiredReplicas is a TOTAL; the chart subtracts stableReplicas
+#                        (floored at 0), so write it as the total you want.
+#   any other KEDA trigger (datadog, prometheus, ...)  computes ceil(service-wide value / target)
+#                        and would size burst for ALL traffic. Its query MUST count burst pods
+#                        only; write {{ .burstDeployment }} where the deployment name goes, e.g.
+#                          query: "sum:trace.http.request.hits{kube_deployment:{{ .burstDeployment }}}.as_rate()"
+#                        The render fails if a non-cron/cpu/memory trigger lacks the placeholder.
+#                        Triggers that cannot be scoped to a deployment (Kafka lag) cannot use stableBurst.
+#
+# Requires autoscaling.enabled or keda.enabled. Not supported with argorollouts.enabled.
+# Rolling out an existing service: set burst.minReplicas to (current replicas - stableReplicas),
+# at least 1, so total capacity does not dip when the stable Deployment shrinks to its fixed
+# size; lower it once the stable pods are confirmed on on-demand nodes.
+stableBurst:
+  # -- (bool) If true, render a stable and a burst Deployment: baseline replicas on on-demand nodes, overflow on spot (see the stableBurst comment in values.yaml).
+  enabled: false
+  # -- (int) Fixed replica count of the stable Deployment. Defaults to autoscaling.minReplicas, or keda.minReplicaCount.
+  stableReplicas: null
+  # -- (string) PriorityClass for the stable pods, e.g. prod-baseline-critical or prod-baseline. Required when enabled; the class must already exist in the cluster.
+  priorityClassName: ""
+  # -- (string) "preferred" (stable pods fall back to spot when on-demand is full) or "required" (they stay Pending).
+  onDemand: preferred
+  burst:
+    # -- (int) Minimum burst replicas. The HPA needs >= 1; KEDA may use 0.
+    minReplicas: 1
+    # -- (int) Maximum burst replicas. Defaults to the autoscaler maximum minus the stable replicas.
+    maxReplicas: null
+
 # -- (bool) If true, It will inject Vault Agent to get secrets from Vault
 vaultAgent:
   enabled: false

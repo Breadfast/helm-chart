@@ -1,0 +1,18 @@
+suite: stableBurst KEDA validation
+templates:
+  - keda-scaledobject.yaml
+set:
+  fullnameOverride: svc
+  image: {repository: nginx, tag: stable}
+  stableBurst: {enabled: true, priorityClassName: prod-baseline}
+tests:
+  - it: rejects an external KEDA trigger that does not reference the burst deployment
+    template: keda-scaledobject.yaml
+    set:
+      keda:
+        enabled: true
+        minReplicaCount: 4
+        triggers:
+          - {type: datadog, metadata: {query: "sum:x{*}", queryValue: "10"}}
+    asserts:
+      - failedTemplate: {errorPattern: "must reference"}

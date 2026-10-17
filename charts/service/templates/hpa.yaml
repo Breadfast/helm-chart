@@ -14,9 +14,14 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
   {{- end}}
-    name: {{ include "service.fullname" . }}
+    name: {{ include "service.scaleTargetName" . }}
+  {{- if .Values.stableBurst.enabled }}
+  minReplicas: {{ .Values.stableBurst.burst.minReplicas }}
+  maxReplicas: {{ include "service.burstMaxReplicas" . }}
+  {{- else }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  {{- end }}
   metrics:
     {{- if .Values.autoscaling.targetMemoryUtilizationPercentage }}
     - type: Resource

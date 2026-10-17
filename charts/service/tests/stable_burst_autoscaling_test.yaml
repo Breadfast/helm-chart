@@ -1,0 +1,97 @@
+suite: stableBurst autoscaling
+templates:
+  - hpa.yaml
+  - keda-scaledobject.yaml
+set:
+  fullnameOverride: svc
+  image: {repository: nginx, tag: stable}
+  stableBurst: {enabled: true, priorityClassName: prod-baseline}
+tests:
+  - it: HPA scales the burst Deployment between burst.minReplicas and maxReplicas minus stable
+    template: hpa.yaml
+    set:
+      autoscaling: {enabled: true, minReplicas: 4, maxReplicas: 12, targetCPUUtilizationPercentage: 80}
+    asserts:
+      - equal: {path: spec.scaleTargetRef.name, value: svc-burst}
+      - equal: {path: spec.minReplicas, value: 1}
+      - equal: {path: spec.maxReplicas, value: 8}
+
+  - it: burst.maxReplicas overrides the derived maximum
+    template: hpa.yaml
+    set:
+      autoscaling: {enabled: true, minReplicas: 4, maxReplicas: 12}
+      stableBurst: {enabled: true, priorityClassName: prod-baseline, burst: {minReplicas: 2, maxReplicas: 5}}
+    asserts:
+      - equal: {path: spec.minReplicas, value: 2}
+      - equal: {path: spec.maxReplicas, value: 5}
+
+  - it: HPA is untouched when stableBurst is disabled
+    template: hpa.yaml
+    set:
+      stableBurst: {enabled: false}
+      autoscaling: {enabled: true, minReplicas: 4, maxReplicas: 12}
+    asserts:
+      - equal: {path: spec.scaleTargetRef.name, value: svc}
+      - equal: {path: spec.minReplicas, value: 4}
+      - equal: {path: spec.maxReplicas, value: 12}
+
+  - it: ScaledObject targets burst, subtracts stable replicas from cron and passes cpu through
+    template: keda-scaledobject.yaml
+    set:
+      keda:
+        enabled: true
+        minReplicaCount: 4
+        maxReplicaCount: 40
+        triggers:
+          - {type: cron, metadata: {timezone: Africa/Cairo, start: "0 8 * * *", end: "0 10 * * *", desiredReplicas: "12"}}
+          - {type: cron, metadata: {timezone: Africa/Cairo, start: "0 10 * * *", end: "0 12 * * *", desiredReplicas: "3"}}
+          - {type: cpu, metricType: Utilization, metadata: {value: "80"}}
+    asserts:
+      - equal: {path: spec.scaleTargetRef.name, value: svc-burst}
+      - equal: {path: spec.minReplicaCount, value: 1}
+      - equal: {path: spec.maxReplicaCount, value: 36}
+      - equal: {path: 'spec.triggers[0].metadata.desiredReplicas', value: "8"}
+      - equal: {path: 'spec.triggers[1].metadata.desiredReplicas', value: "0"}
+      - equal: {path: 'spec.triggers[2].metadata.value', value: "80"}
+
+  - it: ScaledObject renders the burst deployment name into an external trigger query
+    template: keda-scaledobject.yaml
+    set:
+      keda:
+        enabled: true
+        minReplicaCount: 4
+        triggers:
+          - type: datadog
+            metadata:
+              query: "sum:trace.http.request.hits{kube_deployment:{{ .burstDeployment }}}.as_rate()"
+              queryValue: "10"
+    asserts:
+      - equal: {path: 'spec.triggers[0].metadata.query', value: "sum:trace.http.request.hits{kube_deployment:svc-burst}.as_rate()"}
+      - notExists: {path: spec.maxReplicaCount}
+
+  - it: ScaledObject may scale burst to zero
+    template: keda-scaledobject.yaml
+    set:
+      stableBurst: {enabled: true, priorityClassName: prod-baseline, burst: {minReplicas: 0}}
+      keda:
+        enabled: true
+        minReplicaCount: 4
+        triggers:
+          - {type: cpu, metricType: Utilization, metadata: {value: "80"}}
+    asserts:
+      - equal: {path: spec.minReplicaCount, value: 0}
+
+  - it: ScaledObject triggers are untouched when stableBurst is disabled
+    template: keda-scaledobject.yaml
+    set:
+      stableBurst: {enabled: false}
+      keda:
+        enabled: true
+        minReplicaCount: 4
+        maxReplicaCount: 40
+        triggers:
+          - {type: cron, metadata: {timezone: Africa/Cairo, start: "0 8 * * *", end: "0 10 * * *", desiredReplicas: "12"}}
+    asserts:
+      - equal: {path: spec.scaleTargetRef.name, value: svc}
+      - equal: {path: spec.minReplicaCount, value: 4}
+      - equal: {path: 'spec.triggers[0].metadata.desiredReplicas', value: "12"}
