@@ -340,7 +340,7 @@ keda:
 #                     "preferred" falls back to spot if on-demand has no room, "required"
 #                     stays Pending instead.
 #   <fullname>-burst  BURST. Autoscaled between burst.minReplicas and burst.maxReplicas,
-#                     spot nodes only (gke-spot=true), strict one-skew spread across nodes.
+#                     spot nodes only (gke-provisioning=spot), strict one-skew spread across nodes.
 # The HPA / KEDA ScaledObject scales the BURST Deployment only. The Service and the PDB
 # select on app.kubernetes.io/name, which matches both, so traffic and disruption
 # budgets cover all pods.

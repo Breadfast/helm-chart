@@ -62,7 +62,7 @@ tests:
       - notExists: {path: spec.replicas}
       - equal:
           path: spec.template.spec.nodeSelector
-          value: {cloud.google.com/compute-class: class-c, cloud.google.com/gke-spot: "true"}
+          value: {cloud.google.com/compute-class: class-c, cloud.google.com/gke-provisioning: spot}
       - equal: {path: spec.selector.matchLabels, value: {app.kubernetes.io/name: service, app.kubernetes.io/component: burst}}
       - equal: {path: 'spec.template.metadata.labels["app.kubernetes.io/component"]', value: burst}
       - equal: {path: 'spec.template.spec.topologySpreadConstraints[0].whenUnsatisfiable', value: DoNotSchedule}

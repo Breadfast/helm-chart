@@ -118,7 +118,14 @@ spec:
         {{- with $values.nodeSelectorLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
-        cloud.google.com/gke-spot: "true"
+        {{- /*
+        Spot only. Selects on gke-provisioning, not gke-spot: GKE Warden rejects
+        cloud.google.com/gke-spot in a node selector on pods that use a custom
+        ComputeClass (constraint ccc-node-affinity-selector-limitation), while
+        gke-provisioning is not on that list and every spot node carries it. Warden still
+        warns that mixing the two "may lead to unexpected behavior".
+        */}}
+        cloud.google.com/gke-provisioning: spot
       {{- else }}
       {{- with $values.nodeSelectorLabels }}
       nodeSelector:
