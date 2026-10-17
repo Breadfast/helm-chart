@@ -212,6 +212,9 @@ whether or not Argo Rollouts is enabled, so every misconfiguration fails the ren
 {{- if and $burstMax (lt (int $burstMax) 1) -}}
 {{- fail (printf "stableBurst leaves no room for burst: stable replicas (%d) must be below the autoscaler maximum." $stable) -}}
 {{- end -}}
+{{- if and $burstMax (gt (int .Values.stableBurst.burst.minReplicas) (int $burstMax)) -}}
+{{- fail (printf "stableBurst.burst.minReplicas (%d) exceeds the burst maximum (%d); lower it or raise the autoscaler maximum." (int .Values.stableBurst.burst.minReplicas) (int $burstMax)) -}}
+{{- end -}}
 {{- if and (not .Values.keda.enabled) (lt (int .Values.stableBurst.burst.minReplicas) 1) -}}
 {{- fail "stableBurst.burst.minReplicas must be >= 1 with the HPA; only KEDA can scale the burst Deployment to 0." -}}
 {{- end -}}

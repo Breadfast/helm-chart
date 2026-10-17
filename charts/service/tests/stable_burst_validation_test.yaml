@@ -48,3 +48,9 @@ tests:
     set: {stableBurst: {enabled: true, priorityClassName: prod-baseline, burst: {minReplicas: 0}}}
     asserts:
       - failedTemplate: {errorPattern: "only KEDA can scale"}
+
+  - it: rejects burst.minReplicas above the burst maximum
+    template: deployment.yaml
+    set: {stableBurst: {enabled: true, priorityClassName: prod-baseline, burst: {minReplicas: 9}}}
+    asserts:
+      - failedTemplate: {errorPattern: "burst.minReplicas .* exceeds"}
