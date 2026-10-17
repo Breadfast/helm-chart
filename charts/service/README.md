@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.5.11](https://img.shields.io/badge/Version-0.5.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.6.0](https://img.shields.io/badge/Version-0.6.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes.
 
@@ -141,6 +141,12 @@ networkPolicy.internetOnly.ipBlock.except when they are outside the defaults.
 | serviceAccount.annotations | object | `{}` | If not set and create is true, a name is generated using the fullname template |
 | serviceAccount.create | bool | `false` | If true, creates service account |
 | serviceAccount.name | string | `""` |  |
+| stableBurst.burst.maxReplicas | int | `nil` | Maximum burst replicas. Defaults to the autoscaler maximum minus the stable replicas. |
+| stableBurst.burst.minReplicas | int | `1` | Minimum burst replicas. The HPA needs >= 1; KEDA may use 0. |
+| stableBurst.enabled | bool | `false` | If true, render a stable and a burst Deployment (see the block comment above). |
+| stableBurst.onDemand | string | `"preferred"` | "preferred" (stable pods fall back to spot when on-demand is full) or "required" (they stay Pending). |
+| stableBurst.priorityClassName | string | `""` | PriorityClass for the stable pods, e.g. prod-baseline-critical or prod-baseline. Required when enabled; the class must already exist in the cluster. |
+| stableBurst.stableReplicas | int | `nil` | Fixed replica count of the stable Deployment. Defaults to autoscaling.minReplicas, or keda.minReplicaCount. |
 | startupProbe | object | `{}` |  |
 | topologySpreadConstraints | list | `[]` | Spread replicas across nodes or zones. See the comment above for how this differs from podAntiAffinity. |
 | vaultAgent | bool | `{"enabled":false}` | If true, It will inject Vault Agent to get secrets from Vault |
