@@ -2,7 +2,7 @@ suite: HTTPRoute document separators
 templates:
   - httproute.yaml
 values:
-  - ../ci/multi-route-values.yaml
+  - fixtures/multi-route-values.yaml
 tests:
   - it: renders each chunk and hostname as a separate route
     asserts:
