@@ -44,6 +44,11 @@ jobs:
           ct lint --target-branch ${{ github.event.repository.default_branch }}
           --chart-repos keda=https://kedacore.github.io/charts,cloudnative-pg=https://cloudnative-pg.github.io/charts,altinity-clickhouse-operator=https://helm.altinity.com/
 
+      # Exercise multiple HTTPRoute documents without making chart-testing
+      # install the Gateway-enabled fixture in kind (which has no Gateway CRDs).
+      - name: Lint service chart with multiple HTTPRoutes
+        run: helm lint charts/service -f charts/service/tests/fixtures/multi-route-values.yaml
+
   install:
     runs-on: ubuntu-latest
     steps:

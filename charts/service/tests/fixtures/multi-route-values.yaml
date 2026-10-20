@@ -1,0 +1,20 @@
+fullnameOverride: separator-test
+gateway:
+  enabled: true
+  gatewayName: test-gateway
+  maxRulesPerRoute: 1
+  hosts:
+    - host: first.example.test
+      paths:
+        - path: /one
+          pathType: Prefix
+        - path: /redirect
+          pathType: Exact
+          filters:
+            - type: RequestRedirect
+              requestRedirect:
+                scheme: https
+    - host: second.example.test
+      paths:
+        - path: /two
+          pathType: Prefix
