@@ -49,6 +49,9 @@ jobs:
       - name: Lint service chart with multiple HTTPRoutes
         run: helm lint charts/service -f charts/service/tests/fixtures/multi-route-values.yaml
 
+      - name: Lint service chart with HTTPRoute method matchers
+        run: helm lint charts/service -f charts/service/tests/fixtures/method-match-values.yaml
+
   install:
     runs-on: ubuntu-latest
     steps:

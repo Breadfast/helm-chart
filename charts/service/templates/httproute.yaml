@@ -54,6 +54,9 @@
         {{- if .queryParams -}}
           {{- $_ := set $rule "queryParams" .queryParams -}}
         {{- end -}}
+        {{- if .method -}}
+          {{- $_ := set $rule "method" .method -}}
+        {{- end -}}
         {{- if .filters -}}
           {{- $_ := set $rule "filters" .filters -}}
         {{- end -}}
@@ -74,6 +77,9 @@
         {{- $rule := dict "path" .path "pathType" $pathType "serviceName" .serviceName "servicePort" .servicePort -}}
         {{- if .queryParams -}}
           {{- $_ := set $rule "queryParams" .queryParams -}}
+        {{- end -}}
+        {{- if .method -}}
+          {{- $_ := set $rule "method" .method -}}
         {{- end -}}
         {{- if .filters -}}
           {{- $_ := set $rule "filters" .filters -}}
@@ -96,6 +102,9 @@
       {{- $rule := dict "path" .path "pathType" $pathType "serviceName" .serviceName "servicePort" .servicePort -}}
       {{- if .queryParams -}}
         {{- $_ := set $rule "queryParams" .queryParams -}}
+      {{- end -}}
+      {{- if .method -}}
+        {{- $_ := set $rule "method" .method -}}
       {{- end -}}
       {{- if .filters -}}
         {{- $_ := set $rule "filters" .filters -}}
@@ -172,6 +181,9 @@ spec:
         {{- with .queryParams }}
         queryParams:
           {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .method }}
+        method: {{ . }}
         {{- end }}
       {{- with .filters }}
       filters:
