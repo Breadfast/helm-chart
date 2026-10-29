@@ -141,13 +141,16 @@ gateway:
   # -- Additional annotations for HTTPRoute
   annotations: {}
   # -- Hosts and paths for HTTPRoute. Each path may include Gateway API queryParams
-  #    matchers with type Exact or RegularExpression.
+  #    matchers with type Exact or RegularExpression, and an optional HTTP method
+  #    matcher (GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, TRACE, PATCH).
+  #    Requests with another method do not match the rule and fall through to the next one.
   #    Example:
   #    hosts:
   #      - host: www.example.com
   #        paths:
   #          - path: /navigator
   #            pathType: Prefix
+  #            method: GET
   #            queryParams:
   #              - name: warehouseId
   #                type: Exact

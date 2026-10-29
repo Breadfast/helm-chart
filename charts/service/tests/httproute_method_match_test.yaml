@@ -1,0 +1,52 @@
+suite: HTTPRoute method matching
+templates:
+  - httproute.yaml
+values:
+  - fixtures/method-match-values.yaml
+tests:
+  - it: renders the method next to the path match
+    asserts:
+      - equal: {path: 'spec.rules[0].matches[0].method', value: GET}
+      - equal: {path: 'spec.rules[0].matches[0].path.value', value: /read}
+      - equal: {path: 'spec.rules[0].backendRefs[0].name', value: read-service}
+
+  - it: omits method when it is not set
+    asserts:
+      - notExists: {path: 'spec.rules[1].matches[0].method'}
+
+  - it: keeps method together with queryParams
+    asserts:
+      - equal: {path: 'spec.rules[2].matches[0].method', value: POST}
+      - equal: {path: 'spec.rules[2].matches[0].queryParams[0].name', value: v}
+
+  - it: supports method on a list of hostname strings with shared paths
+    set:
+      gateway:
+        hosts:
+          - shared.example.test
+        paths:
+          - path: /shared
+            pathType: Prefix
+            method: GET
+            serviceName: read-service
+            servicePort: 80
+    asserts:
+      - equal: {path: 'spec.rules[0].matches[0].method', value: GET}
+
+  - it: supports method on the ingress gateway type
+    set:
+      gateway:
+        enabled: false
+      ingress:
+        enabled: true
+        type: gateway
+        gateway:
+          gatewayName: test-gateway
+        hosts:
+          - host: ing.example.test
+            paths:
+              - path: /read
+                pathType: Prefix
+                method: GET
+    asserts:
+      - equal: {path: 'spec.rules[0].matches[0].method', value: GET}

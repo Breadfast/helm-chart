@@ -1,0 +1,21 @@
+fullnameOverride: method-test
+gateway:
+  enabled: true
+  gatewayName: test-gateway
+  hosts:
+    - host: api.example.test
+      paths:
+        - path: /read
+          pathType: Prefix
+          method: GET
+          serviceName: read-service
+          servicePort: 80
+        - path: /plain
+          pathType: Prefix
+        - path: /both
+          pathType: Exact
+          method: POST
+          queryParams:
+            - name: v
+              type: Exact
+              value: "1"
