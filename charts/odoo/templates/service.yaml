@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "odoo.fullname" . }}
+  labels:
+    {{- include "odoo.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8069
+      targetPort: 8069
+    - name: websocket
+      port: 8072
+      targetPort: 8072
+    - name: xmlrpc
+      port: 8071
+      targetPort: 8071
+  selector:
+    {{- include "odoo.selectorLabels" . | nindent 4 }}
