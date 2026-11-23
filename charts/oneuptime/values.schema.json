@@ -226,6 +226,29 @@
                 "enabled": {
                     "type": "boolean"
                 },
+                "image": {
+                    "type": "string"
+                },
+                "updateStrategy": {
+                    "$ref": "#/properties/deployment/properties/updateStrategy"
+                },
+                "terminationGracePeriodSeconds": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "gracefulShutdown": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "endpointDrainSeconds": {
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    },
+                    "additionalProperties": false
+                },
                 "replicaCount": {
                     "type": "integer",
                     "minimum": 1

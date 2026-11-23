@@ -81,6 +81,15 @@ metalLb:
 nginx:
   # OneUptime ships with its own ingress gateway container, so Kubernetes Ingress resources are not required.
   enabled: true
+  # Full NGINX image reference. When empty, use the shared image settings.
+  image: ""
+  # Optional NGINX Deployment strategy. When empty, use deployment.updateStrategy.
+  updateStrategy: {}
+  # Pod termination budget, including endpoint withdrawal and connection draining.
+  # terminationGracePeriodSeconds: 90
+  gracefulShutdown:
+    enabled: false
+    endpointDrainSeconds: 10
   replicaCount: 1
   disableTelemetryCollection: false
   disableAutoscaler: false
