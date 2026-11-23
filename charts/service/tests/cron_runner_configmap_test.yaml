@@ -40,3 +40,10 @@ tests:
   - it: ships the run-cron script
     asserts:
       - matchRegex: {path: data.run-cron, pattern: "^#!/bin/sh"}
+  - it: keeps the -cron-runner suffix when the fullname is 63 characters
+    set:
+      fullnameOverride: abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz1
+    asserts:
+      - matchRegex:
+          path: metadata.name
+          pattern: "^[a-z0-9-]{1,51}-cron-runner$"

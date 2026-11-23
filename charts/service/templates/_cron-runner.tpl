@@ -1,7 +1,7 @@
 {{/* Name shared by the cron-runner ConfigMap, Deployment and pod label. Must never equal
 service.name: the Service, HPA and PDB select on app.kubernetes.io/name (see cronjob.yaml). */}}
 {{- define "service.cronRunnerName" -}}
-{{- printf "%s-cron-runner" (include "service.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-cron-runner" (include "service.fullname" . | trunc 51 | trimSuffix "-") -}}
 {{- end -}}
 
 {{/* Renders nothing; fails the render on an invalid cronRunner block. */}}
