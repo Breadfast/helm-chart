@@ -58,6 +58,9 @@ jobs:
       - name: Test run-cron script
         run: bash charts/service/tests/run-cron/run-cron_test.sh
 
+      - name: Test run-job script
+        run: bash charts/service/tests/run-cron/run-job_test.sh
+
       - name: helm-unittest (service)
         run: |
           # v1.0.3 is the last release with legacy command:/hooks: in plugin.yaml; v1.1.x needs Helm >= 3.13 (platformHooks)

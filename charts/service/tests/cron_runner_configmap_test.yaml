@@ -41,6 +41,11 @@ tests:
   - it: ships the run-cron script
     asserts:
       - matchRegex: {path: data.run-cron, pattern: "^#!/bin/sh"}
+  - it: ships the run-job script for manual runs
+    asserts:
+      - matchRegex: {path: data.run-job, pattern: "^#!/bin/sh"}
+      - matchRegex: {path: data.run-job, pattern: "(?m)^run_cron=\\$\\{CRON_RUN_CRON:-/etc/cron-runner/run-cron\\}$"}
+      - matchRegex: {path: data.run-job, pattern: "(?m)^crontab=\\$\\{CRON_CRONTAB:-/etc/cron-runner/crontab\\}$"}
   - it: keeps the -cron-runner suffix when the fullname is 63 characters
     set:
       fullnameOverride: abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz1

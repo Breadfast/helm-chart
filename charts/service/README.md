@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.6.4](https://img.shields.io/badge/Version-0.6.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.6.5](https://img.shields.io/badge/Version-0.6.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes.
 
@@ -12,9 +12,11 @@ When gateway.enabled is true, the chart creates **Gateway API** resources separa
 
 Ingress resources are unchanged; you can use Ingress only, Gateway only, or both.
 
-When cronRunner.enabled is true, the chart runs one **supercronic** Deployment (plus a ConfigMap holding the crontab and the run-cron script)
+When cronRunner.enabled is true, the chart runs one **supercronic** Deployment (plus a ConfigMap holding the crontab and the run-cron and run-job scripts)
 that calls an in-cluster service over HTTP on the schedules listed in cronRunner.crons, sending an optional token header read from Vault.
 It is off by default and does not change the rendered output of existing releases.
+To run one cron now: `kubectl exec deploy/<release>-cron-runner -c cron-runner -- /etc/cron-runner/run-job NAME`
+(`--list` shows names; `--force` also runs a disabled cron). A per-cron lock stops a manual run overlapping a scheduled one.
 
 When networkPolicy.enabled and networkPolicy.internetOnly.enabled are true, the chart creates an egress-only
 NetworkPolicy that allows DNS and public internet traffic while excluding common private/internal CIDRs.
