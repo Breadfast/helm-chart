@@ -8,8 +8,15 @@ service.name: the Service, HPA and PDB select on app.kubernetes.io/name (see cro
 {{- define "service.cronRunnerValidate" -}}
 {{- $cr := .Values.cronRunner -}}
 {{- if not $cr.image.repository }}{{ fail "cronRunner.image.repository is required" }}{{ end -}}
+{{- if not $cr.image.tag }}{{ fail "cronRunner.image.tag is required" }}{{ end -}}
 {{- if not $cr.target }}{{ fail "cronRunner.target is required" }}{{ end -}}
 {{- if not $cr.host }}{{ fail "cronRunner.host is required" }}{{ end -}}
+{{- $hasToken := false -}}
+{{- range $cr.crons }}{{ if .token }}{{ $hasToken = true }}{{ end }}{{ end -}}
+{{- if $hasToken -}}
+{{- if not $cr.vault.role }}{{ fail "cronRunner.vault.role is required when a cron uses a token" }}{{ end -}}
+{{- if not $cr.serviceAccount }}{{ fail "cronRunner.serviceAccount is required when a cron uses a token" }}{{ end -}}
+{{- end -}}
 {{- $seen := dict -}}
 {{- range $i, $c := $cr.crons -}}
 {{- $n := toString $c.name -}}

@@ -9,6 +9,7 @@ set:
     image: {repository: example/cron-runner, tag: v1}
     target: http://svc
     host: www.example.com
+    serviceAccount: touch-vault
     vault: {role: r, path: /p}
 tests:
   - it: requires image.repository
@@ -47,6 +48,18 @@ tests:
   - it: rejects a non-positive timeout
     set: {cronRunner: {crons: [{name: a, schedule: "* * * * *", path: /x, timeout: 0}]}}
     asserts: [{failedTemplate: {errorPattern: "timeout must be a positive"}}]
+  - it: requires image.tag
+    set: {cronRunner: {image: {tag: ""}}}
+    asserts: [{failedTemplate: {errorPattern: "cronRunner.image.tag is required"}}]
+  - it: requires vault.role when a cron has a token
+    set: {cronRunner: {vault: {role: ""}, crons: [{name: a, schedule: "* * * * *", path: /x, token: CRONS_TOKEN}]}}
+    asserts: [{failedTemplate: {errorPattern: "cronRunner.vault.role is required when a cron uses a token"}}]
+  - it: requires serviceAccount when a cron has a token
+    set: {cronRunner: {serviceAccount: "", crons: [{name: a, schedule: "* * * * *", path: /x, token: CRONS_TOKEN}]}}
+    asserts: [{failedTemplate: {errorPattern: "cronRunner.serviceAccount is required when a cron uses a token"}}]
+  - it: accepts an empty vault.role and serviceAccount when no cron has a token
+    set: {cronRunner: {serviceAccount: "", vault: {role: "", path: ""}, crons: [{name: a, schedule: "* * * * *", path: /x}]}}
+    asserts: [{hasDocuments: {count: 1}}]
   - it: accepts a valid set
     set: {cronRunner: {crons: [{name: a, schedule: "* * * * *", path: "/x?y=1", token: CRONS_TOKEN}]}}
     asserts: [{hasDocuments: {count: 1}}]

@@ -9,6 +9,7 @@ set:
     image: {repository: example/cron-runner, tag: v1}
     target: http://breadfast-cron-service.production.svc.cluster.local
     host: www.breadfast.com
+    serviceAccount: touch-vault
     vault: {role: app-role, path: /Breadfast/x/wp-config}
     crons:
       - {name: a, schedule: "* * * * *", path: "/wp-json/breadfast/crons/a?max=1", token: CRONS_TOKEN}

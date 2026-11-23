@@ -60,7 +60,8 @@ jobs:
 
       - name: helm-unittest (service)
         run: |
-          helm plugin install https://github.com/helm-unittest/helm-unittest --version v1.1.2
+          # v1.0.3 is the last release with legacy command:/hooks: in plugin.yaml; v1.1.x needs Helm >= 3.13 (platformHooks)
+          helm plugin install https://github.com/helm-unittest/helm-unittest --version v1.0.3
           helm unittest charts/service
 
   install:
