@@ -1,0 +1,99 @@
+{{- if .Values.cronRunner.enabled }}
+{{- include "service.cronRunnerValidate" . }}
+{{- $cr := .Values.cronRunner }}
+{{- $name := include "service.cronRunnerName" . }}
+{{- $tokensCsv := include "service.cronRunnerTokens" . }}
+{{- $tokens := $tokensCsv | splitList "," | compact }}
+{{- $uid := int $cr.runAsUser }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  labels:
+    app.kubernetes.io/name: {{ $name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  # One runner only: two would fire every cron twice, and these crons are not safe to run twice.
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ $name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ $name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        # The Vault agent only pre-populates, so a new token key needs a new pod.
+        checksum/cron-tokens: {{ $tokensCsv | sha256sum }}
+        proxy.istio.io/config: '{"holdApplicationUntilProxyStarts": true}'
+        ad.datadoghq.com/cron-runner.logs: '[{"source":"supercronic","service":"{{ $name }}"}]'
+        ad.datadoghq.com/cron-runner.checks: '{"openmetrics":{"instances":[{"openmetrics_endpoint":"http://%%host%%:9746/metrics","namespace":"cron_runner","metrics":["supercronic_.*"]}]}}'
+        {{- if $tokens }}
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-init-first: "true"
+        vault.hashicorp.com/agent-pre-populate-only: "true"
+        vault.hashicorp.com/role: {{ $cr.vault.role | quote }}
+        vault.hashicorp.com/agent-run-as-user: {{ $uid | quote }}
+        vault.hashicorp.com/agent-run-as-group: {{ $uid | quote }}
+        vault.hashicorp.com/agent-inject-secret-cron-tokens: {{ $cr.vault.path | quote }}
+        vault.hashicorp.com/agent-inject-perms-cron-tokens: "0400"
+        ad.datadoghq.com/vault-agent-init.exclude: "true"
+        # Values are stored as PHP literals ('abc'); strip the quotes like the Terraform scheduler module does.
+        vault.hashicorp.com/agent-inject-template-cron-tokens: |
+          {{ "{{" }}- with secret {{ $cr.vault.path | quote }} -{{ "}}" }}
+          {{- range $tokens }}
+          {{ . }}={{ "{{" }} index .Data.data {{ . | quote }} | replaceAll "'" "" {{ "}}" }}
+          {{- end }}
+          {{ "{{" }}- end {{ "}}" }}
+        {{- end }}
+    spec:
+      {{- with $cr.serviceAccount }}
+      serviceAccountName: {{ . }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ add (include "service.cronRunnerMaxTimeout" . | int) 20 }}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: {{ $uid }}
+        runAsGroup: {{ $uid }}
+      containers:
+        - name: cron-runner
+          image: "{{ $cr.image.repository }}:{{ $cr.image.tag }}"
+          imagePullPolicy: {{ $cr.image.pullPolicy }}
+          args: ["-json", "-inotify", "-prometheus-listen-address", "0.0.0.0:9746", "/etc/cron-runner/crontab"]
+          env:
+            - name: CRON_TARGET
+              value: {{ $cr.target | quote }}
+            - name: CRON_HOST
+              value: {{ $cr.host | quote }}
+          ports:
+            - name: metrics
+              containerPort: 9746
+          livenessProbe:
+            tcpSocket:
+              port: metrics
+            periodSeconds: 30
+          resources:
+            {{- toYaml $cr.resources | nindent 12 }}
+          volumeMounts:
+            - name: cron-runner
+              mountPath: /etc/cron-runner
+              readOnly: true
+      volumes:
+        - name: cron-runner
+          configMap:
+            name: {{ $name }}
+            defaultMode: 0555
+      {{- with .Values.nodeSelectorLabels }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeTolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

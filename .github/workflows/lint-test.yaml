@@ -52,6 +52,18 @@ jobs:
       - name: Lint service chart with HTTPRoute method matchers
         run: helm lint charts/service -f charts/service/tests/fixtures/method-match-values.yaml
 
+      - name: Lint service chart with the cron runner
+        run: helm lint charts/service -f charts/service/tests/fixtures/cron-runner-values.yaml
+
+      - name: Test run-cron script
+        run: bash charts/service/tests/run-cron/run-cron_test.sh
+
+      - name: helm-unittest (service)
+        run: |
+          # v1.0.3 is the last release with legacy command:/hooks: in plugin.yaml; v1.1.x needs Helm >= 3.13 (platformHooks)
+          helm plugin install https://github.com/helm-unittest/helm-unittest --version v1.0.3
+          helm unittest charts/service
+
   install:
     runs-on: ubuntu-latest
     steps:

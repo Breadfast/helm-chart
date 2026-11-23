@@ -1,0 +1,65 @@
+suite: cronRunner validation
+templates:
+  - cron-runner-configmap.yaml
+set:
+  fullnameOverride: svc
+  image: {repository: nginx, tag: stable}
+  cronRunner:
+    enabled: true
+    image: {repository: example/cron-runner, tag: v1}
+    target: http://svc
+    host: www.example.com
+    serviceAccount: touch-vault
+    vault: {role: r, path: /p}
+tests:
+  - it: requires image.repository
+    set: {cronRunner: {image: {repository: ""}}}
+    asserts: [{failedTemplate: {errorPattern: "cronRunner.image.repository is required"}}]
+  - it: requires target
+    set: {cronRunner: {target: ""}}
+    asserts: [{failedTemplate: {errorPattern: "cronRunner.target is required"}}]
+  - it: requires host
+    set: {cronRunner: {host: ""}}
+    asserts: [{failedTemplate: {errorPattern: "cronRunner.host is required"}}]
+  - it: rejects a bad name
+    set: {cronRunner: {crons: [{name: Bad_Name, schedule: "* * * * *", path: /x}]}}
+    asserts: [{failedTemplate: {errorPattern: "name .* must be"}}]
+  - it: rejects duplicate names
+    set: {cronRunner: {crons: [{name: a, schedule: "* * * * *", path: /x}, {name: a, schedule: "* * * * *", path: /y}]}}
+    asserts: [{failedTemplate: {errorPattern: "duplicate name \"a\""}}]
+  - it: rejects a schedule without 5 fields
+    set: {cronRunner: {crons: [{name: a, schedule: "* * * *", path: /x}]}}
+    asserts: [{failedTemplate: {errorPattern: "schedule must have 5 fields"}}]
+  - it: rejects a path with a quote
+    set: {cronRunner: {crons: [{name: a, schedule: "* * * * *", path: "/x'y"}]}}
+    asserts: [{failedTemplate: {errorPattern: "path must start with /"}}]
+  - it: rejects a relative path
+    set: {cronRunner: {crons: [{name: a, schedule: "* * * * *", path: x}]}}
+    asserts: [{failedTemplate: {errorPattern: "path must start with /"}}]
+  - it: rejects an unknown method
+    set: {cronRunner: {crons: [{name: a, schedule: "* * * * *", path: /x, method: PATCH}]}}
+    asserts: [{failedTemplate: {errorPattern: "method must be"}}]
+  - it: rejects a bad token key
+    set: {cronRunner: {crons: [{name: a, schedule: "* * * * *", path: /x, token: crons-token}]}}
+    asserts: [{failedTemplate: {errorPattern: "token must be"}}]
+  - it: rejects a token without vault.path
+    set: {cronRunner: {vault: {path: ""}, crons: [{name: a, schedule: "* * * * *", path: /x, token: CRONS_TOKEN}]}}
+    asserts: [{failedTemplate: {errorPattern: "needs cronRunner.vault.path"}}]
+  - it: rejects a non-positive timeout
+    set: {cronRunner: {crons: [{name: a, schedule: "* * * * *", path: /x, timeout: 0}]}}
+    asserts: [{failedTemplate: {errorPattern: "timeout must be a positive"}}]
+  - it: requires image.tag
+    set: {cronRunner: {image: {tag: ""}}}
+    asserts: [{failedTemplate: {errorPattern: "cronRunner.image.tag is required"}}]
+  - it: requires vault.role when a cron has a token
+    set: {cronRunner: {vault: {role: ""}, crons: [{name: a, schedule: "* * * * *", path: /x, token: CRONS_TOKEN}]}}
+    asserts: [{failedTemplate: {errorPattern: "cronRunner.vault.role is required when a cron uses a token"}}]
+  - it: requires serviceAccount when a cron has a token
+    set: {cronRunner: {serviceAccount: "", crons: [{name: a, schedule: "* * * * *", path: /x, token: CRONS_TOKEN}]}}
+    asserts: [{failedTemplate: {errorPattern: "cronRunner.serviceAccount is required when a cron uses a token"}}]
+  - it: accepts an empty vault.role and serviceAccount when no cron has a token
+    set: {cronRunner: {serviceAccount: "", vault: {role: "", path: ""}, crons: [{name: a, schedule: "* * * * *", path: /x}]}}
+    asserts: [{hasDocuments: {count: 1}}]
+  - it: accepts a valid set
+    set: {cronRunner: {crons: [{name: a, schedule: "* * * * *", path: "/x?y=1", token: CRONS_TOKEN}]}}
+    asserts: [{hasDocuments: {count: 1}}]

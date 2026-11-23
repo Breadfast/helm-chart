@@ -1,0 +1,21 @@
+{{- if .Values.cronRunner.enabled }}
+{{- include "service.cronRunnerValidate" . }}
+{{- $cr := .Values.cronRunner }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "service.cronRunnerName" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "service.cronRunnerName" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  crontab: |
+    # Rendered by the service chart from cronRunner.crons. Schedules are UTC.
+    {{- range $cr.crons }}
+    {{- $enabled := not (and (hasKey . "enabled") (eq (toString .enabled) "false")) }}
+    {{ if not $enabled }}# disabled: {{ end }}{{ .schedule }} /etc/cron-runner/run-cron {{ .name }} {{ upper (toString (default "GET" .method)) }} {{ int (default $cr.timeout .timeout) }} {{ default "-" .token }} '{{ .path }}'
+    {{- end }}
+  run-cron: |
+{{ .Files.Get "files/cron-runner/run-cron.sh" | indent 4 }}
+{{- end }}

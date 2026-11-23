@@ -1,0 +1,50 @@
+suite: cronRunner configmap
+templates:
+  - cron-runner-configmap.yaml
+set:
+  fullnameOverride: breadfast-cron
+  image: {repository: nginx, tag: stable}
+  cronRunner:
+    enabled: true
+    image: {repository: example/cron-runner, tag: v1}
+    target: http://breadfast-cron-service.production.svc.cluster.local
+    host: www.breadfast.com
+    serviceAccount: touch-vault
+    vault: {role: app-role, path: /Breadfast/x/wp-config}
+    crons:
+      - {name: a, schedule: "* * * * *", path: "/wp-json/breadfast/crons/a?max=1", token: CRONS_TOKEN}
+      - {name: b, schedule: "*/5 * * * *", path: /wp-json/b, method: post, timeout: 60}
+      - {name: c, schedule: "0 21 * * *", path: "/wp-cron.php?doing_wp_cron", enabled: false}
+tests:
+  - it: renders nothing when disabled
+    set: {cronRunner: {enabled: false}}
+    asserts:
+      - hasDocuments: {count: 0}
+  - it: names the configmap after the release
+    asserts:
+      - equal: {path: metadata.name, value: breadfast-cron-cron-runner}
+  - it: renders an enabled cron with its token key
+    asserts:
+      - matchRegex:
+          path: data.crontab
+          pattern: "(?m)^\\* \\* \\* \\* \\* /etc/cron-runner/run-cron a GET 180 CRONS_TOKEN '/wp-json/breadfast/crons/a\\?max=1'$"
+  - it: upper-cases the method, uses the per-cron timeout and - for no token
+    asserts:
+      - matchRegex:
+          path: data.crontab
+          pattern: "(?m)^\\*/5 \\* \\* \\* \\* /etc/cron-runner/run-cron b POST 60 - '/wp-json/b'$"
+  - it: comments out a disabled cron
+    asserts:
+      - matchRegex:
+          path: data.crontab
+          pattern: "(?m)^# disabled: 0 21 \\* \\* \\* /etc/cron-runner/run-cron c GET 180 - '/wp-cron.php\\?doing_wp_cron'$"
+  - it: ships the run-cron script
+    asserts:
+      - matchRegex: {path: data.run-cron, pattern: "^#!/bin/sh"}
+  - it: keeps the -cron-runner suffix when the fullname is 63 characters
+    set:
+      fullnameOverride: abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz1
+    asserts:
+      - matchRegex:
+          path: metadata.name
+          pattern: "^[a-z0-9-]{1,51}-cron-runner$"

@@ -1,0 +1,12 @@
+image: {repository: nginx, tag: stable}
+cronRunner:
+  enabled: true
+  image: {repository: example/cron-runner, tag: "v1@sha256:abc"}
+  target: http://breadfast-cron-service.production.svc.cluster.local
+  host: www.breadfast.com
+  serviceAccount: touch-vault
+  vault: {role: app-role, path: /Breadfast/x/wp-config}
+  crons:
+    - {name: a, schedule: "* * * * *", path: "/wp-json/breadfast/crons/a?max=1", token: CRONS_TOKEN}
+    - {name: b, schedule: "*/5 * * * *", path: /wp-json/b, method: POST, token: HABDA_KEY, timeout: 60}
+    - {name: c, schedule: "* * * * *", path: "/wp-cron.php?doing_wp_cron", enabled: false}
