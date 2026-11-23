@@ -18,4 +18,6 @@ data:
     {{- end }}
   run-cron: |
 {{ .Files.Get "files/cron-runner/run-cron.sh" | indent 4 }}
+  run-job: |
+{{ .Files.Get "files/cron-runner/run-job.sh" | indent 4 }}
 {{- end }}
