@@ -438,6 +438,38 @@ cronJob:
   # -- (list) CronJob definitions. Each entry supports `name`, `schedule`, optional `suspend`, optional `concurrencyPolicy`, optional `useDeploymentImage`, `restartPolicy`, `serviceAccount`, `annotations`, and `containers`. When `useDeploymentImage` is true, every container uses the main Deployment's image repository and tag.
   crons: []
 
+# -- In-cluster HTTP cron runner: one supercronic Deployment that calls `target` + each cron's
+# `path` on its `schedule` (UTC), sending `Host: host`, and `token: <vault key value>` when a cron
+# sets `token`. Entries: `name` (DNS label, unique), `schedule` (5 fields), `path` (starts with /),
+# optional `method` (GET|POST|PUT|DELETE, default GET), `token` (Vault key), `timeout` (seconds),
+# `enabled` (default true; false keeps the line commented out). Usually set from a cron.yaml value file.
+cronRunner:
+  enabled: false
+  image:
+    repository: ""
+    # -- Tag, or tag@sha256:digest
+    tag: ""
+    pullPolicy: IfNotPresent
+  # -- Base URL the crons call, e.g. http://breadfast-cron-service.production.svc.cluster.local
+  target: ""
+  # -- Host header sent with every call
+  host: ""
+  # -- Default per-call timeout in seconds
+  timeout: 180
+  vault:
+    role: ""
+    # -- Vault secret whose keys the crons' `token` fields name
+    path: ""
+  serviceAccount: ""
+  runAsUser: 10001
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      memory: 128Mi
+  crons: []
+
 # -- (bool) If true, Add datadog labels to pods and deployments
 datadog:
   enabled: false
