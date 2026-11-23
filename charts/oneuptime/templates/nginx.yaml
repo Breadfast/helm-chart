@@ -25,7 +25,7 @@ spec:
   replicas: {{ $.Values.deployment.replicaCount }}
   {{- end }}
   {{- end }}
-  strategy: {{- toYaml $.Values.deployment.updateStrategy | nindent 4 }}
+  strategy: {{- toYaml (default $.Values.deployment.updateStrategy $.Values.nginx.updateStrategy) | nindent 4 }}
   template:
     metadata:
       labels:
@@ -38,6 +38,9 @@ spec:
         {{- end }}
         appname: oneuptime
     spec:
+      {{- if hasKey $.Values.nginx "terminationGracePeriodSeconds" }}
+      terminationGracePeriodSeconds: {{ $.Values.nginx.terminationGracePeriodSeconds }}
+      {{- end }}
       volumes:
         - name: status-page-certs
           emptyDir:
@@ -86,8 +89,25 @@ spec:
         {{- toYaml $.Values.nodeSelector | nindent 8 }}
       {{- end }}
       containers:
-        - image: {{ include "oneuptime.image" (dict "Values" $.Values "ServiceName" "nginx") }}
+        - image: {{ default (include "oneuptime.image" (dict "Values" $.Values "ServiceName" "nginx")) $.Values.nginx.image | quote }}
           name: {{ printf "%s-%s" $.Release.Name "nginx"  }}
+          {{- if $.Values.nginx.gracefulShutdown.enabled }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/sh
+                  - -ec
+                  - |
+                    sleep {{ $.Values.nginx.gracefulShutdown.endpointDrainSeconds }}
+                    if [ -s /var/run/nginx.pid ]; then
+                      pid=$(cat /var/run/nginx.pid)
+                      kill -s QUIT "$pid"
+                      while kill -0 "$pid" 2>/dev/null; do
+                        sleep 1
+                      done
+                    fi
+          {{- end }}
           {{- if $.Values.startupProbe.enabled }}
           # Startup probe
           startupProbe:

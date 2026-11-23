@@ -1,6 +1,6 @@
 # oneuptime
 
-![Version: 11.0.1-bf.5](https://img.shields.io/badge/Version-11.0.1--bf.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 11.0.1](https://img.shields.io/badge/AppVersion-11.0.1-informational?style=flat-square)
+![Version: 11.0.1-bf.6](https://img.shields.io/badge/Version-11.0.1--bf.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 11.0.1](https://img.shields.io/badge/AppVersion-11.0.1-informational?style=flat-square)
 
 The Complete Open-Source Observability Platform
 
@@ -274,7 +274,10 @@ The Complete Open-Source Observability Platform
 | nginx.disableAutoscaler | bool | `false` |  |
 | nginx.disableTelemetryCollection | bool | `false` |  |
 | nginx.enabled | bool | `true` |  |
+| nginx.gracefulShutdown.enabled | bool | `false` |  |
+| nginx.gracefulShutdown.endpointDrainSeconds | int | `10` |  |
 | nginx.hostAliases | list | `[]` |  |
+| nginx.image | string | `""` |  |
 | nginx.listenAddress | string | `""` |  |
 | nginx.listenOptions | string | `""` |  |
 | nginx.nodeSelector | object | `{}` |  |
@@ -290,6 +293,7 @@ The Complete Open-Source Observability Platform
 | nginx.service.loadBalancerClass | string | `nil` |  |
 | nginx.service.loadBalancerIP | string | `nil` |  |
 | nginx.service.type | string | `"LoadBalancer"` |  |
+| nginx.updateStrategy | object | `{}` |  |
 | nodeEnvironment | string | `"production"` |  |
 | nodeSelector | string | `nil` |  |
 | notifications.webhooks.slack.onCreateProject | string | `nil` |  |
