@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.6.3](https://img.shields.io/badge/Version-0.6.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.6.4](https://img.shields.io/badge/Version-0.6.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes.
 
@@ -11,6 +11,10 @@ When gateway.enabled is true, the chart creates **Gateway API** resources separa
 - **GCPBackendPolicy** (networking.gke.io/v1) – configures the Gateway backend Service when gateway.backendPolicy.enabled is true: binds a Cloud Armor security policy, optional IAP, and optional connection draining (gateway.backendPolicy.connectionDraining.drainingTimeoutSec) so in-flight requests finish before a backend is removed.
 
 Ingress resources are unchanged; you can use Ingress only, Gateway only, or both.
+
+When cronRunner.enabled is true, the chart runs one **supercronic** Deployment (plus a ConfigMap holding the crontab and the run-cron script)
+that calls an in-cluster service over HTTP on the schedules listed in cronRunner.crons, sending an optional token header read from Vault.
+It is off by default and does not change the rendered output of existing releases.
 
 When networkPolicy.enabled and networkPolicy.internetOnly.enabled are true, the chart creates an egress-only
 NetworkPolicy that allows DNS and public internet traffic while excluding common private/internal CIDRs.
@@ -47,6 +51,12 @@ networkPolicy.internetOnly.ipBlock.except when they are outside the defaults.
 | containerEnv | map | `[]` | Environment variable map |
 | cronJob.create | bool | `false` | If true, creates CronJob resources from `cronJob.crons` |
 | cronJob.crons | list | `[]` | CronJob definitions. Each entry supports `name`, `schedule`, optional `suspend`, optional `concurrencyPolicy`, optional `useDeploymentImage`, `restartPolicy`, `serviceAccount`, `annotations`, and `containers`. When `useDeploymentImage` is true, every container uses the main Deployment's image repository and tag. |
+| cronRunner | object | `{"crons":[],"enabled":false,"host":"","image":{"pullPolicy":"IfNotPresent","repository":"","tag":""},"resources":{"limits":{"memory":"128Mi"},"requests":{"cpu":"20m","memory":"64Mi"}},"runAsUser":10001,"serviceAccount":"","target":"","timeout":180,"vault":{"path":"","role":""}}` | In-cluster HTTP cron runner: one supercronic Deployment that calls `target` + each cron's `path` on its `schedule` (UTC), sending `Host: host`, and `token: <vault key value>` when a cron sets `token`. Entries: `name` (DNS label, unique), `schedule` (5 fields), `path` (starts with /), optional `method` (GET|POST|PUT|DELETE, default GET), `token` (Vault key), `timeout` (seconds), `enabled` (default true; false keeps the line commented out). Usually set from a cron.yaml value file. |
+| cronRunner.host | string | `""` | Host header sent with every call |
+| cronRunner.image.tag | string | `""` | Tag, or tag@sha256:digest |
+| cronRunner.target | string | `""` | Base URL the crons call, e.g. http://breadfast-cron-service.production.svc.cluster.local |
+| cronRunner.timeout | int | `180` | Default per-call timeout in seconds |
+| cronRunner.vault.path | string | `""` | Vault secret whose keys the crons' `token` fields name |
 | datadog | bool | `{"enabled":false}` | If true, Add datadog labels to pods and deployments |
 | deploymentLabels | object | `{}` |  |
 | destinationRule.enabled | bool | `false` |  |

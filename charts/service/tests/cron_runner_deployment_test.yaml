@@ -1,0 +1,74 @@
+suite: cronRunner deployment
+templates:
+  - cron-runner-deployment.yaml
+set:
+  fullnameOverride: breadfast-cron
+  image: {repository: nginx, tag: stable}
+  nodeSelectorLabels: {cloud.google.com/compute-class: php-class}
+  cronRunner:
+    enabled: true
+    image: {repository: example/cron-runner, tag: "v1@sha256:abc"}
+    target: http://breadfast-cron-service.production.svc.cluster.local
+    host: www.breadfast.com
+    serviceAccount: touch-vault
+    vault: {role: app-role, path: /Breadfast/x/wp-config}
+    crons:
+      - {name: a, schedule: "* * * * *", path: /a, token: CRONS_TOKEN}
+      - {name: b, schedule: "* * * * *", path: /b, token: HABDA_KEY, enabled: false}
+      - {name: c, schedule: "* * * * *", path: /c, token: CRONS_TOKEN, timeout: 300}
+      - {name: d, schedule: "* * * * *", path: /d}
+tests:
+  - it: renders nothing when disabled
+    set: {cronRunner: {enabled: false}}
+    asserts: [{hasDocuments: {count: 0}}]
+  - it: runs exactly one replica with Recreate
+    asserts:
+      - equal: {path: spec.replicas, value: 1}
+      - equal: {path: spec.strategy.type, value: Recreate}
+  - it: never carries the service's own name label
+    asserts:
+      - equal: {path: 'spec.selector.matchLabels["app.kubernetes.io/name"]', value: breadfast-cron-cron-runner}
+      - equal: {path: 'spec.template.metadata.labels["app.kubernetes.io/name"]', value: breadfast-cron-cron-runner}
+  - it: uses the image reference as given
+    asserts:
+      - equal: {path: 'spec.template.spec.containers[0].image', value: "example/cron-runner:v1@sha256:abc"}
+  - it: starts supercronic with json logs, inotify and metrics
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].args
+          value: ["-json", "-inotify", "-prometheus-listen-address", "0.0.0.0:9746", "/etc/cron-runner/crontab"]
+  - it: passes target and host as env
+    asserts:
+      - contains: {path: 'spec.template.spec.containers[0].env', content: {name: CRON_TARGET, value: "http://breadfast-cron-service.production.svc.cluster.local"}}
+      - contains: {path: 'spec.template.spec.containers[0].env', content: {name: CRON_HOST, value: www.breadfast.com}}
+  - it: renders only the referenced token keys, including disabled crons, and strips PHP quotes
+    asserts:
+      - equal: {path: 'spec.template.metadata.annotations["vault.hashicorp.com/agent-inject-secret-cron-tokens"]', value: /Breadfast/x/wp-config}
+      - matchRegex: {path: 'spec.template.metadata.annotations["vault.hashicorp.com/agent-inject-template-cron-tokens"]', pattern: 'CRONS_TOKEN=\{\{ index \.Data\.data "CRONS_TOKEN" \| replaceAll "''" "" \}\}'}
+      - matchRegex: {path: 'spec.template.metadata.annotations["vault.hashicorp.com/agent-inject-template-cron-tokens"]', pattern: 'HABDA_KEY='}
+      - notMatchRegex: {path: 'spec.template.metadata.annotations["vault.hashicorp.com/agent-inject-template-cron-tokens"]', pattern: 'CRONS_TOKEN=.*\n(.*\n)*CRONS_TOKEN='}
+      - equal: {path: 'spec.template.metadata.annotations["vault.hashicorp.com/role"]', value: app-role}
+      - equal: {path: 'spec.template.metadata.annotations["vault.hashicorp.com/agent-pre-populate-only"]', value: "true"}
+  - it: skips Vault when no cron has a token
+    set: {cronRunner: {crons: [{name: d, schedule: "* * * * *", path: /d}]}}
+    asserts:
+      - notExists: {path: 'spec.template.metadata.annotations["vault.hashicorp.com/agent-inject"]'}
+  - it: restarts the pod when the token key set changes
+    asserts:
+      - exists: {path: 'spec.template.metadata.annotations["checksum/cron-tokens"]'}
+  - it: allows the longest cron to finish on shutdown
+    asserts:
+      - equal: {path: spec.template.spec.terminationGracePeriodSeconds, value: 320}
+  - it: uses the service account and node selector
+    asserts:
+      - equal: {path: spec.template.spec.serviceAccountName, value: touch-vault}
+      - equal: {path: 'spec.template.spec.nodeSelector["cloud.google.com/compute-class"]', value: php-class}
+  - it: runs as non-root 10001
+    asserts:
+      - equal: {path: spec.template.spec.securityContext.runAsUser, value: 10001}
+      - equal: {path: spec.template.spec.securityContext.runAsNonRoot, value: true}
+  - it: mounts the configmap as a directory so updates reach the pod
+    asserts:
+      - equal: {path: 'spec.template.spec.containers[0].volumeMounts[0].mountPath', value: /etc/cron-runner}
+      - notExists: {path: 'spec.template.spec.containers[0].volumeMounts[0].subPath'}
+      - equal: {path: 'spec.template.spec.volumes[0].configMap.name', value: breadfast-cron-cron-runner}
