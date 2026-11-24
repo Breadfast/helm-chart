@@ -468,6 +468,13 @@ cronRunner:
       memory: 64Mi
     limits:
       memory: 128Mi
+  # -- Runner pod's nodeSelector. Empty uses the service's nodeSelectorLabels.
+  #    The runner is a single replica, so pin it to on-demand nodes where the service runs on spot.
+  nodeSelectorLabels: {}
+  # -- Runner pod's tolerations. Empty uses the service's nodeTolerations.
+  nodeTolerations: []
+  # -- Runner pod's PriorityClass, so it can still be scheduled on a full node pool. Empty sets none.
+  priorityClassName: ""
   crons: []
 
 # -- (bool) If true, Add datadog labels to pods and deployments

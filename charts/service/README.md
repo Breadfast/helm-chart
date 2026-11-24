@@ -18,6 +18,7 @@ It is off by default and does not change the rendered output of existing release
 To run one cron now: `kubectl exec deploy/<release>-cron-runner -c cron-runner -- /etc/cron-runner/run-job NAME`
 (`--list` shows names; `--force` also runs a disabled cron). A per-cron lock stops a manual run overlapping a scheduled one.
 Each run writes one JSON log line (cron, schedule, trigger, method, url, http_code, http_class, result, duration_ms, curl_exit, level).
+cronRunner.nodeSelectorLabels, cronRunner.nodeTolerations and cronRunner.priorityClassName place the runner pod apart from the service's pods (for example on on-demand nodes).
 
 When networkPolicy.enabled and networkPolicy.internetOnly.enabled are true, the chart creates an egress-only
 NetworkPolicy that allows DNS and public internet traffic while excluding common private/internal CIDRs.

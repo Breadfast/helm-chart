@@ -88,11 +88,14 @@ spec:
           configMap:
             name: {{ $name }}
             defaultMode: 0555
-      {{- with .Values.nodeSelectorLabels }}
+      {{- with $cr.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      {{- with ($cr.nodeSelectorLabels | default .Values.nodeSelectorLabels) }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.nodeTolerations }}
+      {{- with ($cr.nodeTolerations | default .Values.nodeTolerations) }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}

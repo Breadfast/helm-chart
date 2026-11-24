@@ -63,6 +63,29 @@ tests:
     asserts:
       - equal: {path: spec.template.spec.serviceAccountName, value: touch-vault}
       - equal: {path: 'spec.template.spec.nodeSelector["cloud.google.com/compute-class"]', value: php-class}
+  - it: sets no priority class by default
+    asserts:
+      - notExists: {path: spec.template.spec.priorityClassName}
+  - it: inherits the service's tolerations by default
+    set:
+      nodeTolerations: [{key: cloud.google.com/compute-class, operator: Equal, value: php-class, effect: NoSchedule}]
+    asserts:
+      - equal: {path: 'spec.template.spec.tolerations[0].value', value: php-class}
+  - it: uses its own node selector, tolerations and priority class when set
+    set:
+      nodeTolerations: [{key: service, operator: Exists}]
+      cronRunner:
+        nodeSelectorLabels: {cloud.google.com/compute-class: php-class, cloud.google.com/gke-nodepool: php-class-ondemand}
+        nodeTolerations: [{key: cloud.google.com/compute-class, operator: Equal, value: php-class, effect: NoSchedule}]
+        priorityClassName: prod-baseline-critical
+    asserts:
+      - equal:
+          path: spec.template.spec.nodeSelector
+          value: {cloud.google.com/compute-class: php-class, cloud.google.com/gke-nodepool: php-class-ondemand}
+      - equal:
+          path: spec.template.spec.tolerations
+          value: [{key: cloud.google.com/compute-class, operator: Equal, value: php-class, effect: NoSchedule}]
+      - equal: {path: spec.template.spec.priorityClassName, value: prod-baseline-critical}
   - it: runs as non-root 10001
     asserts:
       - equal: {path: spec.template.spec.securityContext.runAsUser, value: 10001}
