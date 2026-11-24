@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.6.5](https://img.shields.io/badge/Version-0.6.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.6.6](https://img.shields.io/badge/Version-0.6.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes.
 
@@ -17,6 +17,7 @@ that calls an in-cluster service over HTTP on the schedules listed in cronRunner
 It is off by default and does not change the rendered output of existing releases.
 To run one cron now: `kubectl exec deploy/<release>-cron-runner -c cron-runner -- /etc/cron-runner/run-job NAME`
 (`--list` shows names; `--force` also runs a disabled cron). A per-cron lock stops a manual run overlapping a scheduled one.
+Each run writes one JSON log line (cron, schedule, trigger, method, url, http_code, http_class, result, duration_ms, curl_exit, level).
 
 When networkPolicy.enabled and networkPolicy.internetOnly.enabled are true, the chart creates an egress-only
 NetworkPolicy that allows DNS and public internet traffic while excluding common private/internal CIDRs.

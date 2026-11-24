@@ -64,7 +64,7 @@ spec:
         - name: cron-runner
           image: "{{ $cr.image.repository }}:{{ $cr.image.tag }}"
           imagePullPolicy: {{ $cr.image.pullPolicy }}
-          args: ["-json", "-inotify", "-prometheus-listen-address", "0.0.0.0:9746", "/etc/cron-runner/crontab"]
+          args: ["-json", "-quiet", "-passthrough-logs", "-inotify", "-prometheus-listen-address", "0.0.0.0:9746", "/etc/cron-runner/crontab"]
           env:
             - name: CRON_TARGET
               value: {{ $cr.target | quote }}

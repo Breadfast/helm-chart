@@ -14,7 +14,7 @@ data:
     # Rendered by the service chart from cronRunner.crons. Schedules are UTC.
     {{- range $cr.crons }}
     {{- $enabled := not (and (hasKey . "enabled") (eq (toString .enabled) "false")) }}
-    {{ if not $enabled }}# disabled: {{ end }}{{ .schedule }} /etc/cron-runner/run-cron {{ .name }} {{ upper (toString (default "GET" .method)) }} {{ int (default $cr.timeout .timeout) }} {{ default "-" .token }} '{{ .path }}'
+    {{ if not $enabled }}# disabled: {{ end }}{{ .schedule }} /etc/cron-runner/run-cron {{ .name }} {{ upper (toString (default "GET" .method)) }} {{ int (default $cr.timeout .timeout) }} {{ default "-" .token }} '{{ .path }}' '{{ .schedule }}'
     {{- end }}
   run-cron: |
 {{ .Files.Get "files/cron-runner/run-cron.sh" | indent 4 }}

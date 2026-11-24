@@ -23,7 +23,7 @@ service.name: the Service, HPA and PDB select on app.kubernetes.io/name (see cro
 {{- if not (regexMatch "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$" $n) }}{{ fail (printf "cronRunner.crons[%d].name %q must be lowercase letters, digits and dashes" $i $n) }}{{ end -}}
 {{- if hasKey $seen $n }}{{ fail (printf "cronRunner.crons: duplicate name %q" $n) }}{{ end -}}
 {{- $_ := set $seen $n true -}}
-{{- if not (regexMatch "^[^ ]+( [^ ]+){4}$" (toString $c.schedule)) }}{{ fail (printf "cronRunner.crons %s: schedule must have 5 fields" $n) }}{{ end -}}
+{{- if not (regexMatch "^[^ '\"\\\\]+( [^ '\"\\\\]+){4}$" (toString $c.schedule)) }}{{ fail (printf "cronRunner.crons %s: schedule must have 5 fields and no quote or backslash" $n) }}{{ end -}}
 {{- if not (regexMatch "^/[^'\"\\\\\\s]*$" (toString $c.path)) }}{{ fail (printf "cronRunner.crons %s: path must start with / and contain no quote, backslash or space" $n) }}{{ end -}}
 {{- if not (has (upper (toString (default "GET" $c.method))) (list "GET" "POST" "PUT" "DELETE")) }}{{ fail (printf "cronRunner.crons %s: method must be GET, POST, PUT or DELETE" $n) }}{{ end -}}
 {{- if $c.token -}}

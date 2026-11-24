@@ -36,7 +36,7 @@ tests:
     asserts:
       - equal:
           path: spec.template.spec.containers[0].args
-          value: ["-json", "-inotify", "-prometheus-listen-address", "0.0.0.0:9746", "/etc/cron-runner/crontab"]
+          value: ["-json", "-quiet", "-passthrough-logs", "-inotify", "-prometheus-listen-address", "0.0.0.0:9746", "/etc/cron-runner/crontab"]
   - it: passes target and host as env
     asserts:
       - contains: {path: 'spec.template.spec.containers[0].env', content: {name: CRON_TARGET, value: "http://breadfast-cron-service.production.svc.cluster.local"}}
