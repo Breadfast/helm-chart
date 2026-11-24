@@ -1,6 +1,6 @@
 # service
 
-![Version: 0.6.6](https://img.shields.io/badge/Version-0.6.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.6.7](https://img.shields.io/badge/Version-0.6.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 A Helm chart for Kubernetes.
 
@@ -18,6 +18,7 @@ It is off by default and does not change the rendered output of existing release
 To run one cron now: `kubectl exec deploy/<release>-cron-runner -c cron-runner -- /etc/cron-runner/run-job NAME`
 (`--list` shows names; `--force` also runs a disabled cron). A per-cron lock stops a manual run overlapping a scheduled one.
 Each run writes one JSON log line (cron, schedule, trigger, method, url, http_code, http_class, result, duration_ms, curl_exit, level).
+cronRunner.nodeSelectorLabels, cronRunner.nodeTolerations and cronRunner.priorityClassName place the runner pod apart from the service's pods (for example on on-demand nodes).
 
 When networkPolicy.enabled and networkPolicy.internetOnly.enabled are true, the chart creates an egress-only
 NetworkPolicy that allows DNS and public internet traffic while excluding common private/internal CIDRs.
@@ -54,9 +55,12 @@ networkPolicy.internetOnly.ipBlock.except when they are outside the defaults.
 | containerEnv | map | `[]` | Environment variable map |
 | cronJob.create | bool | `false` | If true, creates CronJob resources from `cronJob.crons` |
 | cronJob.crons | list | `[]` | CronJob definitions. Each entry supports `name`, `schedule`, optional `suspend`, optional `concurrencyPolicy`, optional `useDeploymentImage`, `restartPolicy`, `serviceAccount`, `annotations`, and `containers`. When `useDeploymentImage` is true, every container uses the main Deployment's image repository and tag. |
-| cronRunner | object | `{"crons":[],"enabled":false,"host":"","image":{"pullPolicy":"IfNotPresent","repository":"","tag":""},"resources":{"limits":{"memory":"128Mi"},"requests":{"cpu":"20m","memory":"64Mi"}},"runAsUser":10001,"serviceAccount":"","target":"","timeout":180,"vault":{"path":"","role":""}}` | In-cluster HTTP cron runner: one supercronic Deployment that calls `target` + each cron's `path` on its `schedule` (UTC), sending `Host: host`, and `token: <vault key value>` when a cron sets `token`. Entries: `name` (DNS label, unique), `schedule` (5 fields), `path` (starts with /), optional `method` (GET|POST|PUT|DELETE, default GET), `token` (Vault key), `timeout` (seconds), `enabled` (default true; false keeps the line commented out). Usually set from a cron.yaml value file. |
+| cronRunner | object | `{"crons":[],"enabled":false,"host":"","image":{"pullPolicy":"IfNotPresent","repository":"","tag":""},"nodeSelectorLabels":{},"nodeTolerations":[],"priorityClassName":"","resources":{"limits":{"memory":"128Mi"},"requests":{"cpu":"20m","memory":"64Mi"}},"runAsUser":10001,"serviceAccount":"","target":"","timeout":180,"vault":{"path":"","role":""}}` | In-cluster HTTP cron runner: one supercronic Deployment that calls `target` + each cron's `path` on its `schedule` (UTC), sending `Host: host`, and `token: <vault key value>` when a cron sets `token`. Entries: `name` (DNS label, unique), `schedule` (5 fields), `path` (starts with /), optional `method` (GET|POST|PUT|DELETE, default GET), `token` (Vault key), `timeout` (seconds), `enabled` (default true; false keeps the line commented out). Usually set from a cron.yaml value file. |
 | cronRunner.host | string | `""` | Host header sent with every call |
 | cronRunner.image.tag | string | `""` | Tag, or tag@sha256:digest |
+| cronRunner.nodeSelectorLabels | object | `{}` | Runner pod's nodeSelector. Empty uses the service's nodeSelectorLabels.    The runner is a single replica, so pin it to on-demand nodes where the service runs on spot. |
+| cronRunner.nodeTolerations | list | `[]` | Runner pod's tolerations. Empty uses the service's nodeTolerations. |
+| cronRunner.priorityClassName | string | `""` | Runner pod's PriorityClass, so it can still be scheduled on a full node pool. Empty sets none. |
 | cronRunner.target | string | `""` | Base URL the crons call, e.g. http://breadfast-cron-service.production.svc.cluster.local |
 | cronRunner.timeout | int | `180` | Default per-call timeout in seconds |
 | cronRunner.vault.path | string | `""` | Vault secret whose keys the crons' `token` fields name |
