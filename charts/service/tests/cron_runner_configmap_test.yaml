@@ -27,17 +27,17 @@ tests:
     asserts:
       - matchRegex:
           path: data.crontab
-          pattern: "(?m)^\\* \\* \\* \\* \\* /etc/cron-runner/run-cron a GET 180 CRONS_TOKEN '/wp-json/breadfast/crons/a\\?max=1'$"
+          pattern: "(?m)^\\* \\* \\* \\* \\* /etc/cron-runner/run-cron a GET 180 CRONS_TOKEN '/wp-json/breadfast/crons/a\\?max=1' '\\* \\* \\* \\* \\*'$"
   - it: upper-cases the method, uses the per-cron timeout and - for no token
     asserts:
       - matchRegex:
           path: data.crontab
-          pattern: "(?m)^\\*/5 \\* \\* \\* \\* /etc/cron-runner/run-cron b POST 60 - '/wp-json/b'$"
+          pattern: "(?m)^\\*/5 \\* \\* \\* \\* /etc/cron-runner/run-cron b POST 60 - '/wp-json/b' '\\*/5 \\* \\* \\* \\*'$"
   - it: comments out a disabled cron
     asserts:
       - matchRegex:
           path: data.crontab
-          pattern: "(?m)^# disabled: 0 21 \\* \\* \\* /etc/cron-runner/run-cron c GET 180 - '/wp-cron.php\\?doing_wp_cron'$"
+          pattern: "(?m)^# disabled: 0 21 \\* \\* \\* /etc/cron-runner/run-cron c GET 180 - '/wp-cron.php\\?doing_wp_cron' '0 21 \\* \\* \\*'$"
   - it: ships the run-cron script
     asserts:
       - matchRegex: {path: data.run-cron, pattern: "^#!/bin/sh"}

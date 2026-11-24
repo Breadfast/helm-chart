@@ -30,6 +30,9 @@ tests:
   - it: rejects a schedule without 5 fields
     set: {cronRunner: {crons: [{name: a, schedule: "* * * *", path: /x}]}}
     asserts: [{failedTemplate: {errorPattern: "schedule must have 5 fields"}}]
+  - it: rejects a schedule with a quote
+    set: {cronRunner: {crons: [{name: a, schedule: "* * * * '*", path: /x}]}}
+    asserts: [{failedTemplate: {errorPattern: "schedule must have 5 fields and no quote"}}]
   - it: rejects a path with a quote
     set: {cronRunner: {crons: [{name: a, schedule: "* * * * *", path: "/x'y"}]}}
     asserts: [{failedTemplate: {errorPattern: "path must start with /"}}]

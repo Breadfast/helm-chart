@@ -12,7 +12,7 @@ printf "CRONS_TOKEN=s3cret\n" > "$tmp/tokens"
 # Same shape the chart renders: an enabled line, a disabled line, a slow line.
 cat > "$tmp/crontab" <<'EOF'
 # Rendered by the service chart from cronRunner.crons. Schedules are UTC.
-0 */8 * * * /etc/cron-runner/run-cron job-on GET 180 CRONS_TOKEN '/ok/on?a=1&b=2'
+0 */8 * * * /etc/cron-runner/run-cron job-on GET 180 CRONS_TOKEN '/ok/on?a=1&b=2' '0 */8 * * *'
 # disabled: * * * * * /etc/cron-runner/run-cron job-off POST 30 - '/ok/off'
 */5 * * * * /etc/cron-runner/run-cron job-slow GET 10 - '/slow'
 */5 * * * * /etc/cron-runner/run-cron job-on-extra GET 10 - '/ok/extra'
@@ -32,6 +32,7 @@ check "runs the crontab line's path with its query string" '[ "$(last path)" = "
 check "uses the crontab line's token" '[ "$(last token)" = "s3cret" ]'
 check "uses the crontab line's method" '[ "$(last method)" = "GET" ]'
 check "output is marked trigger manual" '[ "$(field trigger "$out")" = "manual" ]'
+check "schedule from the crontab line is passed through" '[ "$(field schedule "$out")" = "0 */8 * * *" ]'
 check "same line copied to the pod log" '[ "$(tail -n 1 "$tmp/podlog")" = "$out" ]'
 
 n=$(wc -l < "$log")
@@ -60,6 +61,7 @@ n=$(wc -l < "$log")
 out=$(runjob job-slow 2>&1); rc=$?
 check "second run of a running job exits 3" '[ $rc -eq 3 ]'
 check "second run says already running" 'echo "$out" | grep -q "already running"'
+check "second run is result skipped" '[ "$(field result "$out")" = "skipped" ]'
 check "second run makes no request" '[ "$(wc -l < "$log")" -eq "$n" ]'
 wait $bg; bgrc=$?
 check "first run still finishes (timeout path, exit 1)" '[ $bgrc -eq 0 ] || [ $bgrc -eq 1 ]'
